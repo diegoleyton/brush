@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1556a1cac2ce47c1b26c091c6f13478, type: 3}
+  m_Name: RoomSettings
+  m_EditorClassIdentifier: 
+  placeableObjectPrefab_: {fileID: 3020903656568588460, guid: 0bb0dfefff9214fee95f65f20ffc3b2a, type: 3}

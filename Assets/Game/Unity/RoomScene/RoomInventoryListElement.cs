@@ -1,0 +1,130 @@
+using Flowbit.Utilities.Unity.ScrollableList;
+using Flowbit.Utilities.Unity.Instantiator;
+
+using Game.Core.Data;
+using Game.Unity.Definitions;
+
+using UnityEngine;
+using UnityEngine.UI;
+
+using System;
+using Zenject;
+
+namespace Game.Unity.RoomScene
+{
+    /// <summary>
+    /// Visual-only room inventory item used in the scene prototype.
+    /// </summary>
+    public sealed class RoomInventoryItemData
+    {
+        public int ItemId;
+        public InteractionPointType InteractionPointType;
+        public string Name;
+        public Color Color;
+    }
+
+    /// <summary>
+    /// Recycled list element used by the room inventory list.
+    /// </summary>
+    public sealed class RoomInventoryListElement : BaseScrollableListElement<RoomInventoryItemData>
+    {
+        private RoomInventoryItemData data_;
+        private IObjectInstantiator instantiator_;
+
+        [SerializeField]
+        private Image image_;
+
+        [SerializeField]
+        private RoomInventoryDraggable draggable_;
+
+        [SerializeField]
+        private RoomDragVisual dragVisualPrefab_;
+
+        [Inject]
+        public void Construct([Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator instantiator)
+        {
+            instantiator_ = instantiator;
+        }
+
+        public override void Show(RoomInventoryItemData data)
+        {
+            data_ = data;
+            gameObject.SetActive(true);
+
+            if (image_ != null)
+            {
+                image_.color = data.Color;
+            }
+
+            if (draggable_ == null)
+            {
+                throw new Exception("Missing draggable");
+            }
+
+            draggable_.SetData(data);
+
+            if (dragVisualPrefab_ != null)
+            {
+                draggable_.SetDragVisualFactory(CreateDragVisualInstance);
+            }
+            else
+            {
+                draggable_.SetDragVisualFactory(null);
+            }
+        }
+
+        public override void Hide()
+        {
+            data_ = null;
+
+            if (draggable_ != null)
+            {
+                draggable_.ClearData();
+                draggable_.SetDragVisualFactory(null);
+            }
+
+            gameObject.SetActive(false);
+        }
+
+        private void ConfigureDragVisualInstance(RoomDragVisual dragVisualInstance)
+        {
+            if (dragVisualInstance == null || data_ == null)
+            {
+                return;
+            }
+
+            dragVisualInstance.SetColor(data_.Color);
+        }
+
+        private RectTransform CreateDragVisualInstance()
+        {
+            if (dragVisualPrefab_ == null)
+            {
+                return null;
+            }
+
+            Transform parent = ResolveDragVisualParent();
+            RoomDragVisual dragVisualInstance = instantiator_ != null
+                ? instantiator_.InstantiatePrefab(dragVisualPrefab_, parent)
+                : Instantiate(dragVisualPrefab_, parent, false);
+            ConfigureDragVisualInstance(dragVisualInstance);
+            return dragVisualInstance.transform as RectTransform;
+        }
+
+        private Transform ResolveDragVisualParent()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas != null && canvas.rootCanvas != null)
+            {
+                return canvas.rootCanvas.transform;
+            }
+
+            if (canvas != null)
+            {
+                return canvas.transform;
+            }
+
+            return transform.parent;
+        }
+    }
+}

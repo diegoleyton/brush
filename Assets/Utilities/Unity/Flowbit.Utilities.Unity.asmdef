@@ -1,0 +1,16 @@
+{
+    "name": "Flowbit.Utilities.Unity",
+    "rootNamespace": "",
+    "references": [
+        "GUID:8ef688732ae7d4480ad65ada33b7bdea"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

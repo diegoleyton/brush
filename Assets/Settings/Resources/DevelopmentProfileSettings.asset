@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23834294e8c74c13a5704ec30cd0d395, type: 3}
+  m_Name: DevelopmentProfileSettings
+  m_EditorClassIdentifier: 
+  <Enabled>k__BackingField: 1
+  <OnlyInEditorOrDevelopmentBuild>k__BackingField: 1
+  <ProfileName>k__BackingField: Dev Kid
+  <PetName>k__BackingField: Brushy
+  <ProfilePictureId>k__BackingField: 1
+  <MinimumCoins>k__BackingField: 250
+  <PlaceableObjects>k__BackingField:
+    <FirstItemCount>k__BackingField: 12
+    <AdditionalItems>k__BackingField:
+    - <ItemId>k__BackingField: 20
+      <Quantity>k__BackingField: 2
+    - <ItemId>k__BackingField: 29
+      <Quantity>k__BackingField: 4
+  <Paint>k__BackingField:
+    <FirstItemCount>k__BackingField: 5
+    <AdditionalItems>k__BackingField: []
+  <Food>k__BackingField:
+    <FirstItemCount>k__BackingField: 2
+    <AdditionalItems>k__BackingField: []
+  <Skin>k__BackingField:
+    <FirstItemCount>k__BackingField: 6
+    <AdditionalItems>k__BackingField: []
+  <Face>k__BackingField:
+    <FirstItemCount>k__BackingField: 8
+    <AdditionalItems>k__BackingField: []
