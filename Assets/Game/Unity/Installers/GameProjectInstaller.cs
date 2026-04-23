@@ -15,6 +15,7 @@ using Game.Unity.Audio;
 using Game.Unity.Development;
 using Game.Unity.Definitions;
 using Game.Unity.Instantiator;
+using Game.Unity.RoomScene;
 using Game.Unity.Scenes;
 using Game.Unity.Settings;
 
@@ -73,6 +74,9 @@ namespace Game.Unity.Installers
 
             Container.Bind<EventDispatcher>()
                 .FromMethod(_ => composition.CreateEventDispatcher())
+                .AsSingle();
+
+            Container.BindInterfacesAndSelfTo<RoomInventorySelectionState>()
                 .AsSingle();
 
             Container.Bind<ICoroutineService>()

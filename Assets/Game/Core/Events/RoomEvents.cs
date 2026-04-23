@@ -18,6 +18,23 @@ namespace Game.Core.Events
     }
 
     /// <summary>
+    /// Requested when a child room object should be placed in a parent slot.
+    /// </summary>
+    public sealed class RoomChildObjectPlacedEvent : IEvent
+    {
+        public RoomChildObjectPlacedEvent(int itemId, int locationId, int slotId)
+        {
+            ItemId = itemId;
+            LocationId = locationId;
+            SlotId = slotId;
+        }
+
+        public int ItemId { get; }
+        public int LocationId { get; }
+        public int SlotId { get; }
+    }
+
+    /// <summary>
     /// Requested when paint should be applied to a room target.
     /// </summary>
     public sealed class RoomPaintAppliedEvent : IEvent

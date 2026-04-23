@@ -34,12 +34,22 @@ namespace Game.Unity.RoomScene
 
         public override void OnDropAccepted(UIDropTarget target)
         {
-            if (dispatcher_ == null || data_ == null || target is not RoomObjectDropArea dropArea)
+            if (dispatcher_ == null || data_ == null)
             {
                 return;
             }
 
-            dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, data_));
+            if (target is RoomObjectDropArea dropArea)
+            {
+                dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, data_));
+                return;
+            }
+
+            if (target is RoomChildDropArea childDropArea)
+            {
+                dispatcher_.Send(new RoomInventoryChildDropAcceptedEvent(childDropArea, data_));
+                return;
+            }
         }
     }
 }

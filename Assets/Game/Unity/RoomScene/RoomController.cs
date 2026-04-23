@@ -34,6 +34,7 @@ namespace Game.Unity.RoomScene
     {
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
+        private RoomInventorySelectionState selectionState_;
 
         private bool dispatcherSubscribed_;
         private bool initialized_;
@@ -54,14 +55,24 @@ namespace Game.Unity.RoomScene
             Array.Empty<RoomInventoryCategoryButtonBinding>();
 
         [Inject]
-        public void Construct(DataRepository repository, EventDispatcher dispatcher)
+        public void Construct(
+            DataRepository repository,
+            EventDispatcher dispatcher,
+            RoomInventorySelectionState selectionState)
         {
             repository_ = repository;
             dispatcher_ = dispatcher;
+            selectionState_ = selectionState;
         }
 
         private void Awake()
         {
+            if (selectionState_ != null &&
+                selectionState_.CurrentInteractionPointType != selectedInventoryType_)
+            {
+                selectionState_.SetCurrentInteractionPointType(selectedInventoryType_);
+            }
+
             SubscribeToDispatcher();
             BindInventoryCategoryButtons();
         }
@@ -183,6 +194,7 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Subscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
+            dispatcher_.Subscribe<RoomInventoryChildDropAcceptedEvent>(OnRoomInventoryChildDropAccepted);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcherSubscribed_ = true;
@@ -196,6 +208,7 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Unsubscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
+            dispatcher_.Unsubscribe<RoomInventoryChildDropAcceptedEvent>(OnRoomInventoryChildDropAccepted);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcherSubscribed_ = false;
@@ -214,7 +227,7 @@ namespace Game.Unity.RoomScene
         private void SelectInventoryCategory(InteractionPointType interactionPointType)
         {
             selectedInventoryType_ = interactionPointType;
-            dispatcher_?.Send(new SwitchListEvent(interactionPointType));
+            selectionState_?.SetCurrentInteractionPointType(interactionPointType);
             RefreshInventoryList();
             RefreshDropAreas();
         }
@@ -298,6 +311,24 @@ namespace Game.Unity.RoomScene
                     dispatcher_.Send(new RoomFaceAppliedEvent(dragData.ItemId, targetId));
                     return;
             }
+        }
+
+        private void OnRoomInventoryChildDropAccepted(RoomInventoryChildDropAcceptedEvent eventData)
+        {
+            if (eventData?.DropArea == null || eventData.Data == null)
+            {
+                return;
+            }
+
+            if (eventData.Data.InteractionPointType != InteractionPointType.PLACEABLE_OBJECT)
+            {
+                return;
+            }
+
+            dispatcher_?.Send(new RoomChildObjectPlacedEvent(
+                eventData.Data.ItemId,
+                eventData.DropArea.ParentLocationId,
+                eventData.DropArea.SlotId));
         }
 
     }

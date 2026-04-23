@@ -61,7 +61,14 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
+                RoomPlaceableObjectView placeableObjectView = visualInstance.GetComponent<RoomPlaceableObjectView>();
+                if (placeableObjectView != null)
+                {
+                    placeableObjectView.Configure(location.LocationId, location.Item.ItemId, allowChildPlacement: true);
+                }
+
                 dropArea.SetPlacedVisual(visualInstance);
+                ApplyChildObjects(location, placeableObjectView);
             }
         }
 
@@ -109,7 +116,7 @@ namespace Game.Unity.RoomScene
 
         private RectTransform CreateVisualInstance(int itemId)
         {
-            RectTransform prefab = roomSettings_?.PlaceableObjectPrefab;
+            RectTransform prefab = roomSettings_?.ResolvePlaceableObjectPrefab(itemId);
             if (prefab == null)
             {
                 return null;
@@ -126,6 +133,42 @@ namespace Game.Unity.RoomScene
             }
 
             return instance;
+        }
+
+        private void ApplyChildObjects(PlacedRoomObjectLocation location, RoomPlaceableObjectView parentView)
+        {
+            if (location?.Item?.ChildObjects == null || parentView == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < location.Item.ChildObjects.Count; index++)
+            {
+                PlacedChildObjectSlot slot = location.Item.ChildObjects[index];
+                if (slot?.Item == null)
+                {
+                    continue;
+                }
+
+                RoomChildDropArea childDropArea = parentView.FindChildDropArea(slot.SlotId);
+                if (childDropArea == null)
+                {
+                    continue;
+                }
+
+                RectTransform childVisual = CreateVisualInstance(slot.Item.ItemId);
+                if (childVisual == null)
+                {
+                    continue;
+                }
+
+                RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
+                if (childView != null)
+                {
+                    childView.Configure(location.LocationId, slot.Item.ItemId, allowChildPlacement: false);
+                }
+                childDropArea.SetPlacedVisual(childVisual);
+            }
         }
     }
 }

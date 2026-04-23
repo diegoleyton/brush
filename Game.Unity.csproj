@@ -75,6 +75,7 @@
     <Compile Include="Assets/Game/Unity/RoomScene/RoomDragVisual.cs" />
     <Compile Include="Assets/Game/Unity/Instantiator/DependencyObjectInstantiator.cs" />
     <Compile Include="Assets/Game/Unity/RoomScene/PlaceableObjectRoomViewStrategy.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomChildDropArea.cs" />
     <Compile Include="Assets/Game/Unity/RoomScene/RoomPlaceableObjectView.cs" />
     <Compile Include="Assets/Game/Unity/RoomScene/RoomItemVisuals.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Assets/Game/Unity/Installers/GameProjectComposition.cs" />
     <Compile Include="Assets/Game/Unity/RoomScene/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomDropAreaBase.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/SceneSettings.cs" />
     <Compile Include="Assets/Game/Unity/Installers/GameProjectInstaller.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/PopupTransformTransition.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Assets/Game/Unity/Installers/PersistentGameDataLifetime.cs" />
     <Compile Include="Assets/Game/Unity/Settings/RoomSettings.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/SceneBase.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventorySelectionState.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/ScreenBlockerImage.cs" />
     <Compile Include="Assets/Game/Unity/Definitions/SceneType.cs" />
     <Compile Include="Assets/Game/Unity/Audio/AudioReactor.cs" />

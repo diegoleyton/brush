@@ -14,8 +14,8 @@ namespace Game.Core.Configuration
         private static readonly IReadOnlyDictionary<int, RoomObjectDefinition> all_ =
             new Dictionary<int, RoomObjectDefinition>
             {
-                // Configure container and paintable object ids here.
-                // Example: { 42, new RoomObjectDefinition(true, new[] { 1, 2 }) }
+                { 5, new RoomObjectDefinition(false, new[] { 1, 2 }) },
+                { 6, new RoomObjectDefinition(false, new[] { 1 }) }
             };
 
         public static RoomObjectDefinition Get(int itemId)

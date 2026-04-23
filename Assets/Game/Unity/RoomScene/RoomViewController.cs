@@ -34,7 +34,7 @@ namespace Game.Unity.RoomScene
             DataRepository repository,
             EventDispatcher dispatcher,
             RoomSettings roomSettings,
-            [Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator instantiator)
+            [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
             repository_ = repository;
             dispatcher_ = dispatcher;

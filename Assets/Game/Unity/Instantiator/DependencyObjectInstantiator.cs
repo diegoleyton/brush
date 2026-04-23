@@ -20,14 +20,16 @@ namespace Game.Unity.Instantiator
 
         public T InstantiatePrefab<T>(T prefab) where T : Component
         {
-            return instantiator_.InstantiatePrefabForComponent<T>(prefab);
+            return GetRootComponent<T>(instantiator_.InstantiatePrefab(prefab.gameObject));
         }
 
         public T InstantiatePrefab<T>(T prefab, Transform parent) where T : Component
         {
-            return parent != null
-                ? instantiator_.InstantiatePrefabForComponent<T>(prefab, parent)
-                : instantiator_.InstantiatePrefabForComponent<T>(prefab);
+            GameObject instance = parent != null
+                ? instantiator_.InstantiatePrefab(prefab.gameObject, parent)
+                : instantiator_.InstantiatePrefab(prefab.gameObject);
+
+            return GetRootComponent<T>(instance);
         }
 
         public GameObject InstantiatePrefab(GameObject prefab)
@@ -40,6 +42,23 @@ namespace Game.Unity.Instantiator
             return parent != null
                 ? instantiator_.InstantiatePrefab(prefab, parent)
                 : instantiator_.InstantiatePrefab(prefab);
+        }
+
+        private static T GetRootComponent<T>(GameObject instance) where T : Component
+        {
+            if (instance == null)
+            {
+                return null;
+            }
+
+            T component = instance.GetComponent<T>();
+            if (component == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"Instantiated prefab root '{instance.name}' does not contain component {typeof(T).Name}.");
+            }
+
+            return component;
         }
     }
 }

@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1556a1cac2ce47c1b26c091c6f13478, type: 3}
   m_Name: RoomSettings
   m_EditorClassIdentifier: 
-  placeableObjectPrefab_: {fileID: 3020903656568588460, guid: 0bb0dfefff9214fee95f65f20ffc3b2a, type: 3}
+  defaultPlaceableObjectPrefab_: {fileID: 3020903656568588460, guid: 0bb0dfefff9214fee95f65f20ffc3b2a, type: 3}
+  placeableObjectPrefabs_:
+  - ItemId: 5
+    Prefab: {fileID: 6961260748720521705, guid: 7ece93a87b8444b489a8f535692b7a9f, type: 3}
+  - ItemId: 6
+    Prefab: {fileID: 4448644215540970470, guid: c2731ee9a0708443fb7e51cceb23ee97, type: 3}
