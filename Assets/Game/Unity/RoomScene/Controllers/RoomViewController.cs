@@ -28,11 +28,13 @@ namespace Game.Unity.RoomScene
 
         private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
         private RoomPaintSurfaceView[] paintSurfaceViews_;
+        private PetFaceSurfaceView[] faceSurfaceViews_;
 
         private bool initialized_;
         private bool subscribed_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
+        private RoomFaceController faceController_;
 
         [Inject]
         public void Construct(
@@ -75,6 +77,7 @@ namespace Game.Unity.RoomScene
                 repository_,
                 placeableObjectSurfaceViews_,
                 paintSurfaceViews_);
+            faceController_ = new RoomFaceController(faceSurfaceViews_, repository_);
 
             RefreshFromData();
             initialized_ = true;
@@ -108,6 +111,7 @@ namespace Game.Unity.RoomScene
         {
             placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
             paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
+            faceSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetFaceSurfaceView>(true);
         }
 
         private void SubscribeToDispatcher()
@@ -118,6 +122,7 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
+            dispatcher_.Subscribe<PetDataAppliedEvent>(OnPetDataApplied);
             subscribed_ = true;
         }
 
@@ -129,6 +134,7 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
+            dispatcher_.Unsubscribe<PetDataAppliedEvent>(OnPetDataApplied);
             subscribed_ = false;
         }
 
@@ -174,6 +180,21 @@ namespace Game.Unity.RoomScene
                 }
 
                 paintController_?.RefreshPaintedObject(eventData.TargetId);
+                return;
+            }
+
+        }
+
+        private void OnPetDataApplied(PetDataAppliedEvent eventData)
+        {
+            if (!initialized_)
+            {
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.FACE)
+            {
+                faceController_?.Refresh();
             }
         }
 
@@ -181,6 +202,7 @@ namespace Game.Unity.RoomScene
         {
             placeableObjectsController_?.Refresh();
             paintController_?.Refresh();
+            faceController_?.Refresh();
         }
     }
 }

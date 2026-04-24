@@ -103,14 +103,12 @@ namespace Game.Core.Events
     /// </summary>
     public sealed class RoomSkinAppliedEvent : IEvent
     {
-        public RoomSkinAppliedEvent(int itemId, int targetId)
+        public RoomSkinAppliedEvent(int itemId)
         {
             ItemId = itemId;
-            TargetId = targetId;
         }
 
         public int ItemId { get; }
-        public int TargetId { get; }
     }
 
     /// <summary>
@@ -118,14 +116,12 @@ namespace Game.Core.Events
     /// </summary>
     public sealed class RoomFaceAppliedEvent : IEvent
     {
-        public RoomFaceAppliedEvent(int itemId, int targetId)
+        public RoomFaceAppliedEvent(int itemId)
         {
             ItemId = itemId;
-            TargetId = targetId;
         }
 
         public int ItemId { get; }
-        public int TargetId { get; }
     }
 
     /// <summary>
@@ -172,5 +168,35 @@ namespace Game.Core.Events
         public int ItemId { get; }
         public int TargetId { get; }
         public int ParentTargetId { get; }
+    }
+
+    /// <summary>
+    /// Emitted by the data layer after pet data is successfully updated.
+    /// </summary>
+    public sealed class PetDataAppliedEvent : IEvent
+    {
+        public PetDataAppliedEvent(InteractionPointType itemType, int itemId)
+        {
+            ItemType = itemType;
+            ItemId = itemId;
+        }
+
+        public InteractionPointType ItemType { get; }
+        public int ItemId { get; }
+    }
+
+    /// <summary>
+    /// Emitted by the data layer when pet data could not be updated.
+    /// </summary>
+    public sealed class PetDataApplyFailedEvent : IEvent
+    {
+        public PetDataApplyFailedEvent(InteractionPointType itemType, int itemId)
+        {
+            ItemType = itemType;
+            ItemId = itemId;
+        }
+
+        public InteractionPointType ItemType { get; }
+        public int ItemId { get; }
     }
 }

@@ -112,6 +112,11 @@ namespace Game.Unity.RoomScene
             switch (roomTargetKind_)
             {
                 case RoomTargetKind.ROOM:
+                    if (supportedInventoryType_ == InteractionPointType.FACE)
+                    {
+                        return true;
+                    }
+
                     if (supportedInventoryType_ == InteractionPointType.PAINT)
                     {
                         return GameIds.IsRoomSurfaceId(targetId_);

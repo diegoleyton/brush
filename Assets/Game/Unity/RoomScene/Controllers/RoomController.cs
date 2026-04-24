@@ -319,6 +319,10 @@ namespace Game.Unity.RoomScene
                                 eventData.Data.ItemId,
                                 eventData.DropArea.TargetId));
                         }
+                    },
+                    {
+                        (InteractionPointType.FACE, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(new RoomFaceAppliedEvent(eventData.Data.ItemId))
                     }
                 };
         }

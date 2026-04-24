@@ -438,22 +438,26 @@ namespace Game.Core.Services
         {
             if (CurrentProfile.PetData.FaceItemId == itemId)
             {
+                NotifyPetDataApplyFailed(InteractionPointType.FACE, itemId);
                 return;
             }
 
             CurrentProfile.PetData.FaceItemId = itemId;
             ConsumeInventoryItemAndNotify(InteractionPointType.FACE, itemId);
+            NotifyPetDataApplied(InteractionPointType.FACE, itemId);
         }
 
         public void SetPetSkin(int itemId)
         {
             if (CurrentProfile.PetData.SkinItemId == itemId)
             {
+                NotifyPetDataApplyFailed(InteractionPointType.SKIN, itemId);
                 return;
             }
 
             CurrentProfile.PetData.SkinItemId = itemId;
             ConsumeInventoryItemAndNotify(InteractionPointType.SKIN, itemId);
+            NotifyPetDataApplied(InteractionPointType.SKIN, itemId);
         }
 
         public void FeedPet(int itemId)
@@ -529,6 +533,16 @@ namespace Game.Core.Services
             int parentTargetId = -1)
         {
             dispatcher_.Send(new RoomDataItemApplyFailedEvent(itemType, itemId, targetId, parentTargetId));
+        }
+
+        private void NotifyPetDataApplied(InteractionPointType itemType, int itemId)
+        {
+            dispatcher_.Send(new PetDataAppliedEvent(itemType, itemId));
+        }
+
+        private void NotifyPetDataApplyFailed(InteractionPointType itemType, int itemId)
+        {
+            dispatcher_.Send(new PetDataApplyFailedEvent(itemType, itemId));
         }
 
         private void NotifyInventoryChanged()
