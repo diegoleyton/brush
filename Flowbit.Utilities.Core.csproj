@@ -65,6 +65,7 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Utilities/Core/Logger/IGameLogger.cs" />
     <Compile Include="Assets/Utilities/Core/Storage/DataLoadResult.cs" />
     <Compile Include="Assets/Utilities/Core/Events/EventDispatcher.cs" />
     <Compile Include="Assets/Utilities/Core/Storage/PlayerPrefsDataStorage.cs" />

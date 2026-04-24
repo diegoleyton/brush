@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Core.Logger;
 
 using Game.Core.Configuration;
 using Game.Core.Data;
@@ -17,6 +18,7 @@ namespace Game.Core.Services
     public class DataRepository
     {
         private readonly EventDispatcher dispatcher_;
+        private readonly IGameLogger logger_;
 
         public GameState Data { get; private set; }
 
@@ -26,7 +28,7 @@ namespace Game.Core.Services
 
         private static long Now => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        public DataRepository(GameState data, EventDispatcher dispatcher)
+        public DataRepository(GameState data, EventDispatcher dispatcher, IGameLogger logger)
         {
             if (data == null)
             {
@@ -34,6 +36,7 @@ namespace Game.Core.Services
             }
 
             dispatcher_ = dispatcher;
+            logger_ = logger;
             Data = data;
 
             if (Data.CurrentProfile != -1)
@@ -299,6 +302,7 @@ namespace Game.Core.Services
         {
             if (!GameIds.IsRoomObjectLocationId(locationId) || RoomHasObject(locationId, itemId))
             {
+                logger_?.LogWarning($"[RoomData] Failed to place object {itemId} at room location {locationId}.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
                 return;
             }
@@ -310,6 +314,7 @@ namespace Game.Core.Services
                 ItemId = itemId,
                 PaintId = DefaultProfileState.NoPaintItemId
             };
+            logger_?.Log($"[RoomData] Placed object {itemId} at room location {locationId}.");
 
             ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
             NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
@@ -334,6 +339,7 @@ namespace Game.Core.Services
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
             if (roomObject == null)
             {
+                logger_?.LogWarning($"[RoomData] Failed to place child object {itemId} at {locationId}/{slotId}: parent missing.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
                 return;
             }
@@ -341,6 +347,7 @@ namespace Game.Core.Services
             PlacedChildObjectSlot slot = GetOrCreateRoomChildSlot(locationId, slotId);
             if (slot.Item != null && slot.Item.ItemId == itemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to place child object {itemId} at {locationId}/{slotId}: same item already present.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
                 return;
             }
@@ -356,6 +363,7 @@ namespace Game.Core.Services
                 PaintId = DefaultProfileState.NoPaintItemId
             };
 
+            logger_?.Log($"[RoomData] Placed child object {itemId} at {locationId}/{slotId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
             NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
         }
@@ -378,6 +386,7 @@ namespace Game.Core.Services
         {
             if (!GameIds.IsRoomSurfaceId(surfaceId))
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint surface {surfaceId} with item {paintItemId}: invalid surface.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
                 return;
             }
@@ -385,11 +394,13 @@ namespace Game.Core.Services
             RoomPaintSurfaceState surface = GetOrCreateRoomSurface(surfaceId);
             if (surface.PaintId == paintItemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint surface {surfaceId} with item {paintItemId}: already applied.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
                 return;
             }
 
             surface.PaintId = paintItemId;
+            logger_?.Log($"[RoomData] Painted surface {surfaceId} with item {paintItemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
             NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, surfaceId);
         }
@@ -399,17 +410,20 @@ namespace Game.Core.Services
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
             if (roomObject == null)
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint object at location {locationId} with item {paintItemId}: object missing.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
                 return;
             }
 
             if (roomObject.PaintId == paintItemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint object at location {locationId} with item {paintItemId}: already applied.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
                 return;
             }
 
             roomObject.PaintId = paintItemId;
+            logger_?.Log($"[RoomData] Painted object at location {locationId} with item {paintItemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
             NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, locationId);
         }
@@ -419,17 +433,20 @@ namespace Game.Core.Services
             PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
             if (slot?.Item == null)
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint child object at {locationId}/{slotId} with item {paintItemId}: child missing.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
                 return;
             }
 
             if (slot.Item.PaintId == paintItemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to paint child object at {locationId}/{slotId} with item {paintItemId}: already applied.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
                 return;
             }
 
             slot.Item.PaintId = paintItemId;
+            logger_?.Log($"[RoomData] Painted child object at {locationId}/{slotId} with item {paintItemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
             NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, slotId, locationId);
         }
@@ -438,11 +455,13 @@ namespace Game.Core.Services
         {
             if (CurrentProfile.PetData.FaceItemId == itemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to apply pet face item {itemId}: already applied.");
                 NotifyPetDataApplyFailed(InteractionPointType.FACE, itemId);
                 return;
             }
 
             CurrentProfile.PetData.FaceItemId = itemId;
+            logger_?.Log($"[RoomData] Applied pet face item {itemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.FACE, itemId);
             NotifyPetDataApplied(InteractionPointType.FACE, itemId);
         }
@@ -451,24 +470,29 @@ namespace Game.Core.Services
         {
             if (CurrentProfile.PetData.SkinItemId == itemId)
             {
+                logger_?.LogWarning($"[RoomData] Failed to apply pet skin item {itemId}: already applied.");
                 NotifyPetDataApplyFailed(InteractionPointType.SKIN, itemId);
                 return;
             }
 
             CurrentProfile.PetData.SkinItemId = itemId;
+            logger_?.Log($"[RoomData] Applied pet skin item {itemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.SKIN, itemId);
             NotifyPetDataApplied(InteractionPointType.SKIN, itemId);
         }
 
         public void FeedPet(int itemId)
         {
-            if (CanPetEat != PetEatStatus.OK)
+            PetEatStatus petEatStatus = CanPetEat;
+            if (petEatStatus != PetEatStatus.OK)
             {
+                logger_?.LogWarning($"[Food] Failed to feed pet with item {itemId}. Reason: {petEatStatus}");
                 NotifyPetDataApplyFailed(InteractionPointType.FOOD, itemId);
                 return;
             }
 
             PetEat();
+            logger_?.Log($"[Food] Successfully fed pet with item {itemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.FOOD, itemId);
             NotifyPetDataApplied(InteractionPointType.FOOD, itemId);
         }

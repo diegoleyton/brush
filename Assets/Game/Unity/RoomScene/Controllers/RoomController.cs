@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Core.Logger;
 
 using Game.Core.Data;
 using Game.Core.Events;
@@ -39,6 +40,7 @@ namespace Game.Unity.RoomScene
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
         private RoomInventorySelectionState selectionState_;
+        private IGameLogger logger_;
 
         private bool dispatcherSubscribed_;
         private bool initialized_;
@@ -59,11 +61,13 @@ namespace Game.Unity.RoomScene
         public void Construct(
             DataRepository repository,
             EventDispatcher dispatcher,
-            RoomInventorySelectionState selectionState)
+            RoomInventorySelectionState selectionState,
+            IGameLogger logger)
         {
             repository_ = repository;
             dispatcher_ = dispatcher;
             selectionState_ = selectionState;
+            logger_ = logger;
         }
 
         private void Awake()
@@ -266,6 +270,9 @@ namespace Game.Unity.RoomScene
             {
                 return;
             }
+
+            logger_?.Log(
+                $"[RoomUI] Drop accepted. Type: {eventData.Data.InteractionPointType}, Item: {eventData.Data.ItemId}, TargetKind: {eventData.DropArea.RoomTargetKind}, Target: {eventData.DropArea.TargetId}, Parent: {eventData.DropArea.ParentTargetId}");
 
             if (dropAcceptedHandlers_ == null)
             {

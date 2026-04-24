@@ -1,6 +1,7 @@
 using System;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Unity.Instantiator;
 
 using Game.Core.Events;
@@ -23,6 +24,7 @@ namespace Game.Unity.RoomScene
 
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
+        private IGameLogger logger_;
         private RoomSettings roomSettings_;
         private IObjectInstantiator instantiator_;
 
@@ -42,11 +44,13 @@ namespace Game.Unity.RoomScene
         public void Construct(
             DataRepository repository,
             EventDispatcher dispatcher,
+            IGameLogger logger,
             RoomSettings roomSettings,
             [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
             repository_ = repository;
             dispatcher_ = dispatcher;
+            logger_ = logger;
             roomSettings_ = roomSettings;
             instantiator_ = instantiator;
         }
@@ -127,7 +131,6 @@ namespace Game.Unity.RoomScene
 
             dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Subscribe<PetDataAppliedEvent>(OnPetDataApplied);
-            dispatcher_.Subscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = true;
         }
 
@@ -140,7 +143,6 @@ namespace Game.Unity.RoomScene
 
             dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Unsubscribe<PetDataAppliedEvent>(OnPetDataApplied);
-            dispatcher_.Unsubscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = false;
         }
 
@@ -155,6 +157,7 @@ namespace Game.Unity.RoomScene
             {
                 if (eventData.ParentTargetId >= 0)
                 {
+                    logger_?.Log($"[RoomView] Refresh placeable child {eventData.ParentTargetId}/{eventData.TargetId}.");
                     placeableObjectsController_?.RefreshChildPlaceableObject(
                         eventData.ParentTargetId,
                         eventData.TargetId);
@@ -164,6 +167,7 @@ namespace Game.Unity.RoomScene
                     return;
                 }
 
+                logger_?.Log($"[RoomView] Refresh placeable object {eventData.TargetId}.");
                 placeableObjectsController_?.RefreshPlaceableObject(eventData.TargetId);
                 paintController_?.RefreshPaintedObject(eventData.TargetId);
                 return;
@@ -173,6 +177,7 @@ namespace Game.Unity.RoomScene
             {
                 if (eventData.ParentTargetId >= 0)
                 {
+                    logger_?.Log($"[RoomView] Refresh painted child {eventData.ParentTargetId}/{eventData.TargetId}.");
                     paintController_?.RefreshPaintedChildObject(
                         eventData.ParentTargetId,
                         eventData.TargetId);
@@ -181,10 +186,12 @@ namespace Game.Unity.RoomScene
 
                 if (Game.Core.Configuration.GameIds.IsRoomSurfaceId(eventData.TargetId))
                 {
+                    logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
                     paintController_?.RefreshPaintSurface(eventData.TargetId);
                     return;
                 }
 
+                logger_?.Log($"[RoomView] Refresh painted object {eventData.TargetId}.");
                 paintController_?.RefreshPaintedObject(eventData.TargetId);
                 return;
             }
@@ -200,32 +207,15 @@ namespace Game.Unity.RoomScene
 
             if (eventData.ItemType == Core.Data.InteractionPointType.FACE)
             {
+                logger_?.Log("[RoomView] Refresh pet face.");
                 faceController_?.Refresh();
                 return;
             }
 
             if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
             {
+                logger_?.Log("[RoomView] Refresh pet skin.");
                 skinController_?.Refresh();
-                return;
-            }
-
-            if (eventData.ItemType == Core.Data.InteractionPointType.FOOD)
-            {
-                Debug.Log($"Pet food applied successfully. ItemId: {eventData.ItemId}");
-            }
-        }
-
-        private void OnPetDataApplyFailed(PetDataApplyFailedEvent eventData)
-        {
-            if (!initialized_)
-            {
-                return;
-            }
-
-            if (eventData.ItemType == Core.Data.InteractionPointType.FOOD)
-            {
-                Debug.LogWarning($"Pet food apply failed. ItemId: {eventData.ItemId}");
             }
         }
 

@@ -2,10 +2,12 @@ using System;
 
 using Flowbit.Utilities.Audio;
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.Storage;
 using Flowbit.Utilities.Unity.Instantiator;
+using Flowbit.Utilities.Unity.Logger;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
@@ -76,6 +78,10 @@ namespace Game.Unity.Installers
                 .FromMethod(_ => composition.CreateEventDispatcher())
                 .AsSingle();
 
+            Container.Bind<IGameLogger>()
+                .To<UnityGameLogger>()
+                .AsSingle();
+
             Container.BindInterfacesAndSelfTo<RoomInventorySelectionState>()
                 .AsSingle();
 
@@ -100,7 +106,8 @@ namespace Game.Unity.Installers
                 .FromMethod(ctx =>
                     composition.CreateDataRepository(
                         ctx.Container.Resolve<Data>(),
-                        ctx.Container.Resolve<EventDispatcher>()))
+                        ctx.Container.Resolve<EventDispatcher>(),
+                        ctx.Container.Resolve<IGameLogger>()))
                 .AsSingle();
 
             Container.BindInterfacesAndSelfTo<DataController>()

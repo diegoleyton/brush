@@ -80,6 +80,7 @@
     <Compile Include="Assets/Utilities/Unity/Audio/ILoopingAudioSourcePool.cs" />
     <Compile Include="Assets/Utilities/Unity/DragAndDrop/UIDropTarget.cs" />
     <Compile Include="Assets/Utilities/Unity/Audio/Editor/SoundAssetPreviewPlayer.cs" />
+    <Compile Include="Assets/Utilities/Unity/Logger/UnityGameLogger.cs" />
     <Compile Include="Assets/Utilities/Unity/UI/LoopMove.cs" />
     <Compile Include="Assets/Utilities/Unity/Audio/AudioPlayer.cs" />
     <Compile Include="Assets/Utilities/Unity/DragAndDrop/UIDraggable.cs" />

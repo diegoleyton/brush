@@ -2,6 +2,7 @@ using System;
 
 using Flowbit.Utilities.Audio;
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.Storage;
@@ -75,9 +76,9 @@ namespace Game.Unity.Installers
         /// <summary>
         /// Creates the runtime data repository.
         /// </summary>
-        public DataRepository CreateDataRepository(Data data, EventDispatcher dispatcher)
+        public DataRepository CreateDataRepository(Data data, EventDispatcher dispatcher, IGameLogger logger)
         {
-            return new DataRepository(data, dispatcher);
+            return new DataRepository(data, dispatcher, logger);
         }
 
         /// <summary>
