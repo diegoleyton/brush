@@ -21,6 +21,7 @@ namespace Game.Unity.RoomScene
         public InteractionPointType InteractionPointType;
         public string Name;
         public Color Color;
+        public int Quantity;
     }
 
     /// <summary>
@@ -40,6 +41,12 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private RoomDragVisual dragVisualPrefab_;
 
+        [SerializeField]
+        private Text quantityText_;
+
+        [SerializeField]
+        private GameObject quantityTextContainer_;
+
         [Inject]
         public void Construct([Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator instantiator)
         {
@@ -54,6 +61,16 @@ namespace Game.Unity.RoomScene
             if (image_ != null)
             {
                 image_.color = data.Color;
+            }
+
+            if (quantityText_ != null)
+            {
+                bool shouldShowQuantity = data.Quantity >= 0;
+                quantityTextContainer_.SetActive(shouldShowQuantity);
+                if (shouldShowQuantity)
+                {
+                    quantityText_.text = data.Quantity.ToString();
+                }
             }
 
             if (draggable_ == null)
@@ -81,6 +98,12 @@ namespace Game.Unity.RoomScene
             {
                 draggable_.ClearData();
                 draggable_.SetDragVisualFactory(null);
+            }
+
+            if (quantityText_ != null)
+            {
+                quantityTextContainer_.SetActive(false);
+                quantityText_.text = string.Empty;
             }
 
             gameObject.SetActive(false);

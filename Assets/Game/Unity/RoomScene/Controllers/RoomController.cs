@@ -244,7 +244,8 @@ namespace Game.Unity.RoomScene
                     ItemId = entry.Key,
                     InteractionPointType = interactionPointType,
                     Name = $"{RoomItemVisuals.GetCategoryDisplayName(interactionPointType)} {entry.Key}",
-                    Color = RoomItemVisuals.GetItemColor(interactionPointType, entry.Key)
+                    Color = RoomItemVisuals.GetItemColor(interactionPointType, entry.Key),
+                    Quantity = entry.Value
                 })
                 .ToList();
         }
