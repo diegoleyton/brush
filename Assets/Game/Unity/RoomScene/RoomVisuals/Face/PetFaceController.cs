@@ -8,12 +8,12 @@ namespace Game.Unity.RoomScene
     /// <summary>
     /// Applies persisted face state to fixed room face surfaces.
     /// </summary>
-    public sealed class RoomFaceController
+    public sealed class PetFaceController
     {
         private readonly IReadOnlyList<PetFaceSurfaceView> faceSurfaceViews_;
         private readonly DataRepository repository_;
 
-        public RoomFaceController(
+        public PetFaceController(
             IReadOnlyList<PetFaceSurfaceView> faceSurfaceViews,
             DataRepository repository)
         {

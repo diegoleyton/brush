@@ -112,7 +112,8 @@ namespace Game.Unity.RoomScene
             switch (roomTargetKind_)
             {
                 case RoomTargetKind.ROOM:
-                    if (supportedInventoryType_ == InteractionPointType.FACE)
+                    if (supportedInventoryType_ == InteractionPointType.FACE ||
+                        supportedInventoryType_ == InteractionPointType.SKIN)
                     {
                         return true;
                     }

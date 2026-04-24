@@ -323,6 +323,10 @@ namespace Game.Unity.RoomScene
                     {
                         (InteractionPointType.FACE, RoomTargetKind.ROOM),
                         eventData => dispatcher_.Send(new RoomFaceAppliedEvent(eventData.Data.ItemId))
+                    },
+                    {
+                        (InteractionPointType.SKIN, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(new RoomSkinAppliedEvent(eventData.Data.ItemId))
                     }
                 };
         }

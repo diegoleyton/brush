@@ -29,12 +29,14 @@ namespace Game.Unity.RoomScene
         private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
         private RoomPaintSurfaceView[] paintSurfaceViews_;
         private PetFaceSurfaceView[] faceSurfaceViews_;
+        private PetSkinSurfaceView[] skinSurfaceViews_;
 
         private bool initialized_;
         private bool subscribed_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
-        private RoomFaceController faceController_;
+        private PetFaceController faceController_;
+        private PetSkinController skinController_;
 
         [Inject]
         public void Construct(
@@ -77,7 +79,8 @@ namespace Game.Unity.RoomScene
                 repository_,
                 placeableObjectSurfaceViews_,
                 paintSurfaceViews_);
-            faceController_ = new RoomFaceController(faceSurfaceViews_, repository_);
+            faceController_ = new PetFaceController(faceSurfaceViews_, repository_);
+            skinController_ = new PetSkinController(skinSurfaceViews_, repository_);
 
             RefreshFromData();
             initialized_ = true;
@@ -112,6 +115,7 @@ namespace Game.Unity.RoomScene
             placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
             paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
             faceSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetFaceSurfaceView>(true);
+            skinSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetSkinSurfaceView>(true);
         }
 
         private void SubscribeToDispatcher()
@@ -195,6 +199,12 @@ namespace Game.Unity.RoomScene
             if (eventData.ItemType == Core.Data.InteractionPointType.FACE)
             {
                 faceController_?.Refresh();
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
+            {
+                skinController_?.Refresh();
             }
         }
 
@@ -203,6 +213,7 @@ namespace Game.Unity.RoomScene
             placeableObjectsController_?.Refresh();
             paintController_?.Refresh();
             faceController_?.Refresh();
+            skinController_?.Refresh();
         }
     }
 }
