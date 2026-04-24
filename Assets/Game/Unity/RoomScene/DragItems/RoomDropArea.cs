@@ -5,6 +5,7 @@ using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
+using Game.Unity.Settings;
 
 using UnityEngine;
 using Zenject;
@@ -18,6 +19,7 @@ namespace Game.Unity.RoomScene
     public sealed class RoomDropArea : UIDropTarget
     {
         private EventDispatcher dispatcher_;
+        private RoomSettings roomSettings_;
 
         [SerializeField]
         private InteractionPointType supportedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -43,9 +45,10 @@ namespace Game.Unity.RoomScene
         public int ParentTargetId => parentTargetId_;
 
         [Inject]
-        public void Construct(EventDispatcher dispatcher)
+        public void Construct(EventDispatcher dispatcher, RoomSettings roomSettings)
         {
             dispatcher_ = dispatcher;
+            roomSettings_ = roomSettings;
         }
 
         private void Awake()
@@ -140,8 +143,25 @@ namespace Game.Unity.RoomScene
         private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent eventData)
         {
             interactionVisible_ = eventData?.Data != null &&
-                ShouldShowForInteractionType(eventData.Data.InteractionPointType);
+                ShouldShowForInteractionType(eventData.Data.InteractionPointType) &&
+                CanShowForDraggedItem(eventData.Data);
             UpdateVisibility();
+        }
+
+        private bool CanShowForDraggedItem(RoomInventoryItemData data)
+        {
+            if (data == null)
+            {
+                return false;
+            }
+
+            if (supportedInventoryType_ != InteractionPointType.PLACEABLE_OBJECT ||
+                roomTargetKind_ != RoomTargetKind.PLACEABLE_OBJECT)
+            {
+                return true;
+            }
+
+            return roomSettings_ == null || !roomSettings_.SupportsChildPlaceables(data.ItemId);
         }
 
         private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent _)

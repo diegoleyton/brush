@@ -25,6 +25,8 @@ namespace Game.Unity.Settings
         private List<PlaceableObjectPrefabDefinition> placeableObjectPrefabs_ =
             new List<PlaceableObjectPrefabDefinition>();
 
+        private readonly Dictionary<int, bool> supportsChildPlaceablesCache_ = new Dictionary<int, bool>();
+
         public RectTransform ResolvePlaceableObjectPrefab(int itemId)
         {
             for (int index = 0; index < placeableObjectPrefabs_.Count; index++)
@@ -37,6 +39,21 @@ namespace Game.Unity.Settings
             }
 
             return defaultPlaceableObjectPrefab_;
+        }
+
+        public bool SupportsChildPlaceables(int itemId)
+        {
+            if (supportsChildPlaceablesCache_.TryGetValue(itemId, out bool cachedValue))
+            {
+                return cachedValue;
+            }
+
+            RectTransform prefab = ResolvePlaceableObjectPrefab(itemId);
+            bool supportsChildPlaceables =
+                prefab != null && prefab.GetComponentInChildren<Game.Unity.RoomScene.RoomPlaceableChildSurfaceView>(true) != null;
+
+            supportsChildPlaceablesCache_[itemId] = supportsChildPlaceables;
+            return supportsChildPlaceables;
         }
     }
 }
