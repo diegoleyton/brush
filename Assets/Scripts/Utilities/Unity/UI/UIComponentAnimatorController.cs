@@ -8,6 +8,7 @@ namespace Flowbit.Utilities.Unity.UI
     public class UIComponentAnimatorController : MonoBehaviour
     {
         private const string FinishTrigger = "finish";
+        private const string InitTrigger = "init";
 
         [SerializeField]
         [Tooltip("Animator used to control the UI component state transitions.")]
@@ -25,6 +26,20 @@ namespace Flowbit.Utilities.Unity.UI
             }
 
             _animator.SetTrigger(FinishTrigger);
+        }
+
+        /// <summary>
+        /// Triggers the animator transition to the initial state.
+        /// </summary>
+        public void GoToInitialState()
+        {
+            if (_animator == null)
+            {
+                Debug.LogWarning($"{nameof(UIComponentAnimatorController)} on {gameObject.name} is missing an Animator reference.");
+                return;
+            }
+
+            _animator.SetTrigger(InitTrigger);
         }
     }
 }

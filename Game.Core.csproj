@@ -65,29 +65,29 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Game/Core/Rules/GameRules.cs" />
-    <Compile Include="Assets/Game/Core/Configuration/MarketCatalog.cs" />
-    <Compile Include="Assets/Game/Core/Configuration/MetaDataUtils.cs" />
-    <Compile Include="Assets/Game/Core/Configuration/GameIds.cs" />
-    <Compile Include="Assets/Game/Core/Events/InventoryEvents.cs" />
-    <Compile Include="Assets/Game/Core/Events/PersistenceEvents.cs" />
-    <Compile Include="Assets/Game/Core/Events/BankEvents.cs" />
-    <Compile Include="Assets/Game/Core/Data/Reward.cs" />
-    <Compile Include="Assets/Game/Core/Configuration/ItemCatalog.cs" />
-    <Compile Include="Assets/Game/Core/Data/Economy.cs" />
-    <Compile Include="Assets/Game/Core/DataController/DataController.cs" />
-    <Compile Include="Assets/Game/Core/Data/Definitions.cs" />
-    <Compile Include="Assets/Game/Core/Events/AppEvents.cs" />
-    <Compile Include="Assets/Game/Core/Configuration/DefaultProfileState.cs" />
-    <Compile Include="Assets/Game/Core/Services/DataRepository.cs" />
-    <Compile Include="Assets/Game/Core/Events/ProfileEvents.cs" />
-    <Compile Include="Assets/Game/Core/Services/PersistentGameDataService.cs" />
-    <Compile Include="Assets/Game/Core/Events/RoomEvents.cs" />
-    <Compile Include="Assets/Game/Core/Data/Data.cs" />
-    <Compile Include="Assets/Game/Core/Data/InventoryExtensions.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/RoomEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/ProfileEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Data/InventoryExtensions.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/GameIds.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/PersistenceEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Data/Reward.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/DataController/DataController.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/ItemCatalog.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Rules/GameRules.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/DataRepository.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/BankEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Data/Data.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/MarketCatalog.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Data/Economy.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/MetaDataUtils.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Data/Definitions.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/DefaultProfileState.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/PersistentGameDataService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/AppEvents.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets/Game/Core/Game.Core.asmdef" />
+    <None Include="Assets/Scripts/Game/Core/Game.Core.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
