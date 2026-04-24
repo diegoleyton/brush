@@ -18,16 +18,21 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class RoomViewController : MonoBehaviour
     {
+        [SerializeField]
+        private GameObject SurfaceViewConatiner_;
+
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
         private RoomSettings roomSettings_;
         private IObjectInstantiator instantiator_;
 
-        private RoomObjectDropArea[] dropAreas_ = Array.Empty<RoomObjectDropArea>();
+        private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
+        private RoomPaintSurfaceView[] paintSurfaceViews_;
 
         private bool initialized_;
         private bool subscribed_;
-        private PlaceableObjectRoomViewStrategy placeableObjectStrategy_;
+        private RoomPlaceableObjectsController placeableObjectsController_;
+        private RoomPaintController paintController_;
 
         [Inject]
         public void Construct(
@@ -44,6 +49,7 @@ namespace Game.Unity.RoomScene
 
         private void Awake()
         {
+            SetSurfaceViews();
             SubscribeToDispatcher();
         }
 
@@ -60,35 +66,34 @@ namespace Game.Unity.RoomScene
             }
 
             ValidateSceneReferences();
-            placeableObjectStrategy_ = new PlaceableObjectRoomViewStrategy(
+            placeableObjectsController_ = new RoomPlaceableObjectsController(
                 repository_,
-                dropAreas_,
+                placeableObjectSurfaceViews_,
                 roomSettings_,
                 instantiator_);
+            paintController_ = new RoomPaintController(
+                repository_,
+                placeableObjectSurfaceViews_,
+                paintSurfaceViews_);
 
             RefreshFromData();
             initialized_ = true;
         }
 
-        public void SetDropAreas(RoomObjectDropArea[] dropAreas)
-        {
-            dropAreas_ = dropAreas ?? Array.Empty<RoomObjectDropArea>();
-        }
-
         private void ValidateSceneReferences()
         {
-            if (dropAreas_ == null || dropAreas_.Length == 0)
+            if (placeableObjectSurfaceViews_ == null || placeableObjectSurfaceViews_.Length == 0)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(RoomViewController)} requires at least one {nameof(RoomObjectDropArea)} reference.");
+                    $"{nameof(RoomViewController)} requires at least one {nameof(RoomPlaceableObjectSurfaceView)} reference.");
             }
 
-            for (int index = 0; index < dropAreas_.Length; index++)
+            for (int index = 0; index < placeableObjectSurfaceViews_.Length; index++)
             {
-                if (dropAreas_[index] == null)
+                if (placeableObjectSurfaceViews_[index] == null)
                 {
                     throw new InvalidOperationException(
-                        $"{nameof(RoomViewController)} has a missing drop area reference at index {index}.");
+                        $"{nameof(RoomViewController)} has a missing surface view reference at index {index}.");
                 }
             }
 
@@ -97,6 +102,12 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomViewController)} requires a {nameof(RoomSettings)} binding.");
             }
+        }
+
+        private void SetSurfaceViews()
+        {
+            placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
+            paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
         }
 
         private void SubscribeToDispatcher()
@@ -133,7 +144,8 @@ namespace Game.Unity.RoomScene
 
         private void RefreshFromData()
         {
-            placeableObjectStrategy_?.Refresh();
+            placeableObjectsController_?.Refresh();
+            paintController_?.Refresh();
         }
     }
 }

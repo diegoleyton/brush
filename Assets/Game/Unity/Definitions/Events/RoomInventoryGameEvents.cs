@@ -9,28 +9,13 @@ namespace Game.Unity.Definitions.Events
     /// </summary>
     public sealed class RoomInventoryDropAcceptedEvent : IEvent
     {
-        public RoomInventoryDropAcceptedEvent(RoomObjectDropArea dropArea, RoomInventoryItemData data)
+        public RoomInventoryDropAcceptedEvent(RoomDropArea dropArea, RoomInventoryItemData data)
         {
             DropArea = dropArea;
             Data = data;
         }
 
-        public RoomObjectDropArea DropArea { get; }
-        public RoomInventoryItemData Data { get; }
-    }
-
-    /// <summary>
-    /// Emitted when a room inventory item is accepted by a room child drop area.
-    /// </summary>
-    public sealed class RoomInventoryChildDropAcceptedEvent : IEvent
-    {
-        public RoomInventoryChildDropAcceptedEvent(RoomChildDropArea dropArea, RoomInventoryItemData data)
-        {
-            DropArea = dropArea;
-            Data = data;
-        }
-
-        public RoomChildDropArea DropArea { get; }
+        public RoomDropArea DropArea { get; }
         public RoomInventoryItemData Data { get; }
     }
 }

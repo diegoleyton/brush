@@ -59,50 +59,54 @@
     <UnityVersion>6000.0.26f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/Diego/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.2.1/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/Diego/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.2.2/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Game/Unity/RoomScene/Controllers/RoomController.cs" />
     <Compile Include="Assets/Game/Unity/Definitions/InstantiatorIds.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPlaceableObjectsController.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/PopupBase.cs" />
     <Compile Include="Assets/Game/Unity/Development/DevelopmentProfileSettings.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomSceneController.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventoryDragData.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomController.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPlaceableObjectView.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPlaceableObjectSurfaceView.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
     <Compile Include="Assets/Game/Unity/Audio/GameSoundLibrary.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomDragVisual.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/DragItems/RoomInventoryDraggable.cs" />
     <Compile Include="Assets/Game/Unity/Instantiator/DependencyObjectInstantiator.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/PlaceableObjectRoomViewStrategy.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomChildDropArea.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomPlaceableObjectView.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomItemVisuals.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/DragItems/RoomInventoryDragData.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/Inventory/RoomInventoryListUI.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPaintSurfaceView.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomItemVisuals.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/IGameNavigationService.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/Inventory/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Game/Unity/Audio/SoundId.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/Controllers/RoomViewController.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
     <Compile Include="Assets/Game/Unity/Definitions/Events/RoomInventoryGameEvents.cs" />
     <Compile Include="Assets/Game/Unity/Installers/GameProjectComposition.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomDropAreaBase.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/SceneSettings.cs" />
     <Compile Include="Assets/Game/Unity/Installers/GameProjectInstaller.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/Transitions/PopupTransformTransition.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventoryDraggable.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/Inventory/RoomInventorySelectionState.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
     <Compile Include="Assets/Game/Unity/Development/DevelopmentProfileBootstrap.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomViewController.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomObjectDropArea.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/DragItems/RoomDropArea.cs" />
     <Compile Include="Assets/Game/Unity/Definitions/Events/NavigationGameEvents.cs" />
+    <Compile Include="Assets/Game/Unity/Definitions/RoomTargetKind.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPlaceableChildSurfaceView.cs" />
     <Compile Include="Assets/Game/Unity/Installers/PersistentGameDataLifetime.cs" />
     <Compile Include="Assets/Game/Unity/Settings/RoomSettings.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/SceneBase.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventorySelectionState.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPaintController.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/ScreenBlockerImage.cs" />
+    <Compile Include="Assets/Game/Unity/RoomScene/RoomVisuals/RoomPlaceableObjectSurfaceBase.cs" />
     <Compile Include="Assets/Game/Unity/Definitions/SceneType.cs" />
     <Compile Include="Assets/Game/Unity/Audio/AudioReactor.cs" />
-    <Compile Include="Assets/Game/Unity/RoomScene/RoomInventoryListUI.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
   </ItemGroup>

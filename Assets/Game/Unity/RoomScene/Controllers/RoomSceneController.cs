@@ -55,7 +55,6 @@ namespace Game.Unity.RoomScene
             }
 
             roomController_.Initialize();
-            roomViewController_.SetDropAreas(roomController_.DropAreas);
             roomViewController_.Initialize();
         }
     }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;
 using Game.Unity.Settings;
@@ -12,21 +13,21 @@ namespace Game.Unity.RoomScene
     /// <summary>
     /// Applies persisted placeable room objects to the room scene visuals.
     /// </summary>
-    public sealed class PlaceableObjectRoomViewStrategy
+    public sealed class RoomPlaceableObjectsController
     {
         private readonly DataRepository repository_;
-        private readonly IReadOnlyList<RoomObjectDropArea> dropAreas_;
+        private readonly IReadOnlyList<RoomPlaceableObjectSurfaceView> surfaceViews_;
         private readonly RoomSettings roomSettings_;
         private readonly IObjectInstantiator instantiator_;
 
-        public PlaceableObjectRoomViewStrategy(
+        public RoomPlaceableObjectsController(
             DataRepository repository,
-            IReadOnlyList<RoomObjectDropArea> dropAreas,
+            IReadOnlyList<RoomPlaceableObjectSurfaceView> surfaceViews,
             RoomSettings roomSettings,
             IObjectInstantiator instantiator)
         {
             repository_ = repository;
-            dropAreas_ = dropAreas;
+            surfaceViews_ = surfaceViews;
             roomSettings_ = roomSettings;
             instantiator_ = instantiator;
         }
@@ -49,8 +50,8 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
-                RoomObjectDropArea dropArea = FindDropArea(location.LocationId);
-                if (dropArea == null)
+                RoomPlaceableObjectSurfaceView surfaceView = FindSurfaceView(location.LocationId);
+                if (surfaceView == null)
                 {
                     continue;
                 }
@@ -64,50 +65,51 @@ namespace Game.Unity.RoomScene
                 RoomPlaceableObjectView placeableObjectView = visualInstance.GetComponent<RoomPlaceableObjectView>();
                 if (placeableObjectView != null)
                 {
-                    placeableObjectView.Configure(location.LocationId, location.Item.ItemId, allowChildPlacement: true);
+                    placeableObjectView.SetColor(
+                        RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, location.Item.ItemId));
+                    placeableObjectView.ConfigureTopLevel(location.LocationId, location.Item.ItemId);
                 }
 
-                dropArea.SetPlacedVisual(visualInstance);
+                surfaceView.SetPlacedVisual(visualInstance);
                 ApplyChildObjects(location, placeableObjectView);
             }
         }
 
         private void ClearAllPlaceableObjectAreas()
         {
-            if (dropAreas_ == null)
+            if (surfaceViews_ == null)
             {
                 return;
             }
 
-            for (int index = 0; index < dropAreas_.Count; index++)
+            for (int index = 0; index < surfaceViews_.Count; index++)
             {
-                RoomObjectDropArea dropArea = dropAreas_[index];
-                if (dropArea != null && dropArea.SupportedInventoryType == InteractionPointType.PLACEABLE_OBJECT)
+                RoomPlaceableObjectSurfaceView surfaceView = surfaceViews_[index];
+                if (surfaceView != null)
                 {
-                    dropArea.ClearPlacedVisual();
+                    surfaceView.ClearPlacedVisual();
                 }
             }
         }
 
-        private RoomObjectDropArea FindDropArea(int targetId)
+        private RoomPlaceableObjectSurfaceView FindSurfaceView(int targetId)
         {
-            if (dropAreas_ == null)
+            if (surfaceViews_ == null)
             {
                 return null;
             }
 
-            for (int index = 0; index < dropAreas_.Count; index++)
+            for (int index = 0; index < surfaceViews_.Count; index++)
             {
-                RoomObjectDropArea dropArea = dropAreas_[index];
-                if (dropArea == null)
+                RoomPlaceableObjectSurfaceView surfaceView = surfaceViews_[index];
+                if (surfaceView == null)
                 {
                     continue;
                 }
 
-                if (dropArea.TargetId == targetId &&
-                    dropArea.SupportedInventoryType == InteractionPointType.PLACEABLE_OBJECT)
+                if (surfaceView.LocationId == targetId)
                 {
-                    return dropArea;
+                    return surfaceView;
                 }
             }
 
@@ -125,13 +127,6 @@ namespace Game.Unity.RoomScene
             RectTransform instance = instantiator_ != null
                 ? instantiator_.InstantiatePrefab(prefab)
                 : UnityEngine.Object.Instantiate(prefab);
-            RoomPlaceableObjectView placeableObjectView = instance.GetComponent<RoomPlaceableObjectView>();
-            if (placeableObjectView != null)
-            {
-                placeableObjectView.SetColor(
-                    RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, itemId));
-            }
-
             return instance;
         }
 
@@ -150,8 +145,8 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
-                RoomChildDropArea childDropArea = parentView.FindChildDropArea(slot.SlotId);
-                if (childDropArea == null)
+                RoomPlaceableChildSurfaceView childSurfaceView = parentView.FindChildSurfaceView(slot.SlotId);
+                if (childSurfaceView == null)
                 {
                     continue;
                 }
@@ -165,9 +160,11 @@ namespace Game.Unity.RoomScene
                 RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
                 if (childView != null)
                 {
-                    childView.Configure(location.LocationId, slot.Item.ItemId, allowChildPlacement: false);
+                    childView.SetColor(
+                        RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, slot.Item.ItemId));
+                    childView.ConfigureChild(location.LocationId, slot.SlotId, slot.Item.ItemId);
                 }
-                childDropArea.SetPlacedVisual(childVisual);
+                childSurfaceView.SetPlacedVisual(childVisual);
             }
         }
     }

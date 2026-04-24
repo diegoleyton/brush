@@ -349,6 +349,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void FinishSuccessfulDrop()
         {
+            if (activeDragVisualInstance_ != null)
+            {
+                DestroyActiveDragVisual();
+            }
+
             FinishDragState();
             onDragCompleted_?.Invoke();
         }

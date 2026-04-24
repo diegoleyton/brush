@@ -10,9 +10,6 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
     public abstract class UIDropTarget : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDropHandler
     {
         [SerializeField]
-        private RectTransform dropContainer_;
-
-        [SerializeField]
         private bool reparentDroppedItem_ = true;
 
         [SerializeField]
@@ -28,12 +25,10 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         /// Configures the target at runtime.
         /// </summary>
         public void Configure(
-            RectTransform dropContainer,
             bool reparentDroppedItem = true,
             bool resetAnchoredPositionOnDrop = true,
             bool positionDroppedItemAtPointer = false)
         {
-            dropContainer_ = dropContainer;
             reparentDroppedItem_ = reparentDroppedItem;
             resetAnchoredPositionOnDrop_ = resetAnchoredPositionOnDrop;
             positionDroppedItemAtPointer_ = positionDroppedItemAtPointer;
@@ -79,7 +74,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             }
 
             RectTransform draggableTransform = draggable.DraggedRectTransform;
-            RectTransform targetContainer = dropContainer_ != null ? dropContainer_ : transform as RectTransform;
+            RectTransform targetContainer = ResolveDropContainer();
 
             if (draggableTransform == null || targetContainer == null)
             {
@@ -105,6 +100,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                     draggableTransform.anchoredPosition = Vector2.zero;
                 }
             }
+        }
+
+        protected virtual RectTransform ResolveDropContainer()
+        {
+            return transform as RectTransform;
         }
 
         private static UIDraggable ResolveDraggable(PointerEventData eventData)

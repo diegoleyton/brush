@@ -7,6 +7,7 @@ using Flowbit.Utilities.Core.Events;
 using Game.Core.Data;
 using Game.Core.Events;
 using Game.Core.Services;
+using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 
 using UnityEngine;
@@ -32,6 +33,9 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class RoomController : MonoBehaviour
     {
+        private Dictionary<(InteractionPointType, RoomTargetKind), Action<RoomInventoryDropAcceptedEvent>>
+            dropAcceptedHandlers_;
+
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
         private RoomInventorySelectionState selectionState_;
@@ -43,9 +47,6 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
         private RoomInventoryListUI inventoryList_;
-
-        [SerializeField]
-        private RoomObjectDropArea[] dropAreas_ = Array.Empty<RoomObjectDropArea>();
 
         [SerializeField]
         private InteractionPointType selectedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -75,6 +76,7 @@ namespace Game.Unity.RoomScene
 
             SubscribeToDispatcher();
             BindInventoryCategoryButtons();
+            BuildDropAcceptedHandlers();
         }
 
         private void OnEnable()
@@ -119,29 +121,7 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
             }
-
-            if (dropAreas_ == null || dropAreas_.Length == 0)
-            {
-                dropAreas_ = GetComponentsInChildren<RoomObjectDropArea>(true);
-            }
-
-            if (dropAreas_ == null || dropAreas_.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(RoomController)} requires at least one {nameof(RoomObjectDropArea)} reference.");
-            }
-
-            for (int index = 0; index < dropAreas_.Length; index++)
-            {
-                if (dropAreas_[index] == null)
-                {
-                    throw new InvalidOperationException(
-                        $"{nameof(RoomController)} has a missing drop area reference at index {index}.");
-                }
-            }
         }
-
-        public RoomObjectDropArea[] DropAreas => dropAreas_;
 
         private void BindInventoryCategoryButtons()
         {
@@ -194,7 +174,6 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Subscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
-            dispatcher_.Subscribe<RoomInventoryChildDropAcceptedEvent>(OnRoomInventoryChildDropAccepted);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcherSubscribed_ = true;
@@ -208,7 +187,6 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Unsubscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
-            dispatcher_.Unsubscribe<RoomInventoryChildDropAcceptedEvent>(OnRoomInventoryChildDropAccepted);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcherSubscribed_ = false;
@@ -283,52 +261,65 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            DispatchRoomInteractionEvent(eventData.Data, eventData.DropArea.TargetId);
-        }
-
-        private void DispatchRoomInteractionEvent(RoomInventoryItemData dragData, int targetId)
-        {
-            if (dispatcher_ == null || dragData == null)
+            if (dispatcher_ == null)
             {
                 return;
             }
 
-            switch (dragData.InteractionPointType)
+            if (dropAcceptedHandlers_ == null)
             {
-                case InteractionPointType.PLACEABLE_OBJECT:
-                    dispatcher_.Send(new RoomObjectPlacedEvent(dragData.ItemId, targetId));
-                    return;
-                case InteractionPointType.PAINT:
-                    dispatcher_.Send(new RoomPaintAppliedEvent(dragData.ItemId, targetId));
-                    return;
-                case InteractionPointType.FOOD:
-                    dispatcher_.Send(new RoomFoodAppliedEvent(dragData.ItemId, targetId));
-                    return;
-                case InteractionPointType.SKIN:
-                    dispatcher_.Send(new RoomSkinAppliedEvent(dragData.ItemId, targetId));
-                    return;
-                case InteractionPointType.FACE:
-                    dispatcher_.Send(new RoomFaceAppliedEvent(dragData.ItemId, targetId));
-                    return;
+                BuildDropAcceptedHandlers();
+            }
+
+            if (dropAcceptedHandlers_.TryGetValue(
+                    (eventData.Data.InteractionPointType, eventData.DropArea.RoomTargetKind),
+                    out Action<RoomInventoryDropAcceptedEvent> handler))
+            {
+                handler.Invoke(eventData);
             }
         }
 
-        private void OnRoomInventoryChildDropAccepted(RoomInventoryChildDropAcceptedEvent eventData)
+        private void BuildDropAcceptedHandlers()
         {
-            if (eventData?.DropArea == null || eventData.Data == null)
-            {
-                return;
-            }
+            dropAcceptedHandlers_ =
+                new Dictionary<(InteractionPointType, RoomTargetKind), Action<RoomInventoryDropAcceptedEvent>>
+                {
+                    {
+                        (InteractionPointType.PLACEABLE_OBJECT, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(
+                            new RoomObjectPlacedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId))
+                    },
+                    {
+                        (InteractionPointType.PLACEABLE_OBJECT, RoomTargetKind.PLACEABLE_OBJECT),
+                        eventData => dispatcher_.Send(new RoomChildObjectPlacedEvent(
+                            eventData.Data.ItemId,
+                            eventData.DropArea.ParentTargetId,
+                            eventData.DropArea.TargetId))
+                    },
+                    {
+                        (InteractionPointType.PAINT, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(
+                            new RoomPaintAppliedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId))
+                    },
+                    {
+                        (InteractionPointType.PAINT, RoomTargetKind.PLACEABLE_OBJECT),
+                        eventData =>
+                        {
+                            if (eventData.DropArea.ParentTargetId >= 0)
+                            {
+                                dispatcher_.Send(new RoomChildObjectPaintAppliedEvent(
+                                    eventData.Data.ItemId,
+                                    eventData.DropArea.ParentTargetId,
+                                    eventData.DropArea.TargetId));
+                                return;
+                            }
 
-            if (eventData.Data.InteractionPointType != InteractionPointType.PLACEABLE_OBJECT)
-            {
-                return;
-            }
-
-            dispatcher_?.Send(new RoomChildObjectPlacedEvent(
-                eventData.Data.ItemId,
-                eventData.DropArea.ParentLocationId,
-                eventData.DropArea.SlotId));
+                            dispatcher_.Send(new RoomObjectPaintAppliedEvent(
+                                eventData.Data.ItemId,
+                                eventData.DropArea.TargetId));
+                        }
+                    }
+                };
         }
 
     }

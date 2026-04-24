@@ -50,6 +50,38 @@ namespace Game.Core.Events
     }
 
     /// <summary>
+    /// Requested when paint should be applied to a placed room object.
+    /// </summary>
+    public sealed class RoomObjectPaintAppliedEvent : IEvent
+    {
+        public RoomObjectPaintAppliedEvent(int itemId, int locationId)
+        {
+            ItemId = itemId;
+            LocationId = locationId;
+        }
+
+        public int ItemId { get; }
+        public int LocationId { get; }
+    }
+
+    /// <summary>
+    /// Requested when paint should be applied to a placed child room object.
+    /// </summary>
+    public sealed class RoomChildObjectPaintAppliedEvent : IEvent
+    {
+        public RoomChildObjectPaintAppliedEvent(int itemId, int locationId, int slotId)
+        {
+            ItemId = itemId;
+            LocationId = locationId;
+            SlotId = slotId;
+        }
+
+        public int ItemId { get; }
+        public int LocationId { get; }
+        public int SlotId { get; }
+    }
+
+    /// <summary>
     /// Requested when food should be applied from the room scene.
     /// </summary>
     public sealed class RoomFoodAppliedEvent : IEvent

@@ -39,16 +39,9 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            if (target is RoomObjectDropArea dropArea)
+            if (target is RoomDropArea dropArea)
             {
                 dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, data_));
-                return;
-            }
-
-            if (target is RoomChildDropArea childDropArea)
-            {
-                dispatcher_.Send(new RoomInventoryChildDropAcceptedEvent(childDropArea, data_));
-                return;
             }
         }
     }

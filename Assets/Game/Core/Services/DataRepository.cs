@@ -330,7 +330,7 @@ namespace Game.Core.Services
         public void SetChildRoomObject(int locationId, int slotId, int itemId)
         {
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            if (roomObject == null || !RoomObjectCatalog.SupportsChildSlot(roomObject.ItemId, slotId))
+            if (roomObject == null)
             {
                 return;
             }
@@ -389,7 +389,7 @@ namespace Game.Core.Services
         public void PaintRoomObject(int locationId, int paintItemId)
         {
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            if (roomObject == null || !RoomObjectCatalog.SupportsPaint(roomObject.ItemId))
+            if (roomObject == null)
             {
                 return;
             }
@@ -406,7 +406,7 @@ namespace Game.Core.Services
         public void PaintChildRoomObject(int locationId, int slotId, int paintItemId)
         {
             PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
-            if (slot?.Item == null || !RoomObjectCatalog.SupportsPaint(slot.Item.ItemId))
+            if (slot?.Item == null)
             {
                 return;
             }
