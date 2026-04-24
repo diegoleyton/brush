@@ -171,7 +171,7 @@ namespace Game.Core.Services
 
             SpendCurrency(itemDefinition.CurrencyType, itemDefinition.Price);
             AddInventoryItem(itemType, itemId, itemDefinition.Quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.OK, itemDefinition));
             NotifyDataChanged();
             return MarketPurchaseStatus.OK;
@@ -191,7 +191,7 @@ namespace Game.Core.Services
             }
 
             NotifyDataChanged();
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             return rewards;
         }
 
@@ -299,6 +299,7 @@ namespace Game.Core.Services
         {
             if (!GameIds.IsRoomObjectLocationId(locationId) || RoomHasObject(locationId, itemId))
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
                 return;
             }
 
@@ -311,6 +312,7 @@ namespace Game.Core.Services
             };
 
             ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
+            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
         }
 
         public void RemoveRoomObject(int locationId)
@@ -323,7 +325,7 @@ namespace Game.Core.Services
 
             ReturnPlacedRoomObjectToInventory(roomObject.Item);
             roomObject.Item = null;
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
@@ -332,12 +334,14 @@ namespace Game.Core.Services
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
             if (roomObject == null)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
                 return;
             }
 
             PlacedChildObjectSlot slot = GetOrCreateRoomChildSlot(locationId, slotId);
             if (slot.Item != null && slot.Item.ItemId == itemId)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
                 return;
             }
 
@@ -353,6 +357,7 @@ namespace Game.Core.Services
             };
 
             ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
+            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
         }
 
         public void RemoveChildRoomObject(int locationId, int slotId)
@@ -365,7 +370,7 @@ namespace Game.Core.Services
 
             AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, slot.Item.ItemId, 1);
             slot.Item = null;
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
@@ -373,17 +378,20 @@ namespace Game.Core.Services
         {
             if (!GameIds.IsRoomSurfaceId(surfaceId))
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
                 return;
             }
 
             RoomPaintSurfaceState surface = GetOrCreateRoomSurface(surfaceId);
             if (surface.PaintId == paintItemId)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
                 return;
             }
 
             surface.PaintId = paintItemId;
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
+            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, surfaceId);
         }
 
         public void PaintRoomObject(int locationId, int paintItemId)
@@ -391,16 +399,19 @@ namespace Game.Core.Services
             PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
             if (roomObject == null)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
                 return;
             }
 
             if (roomObject.PaintId == paintItemId)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
                 return;
             }
 
             roomObject.PaintId = paintItemId;
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
+            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, locationId);
         }
 
         public void PaintChildRoomObject(int locationId, int slotId, int paintItemId)
@@ -408,16 +419,19 @@ namespace Game.Core.Services
             PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
             if (slot?.Item == null)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
                 return;
             }
 
             if (slot.Item.PaintId == paintItemId)
             {
+                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
                 return;
             }
 
             slot.Item.PaintId = paintItemId;
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
+            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, slotId, locationId);
         }
 
         public void SetPetFace(int itemId)
@@ -456,35 +470,35 @@ namespace Game.Core.Services
         public void AddPlaceableObject(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, id, quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
         public void AddPaint(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.Paint, id, quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
         public void AddFood(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.Food, id, quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
         public void AddSkin(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.Skin, id, quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
         public void AddFace(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.Face, id, quantity);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 
@@ -497,6 +511,29 @@ namespace Game.Core.Services
         private void NotifyDataChanged()
         {
             dispatcher_.Send(new LocalDataChangedEvent());
+        }
+
+        private void NotifyRoomDataItemApplied(
+            InteractionPointType itemType,
+            int itemId,
+            int targetId,
+            int parentTargetId = -1)
+        {
+            dispatcher_.Send(new RoomDataItemAppliedEvent(itemType, itemId, targetId, parentTargetId));
+        }
+
+        private void NotifyRoomDataItemApplyFailed(
+            InteractionPointType itemType,
+            int itemId,
+            int targetId,
+            int parentTargetId = -1)
+        {
+            dispatcher_.Send(new RoomDataItemApplyFailedEvent(itemType, itemId, targetId, parentTargetId));
+        }
+
+        private void NotifyInventoryChanged()
+        {
+            dispatcher_.Send(new InventoryUpdatedEvent());
         }
 
         private void SpendCurrency(CurrencyType currencyType, int amount)
@@ -558,7 +595,7 @@ namespace Game.Core.Services
         private void ConsumeInventoryItemAndNotify(InteractionPointType interactionPointType, int itemId)
         {
             AddInventoryItem(interactionPointType, itemId, -1);
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            NotifyInventoryChanged();
             NotifyDataChanged();
         }
 

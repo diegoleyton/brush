@@ -1,5 +1,7 @@
 using Flowbit.Utilities.Core.Events;
 
+using Game.Core.Data;
+
 namespace Game.Core.Events
 {
     /// <summary>
@@ -124,5 +126,51 @@ namespace Game.Core.Events
 
         public int ItemId { get; }
         public int TargetId { get; }
+    }
+
+    /// <summary>
+    /// Emitted by the data layer after a room item operation is successfully applied.
+    /// </summary>
+    public sealed class RoomDataItemAppliedEvent : IEvent
+    {
+        public RoomDataItemAppliedEvent(
+            InteractionPointType itemType,
+            int itemId,
+            int targetId,
+            int parentTargetId = -1)
+        {
+            ItemType = itemType;
+            ItemId = itemId;
+            TargetId = targetId;
+            ParentTargetId = parentTargetId;
+        }
+
+        public InteractionPointType ItemType { get; }
+        public int ItemId { get; }
+        public int TargetId { get; }
+        public int ParentTargetId { get; }
+    }
+
+    /// <summary>
+    /// Emitted by the data layer when a room item operation could not be applied.
+    /// </summary>
+    public sealed class RoomDataItemApplyFailedEvent : IEvent
+    {
+        public RoomDataItemApplyFailedEvent(
+            InteractionPointType itemType,
+            int itemId,
+            int targetId,
+            int parentTargetId = -1)
+        {
+            ItemType = itemType;
+            ItemId = itemId;
+            TargetId = targetId;
+            ParentTargetId = parentTargetId;
+        }
+
+        public InteractionPointType ItemType { get; }
+        public int ItemId { get; }
+        public int TargetId { get; }
+        public int ParentTargetId { get; }
     }
 }

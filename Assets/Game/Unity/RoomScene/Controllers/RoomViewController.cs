@@ -117,7 +117,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Subscribe<LocalDataChangedEvent>(OnLocalDataChanged);
+            dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             subscribed_ = true;
         }
 
@@ -128,18 +128,53 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Unsubscribe<LocalDataChangedEvent>(OnLocalDataChanged);
+            dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             subscribed_ = false;
         }
 
-        private void OnLocalDataChanged(LocalDataChangedEvent _)
+        private void OnRoomDataItemApplied(RoomDataItemAppliedEvent eventData)
         {
             if (!initialized_)
             {
                 return;
             }
 
-            RefreshFromData();
+            if (eventData.ItemType == Core.Data.InteractionPointType.PLACEABLE_OBJECT)
+            {
+                if (eventData.ParentTargetId >= 0)
+                {
+                    placeableObjectsController_?.RefreshChildPlaceableObject(
+                        eventData.ParentTargetId,
+                        eventData.TargetId);
+                    paintController_?.RefreshPaintedChildObject(
+                        eventData.ParentTargetId,
+                        eventData.TargetId);
+                    return;
+                }
+
+                placeableObjectsController_?.RefreshPlaceableObject(eventData.TargetId);
+                paintController_?.RefreshPaintedObject(eventData.TargetId);
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.PAINT)
+            {
+                if (eventData.ParentTargetId >= 0)
+                {
+                    paintController_?.RefreshPaintedChildObject(
+                        eventData.ParentTargetId,
+                        eventData.TargetId);
+                    return;
+                }
+
+                if (Game.Core.Configuration.GameIds.IsRoomSurfaceId(eventData.TargetId))
+                {
+                    paintController_?.RefreshPaintSurface(eventData.TargetId);
+                    return;
+                }
+
+                paintController_?.RefreshPaintedObject(eventData.TargetId);
+            }
         }
 
         private void RefreshFromData()

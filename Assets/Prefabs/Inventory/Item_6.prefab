@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 3238119276636385128}
   - component: {fileID: 236659547842862316}
   - component: {fileID: 1132950832747235893}
-  - component: {fileID: 4564945264486897127}
   m_Layer: 5
   m_Name: Item_6
   m_TagString: Untagged
@@ -112,22 +111,8 @@ MonoBehaviour:
       m_Calls: []
   supportedInventoryType_: 1
   roomTargetKind_: 1
-  targetId_: 2
+  targetId_: 0
   visibilityRoot_: {fileID: 0}
---- !u!114 &4564945264486897127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2434950618036019957}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 564b4a41031cd450691087546e72bf6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  surfaceId_: 2
-  image_: {fileID: 3238119276636385128}
 --- !u!1 &3990510936199590909
 GameObject:
   m_ObjectHideFlags: 0
@@ -219,7 +204,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemContainer_: {fileID: 3805104598618641828}
   slotId_: 1
-  visibilityRoot_: {fileID: 3990510936199590909}
 --- !u!114 &9062874671339735889
 MonoBehaviour:
   m_ObjectHideFlags: 0
