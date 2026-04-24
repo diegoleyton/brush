@@ -289,8 +289,14 @@ namespace Game.Core.Services
                 case InteractionPointType.FACE:
                     SetPetFace(itemId);
                     return;
+                case InteractionPointType.HAT:
+                    SetPetHat(itemId);
+                    return;
                 case InteractionPointType.SKIN:
                     SetPetSkin(itemId);
+                    return;
+                case InteractionPointType.DRESS:
+                    SetPetDress(itemId);
                     return;
                 case InteractionPointType.FOOD:
                     FeedPet(itemId);
@@ -466,6 +472,21 @@ namespace Game.Core.Services
             NotifyPetDataApplied(InteractionPointType.FACE, itemId);
         }
 
+        public void SetPetHat(int itemId)
+        {
+            if (CurrentProfile.PetData.HatItemId == itemId)
+            {
+                logger_?.LogWarning($"[RoomData] Failed to apply pet hat item {itemId}: already applied.");
+                NotifyPetDataApplyFailed(InteractionPointType.HAT, itemId);
+                return;
+            }
+
+            CurrentProfile.PetData.HatItemId = itemId;
+            logger_?.Log($"[RoomData] Applied pet hat item {itemId}.");
+            ConsumeInventoryItemAndNotify(InteractionPointType.HAT, itemId);
+            NotifyPetDataApplied(InteractionPointType.HAT, itemId);
+        }
+
         public void SetPetSkin(int itemId)
         {
             if (CurrentProfile.PetData.SkinItemId == itemId)
@@ -479,6 +500,21 @@ namespace Game.Core.Services
             logger_?.Log($"[RoomData] Applied pet skin item {itemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.SKIN, itemId);
             NotifyPetDataApplied(InteractionPointType.SKIN, itemId);
+        }
+
+        public void SetPetDress(int itemId)
+        {
+            if (CurrentProfile.PetData.DressItemId == itemId)
+            {
+                logger_?.LogWarning($"[RoomData] Failed to apply pet dress item {itemId}: already applied.");
+                NotifyPetDataApplyFailed(InteractionPointType.DRESS, itemId);
+                return;
+            }
+
+            CurrentProfile.PetData.DressItemId = itemId;
+            logger_?.Log($"[RoomData] Applied pet dress item {itemId}.");
+            ConsumeInventoryItemAndNotify(InteractionPointType.DRESS, itemId);
+            NotifyPetDataApplied(InteractionPointType.DRESS, itemId);
         }
 
         public void FeedPet(int itemId)
@@ -521,6 +557,20 @@ namespace Game.Core.Services
         public void AddSkin(int id, int quantity)
         {
             AddInventoryItem(CurrentProfile.InventoryData.Skin, id, quantity);
+            NotifyInventoryChanged();
+            NotifyDataChanged();
+        }
+
+        public void AddHat(int id, int quantity)
+        {
+            AddInventoryItem(CurrentProfile.InventoryData.Hat, id, quantity);
+            NotifyInventoryChanged();
+            NotifyDataChanged();
+        }
+
+        public void AddDress(int id, int quantity)
+        {
+            AddInventoryItem(CurrentProfile.InventoryData.Dress, id, quantity);
             NotifyInventoryChanged();
             NotifyDataChanged();
         }
@@ -599,7 +649,9 @@ namespace Game.Core.Services
                 eatCount = 0,
                 lastBrushTime = -1,
                 FaceItemId = DefaultProfileState.DefaultPetFaceItemId,
-                SkinItemId = DefaultProfileState.DefaultPetSkinItemId
+                SkinItemId = DefaultProfileState.DefaultPetSkinItemId,
+                HatItemId = DefaultProfileState.DefaultPetHatItemId,
+                DressItemId = DefaultProfileState.DefaultPetDressItemId
             };
         }
 

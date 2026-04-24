@@ -45,6 +45,8 @@ namespace Game.Core.Data
         public long lastBrushTime;
         public int FaceItemId = DefaultProfileState.DefaultPetFaceItemId;
         public int SkinItemId = DefaultProfileState.DefaultPetSkinItemId;
+        public int HatItemId = DefaultProfileState.DefaultPetHatItemId;
+        public int DressItemId = DefaultProfileState.DefaultPetDressItemId;
     }
 
     /// <summary>
@@ -125,6 +127,10 @@ namespace Game.Core.Data
         [NonSerialized]
         public Dictionary<int, int> Skin = new Dictionary<int, int>();
         [NonSerialized]
+        public Dictionary<int, int> Hat = new Dictionary<int, int>();
+        [NonSerialized]
+        public Dictionary<int, int> Dress = new Dictionary<int, int>();
+        [NonSerialized]
         public Dictionary<int, int> Face = new Dictionary<int, int>();
 
         [SerializeField]
@@ -140,6 +146,12 @@ namespace Game.Core.Data
         private List<InventoryItemAmount> skinSerialized_ = new List<InventoryItemAmount>();
 
         [SerializeField]
+        private List<InventoryItemAmount> hatSerialized_ = new List<InventoryItemAmount>();
+
+        [SerializeField]
+        private List<InventoryItemAmount> dressSerialized_ = new List<InventoryItemAmount>();
+
+        [SerializeField]
         private List<InventoryItemAmount> faceSerialized_ = new List<InventoryItemAmount>();
 
         public void OnBeforeSerialize()
@@ -148,6 +160,8 @@ namespace Game.Core.Data
             paintSerialized_ = SerializeDictionary(Paint);
             foodSerialized_ = SerializeDictionary(Food);
             skinSerialized_ = SerializeDictionary(Skin);
+            hatSerialized_ = SerializeDictionary(Hat);
+            dressSerialized_ = SerializeDictionary(Dress);
             faceSerialized_ = SerializeDictionary(Face);
         }
 
@@ -157,6 +171,8 @@ namespace Game.Core.Data
             Paint = DeserializeDictionary(paintSerialized_);
             Food = DeserializeDictionary(foodSerialized_);
             Skin = DeserializeDictionary(skinSerialized_);
+            Hat = DeserializeDictionary(hatSerialized_);
+            Dress = DeserializeDictionary(dressSerialized_);
             Face = DeserializeDictionary(faceSerialized_);
         }
 

@@ -141,10 +141,22 @@ namespace Game.Unity.Development
                 repository_.AddFood);
 
             EnsureInventoryCategory(
+                InteractionPointType.HAT,
+                repository_.CurrentProfile.InventoryData.Hat,
+                settings_.Hat,
+                repository_.AddHat);
+
+            EnsureInventoryCategory(
                 InteractionPointType.SKIN,
                 repository_.CurrentProfile.InventoryData.Skin,
                 settings_.Skin,
                 repository_.AddSkin);
+
+            EnsureInventoryCategory(
+                InteractionPointType.DRESS,
+                repository_.CurrentProfile.InventoryData.Dress,
+                settings_.Dress,
+                repository_.AddDress);
 
             EnsureInventoryCategory(
                 InteractionPointType.FACE,

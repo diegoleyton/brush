@@ -31,14 +31,18 @@ namespace Game.Unity.RoomScene
         private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
         private RoomPaintSurfaceView[] paintSurfaceViews_;
         private PetFaceSurfaceView[] faceSurfaceViews_;
+        private PetHatSurfaceView[] hatSurfaceViews_;
         private PetSkinSurfaceView[] skinSurfaceViews_;
+        private PetDressSurfaceView[] dressSurfaceViews_;
 
         private bool initialized_;
         private bool subscribed_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
         private PetFaceController faceController_;
+        private PetHatController hatController_;
         private PetSkinController skinController_;
+        private PetDressController dressController_;
 
         [Inject]
         public void Construct(
@@ -84,7 +88,9 @@ namespace Game.Unity.RoomScene
                 placeableObjectSurfaceViews_,
                 paintSurfaceViews_);
             faceController_ = new PetFaceController(faceSurfaceViews_, repository_);
+            hatController_ = new PetHatController(hatSurfaceViews_, repository_);
             skinController_ = new PetSkinController(skinSurfaceViews_, repository_);
+            dressController_ = new PetDressController(dressSurfaceViews_, repository_);
 
             RefreshFromData();
             initialized_ = true;
@@ -119,7 +125,9 @@ namespace Game.Unity.RoomScene
             placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
             paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
             faceSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetFaceSurfaceView>(true);
+            hatSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetHatSurfaceView>(true);
             skinSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetSkinSurfaceView>(true);
+            dressSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetDressSurfaceView>(true);
         }
 
         private void SubscribeToDispatcher()
@@ -212,10 +220,24 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            if (eventData.ItemType == Core.Data.InteractionPointType.HAT)
+            {
+                logger_?.Log("[RoomView] Refresh pet hat.");
+                hatController_?.Refresh();
+                return;
+            }
+
             if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
             {
                 logger_?.Log("[RoomView] Refresh pet skin.");
                 skinController_?.Refresh();
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.DRESS)
+            {
+                logger_?.Log("[RoomView] Refresh pet dress.");
+                dressController_?.Refresh();
             }
         }
 
@@ -224,7 +246,9 @@ namespace Game.Unity.RoomScene
             placeableObjectsController_?.Refresh();
             paintController_?.Refresh();
             faceController_?.Refresh();
+            hatController_?.Refresh();
             skinController_?.Refresh();
+            dressController_?.Refresh();
         }
     }
 }

@@ -56,8 +56,12 @@ namespace Game.Core.Configuration
 
             switch (itemType)
             {
+                case InteractionPointType.DRESS:
+                    return 24 + (tier * 6);
                 case InteractionPointType.FOOD:
                     return 5 + tier;
+                case InteractionPointType.HAT:
+                    return 22 + (tier * 5);
                 case InteractionPointType.PAINT:
                     return 12 + (tier * 3);
                 case InteractionPointType.FACE:
@@ -77,6 +81,8 @@ namespace Game.Core.Configuration
             {
                 case InteractionPointType.FOOD:
                     return 3;
+                case InteractionPointType.HAT:
+                case InteractionPointType.DRESS:
                 case InteractionPointType.PAINT:
                     return 2;
                 default:

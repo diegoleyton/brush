@@ -19,8 +19,12 @@ namespace Game.Unity.RoomScene
                     return "Paint";
                 case InteractionPointType.FOOD:
                     return "Food";
+                case InteractionPointType.HAT:
+                    return "Hat";
                 case InteractionPointType.SKIN:
                     return "Skin";
+                case InteractionPointType.DRESS:
+                    return "Dress";
                 case InteractionPointType.FACE:
                     return "Face";
                 default:

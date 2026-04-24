@@ -17,6 +17,8 @@ namespace Game.Core.Configuration
         private const int RedItemId = 4;
         public const int DefaultPetFaceItemId = 1;
         public const int DefaultPetSkinItemId = 1;
+        public const int DefaultPetHatItemId = 1;
+        public const int DefaultPetDressItemId = 1;
 
         public const bool InitialPendingReward = true;
 

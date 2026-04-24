@@ -332,8 +332,16 @@ namespace Game.Unity.RoomScene
                         eventData => dispatcher_.Send(new RoomFaceAppliedEvent(eventData.Data.ItemId))
                     },
                     {
+                        (InteractionPointType.HAT, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(new RoomHatAppliedEvent(eventData.Data.ItemId))
+                    },
+                    {
                         (InteractionPointType.SKIN, RoomTargetKind.ROOM),
                         eventData => dispatcher_.Send(new RoomSkinAppliedEvent(eventData.Data.ItemId))
+                    },
+                    {
+                        (InteractionPointType.DRESS, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(new RoomDressAppliedEvent(eventData.Data.ItemId))
                     },
                     {
                         (InteractionPointType.FOOD, RoomTargetKind.ROOM),

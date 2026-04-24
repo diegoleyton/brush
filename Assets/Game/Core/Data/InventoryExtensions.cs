@@ -16,10 +16,14 @@ namespace Game.Core.Data
                     return inventory.Face;
                 case InteractionPointType.FOOD:
                     return inventory.Food;
+                case InteractionPointType.HAT:
+                    return inventory.Hat;
                 case InteractionPointType.PAINT:
                     return inventory.Paint;
                 case InteractionPointType.PLACEABLE_OBJECT:
                     return inventory.PlaceableObjects;
+                case InteractionPointType.DRESS:
+                    return inventory.Dress;
                 case InteractionPointType.SKIN:
                     return inventory.Skin;
                 default:

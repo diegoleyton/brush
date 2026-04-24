@@ -110,6 +110,32 @@ namespace Game.Core.Events
     }
 
     /// <summary>
+    /// Requested when a pet hat should be applied from the room scene.
+    /// </summary>
+    public sealed class RoomHatAppliedEvent : IEvent
+    {
+        public RoomHatAppliedEvent(int itemId)
+        {
+            ItemId = itemId;
+        }
+
+        public int ItemId { get; }
+    }
+
+    /// <summary>
+    /// Requested when a pet dress should be applied from the room scene.
+    /// </summary>
+    public sealed class RoomDressAppliedEvent : IEvent
+    {
+        public RoomDressAppliedEvent(int itemId)
+        {
+            ItemId = itemId;
+        }
+
+        public int ItemId { get; }
+    }
+
+    /// <summary>
     /// Requested when a pet face should be applied from the room scene.
     /// </summary>
     public sealed class RoomFaceAppliedEvent : IEvent

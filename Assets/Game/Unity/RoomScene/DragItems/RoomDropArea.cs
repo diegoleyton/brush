@@ -113,7 +113,9 @@ namespace Game.Unity.RoomScene
             {
                 case RoomTargetKind.ROOM:
                     if (supportedInventoryType_ == InteractionPointType.FACE ||
+                        supportedInventoryType_ == InteractionPointType.HAT ||
                         supportedInventoryType_ == InteractionPointType.SKIN ||
+                        supportedInventoryType_ == InteractionPointType.DRESS ||
                         supportedInventoryType_ == InteractionPointType.FOOD)
                     {
                         return true;

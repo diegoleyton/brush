@@ -12,8 +12,10 @@ namespace Game.Core.Configuration
         private static readonly IReadOnlyDictionary<InteractionPointType, ItemCategoryConfig> all_ =
             new Dictionary<InteractionPointType, ItemCategoryConfig>
             {
+                { InteractionPointType.DRESS, new ItemCategoryConfig(20, 1, 2) },
                 { InteractionPointType.FACE, new ItemCategoryConfig(25, 1, 2) },
                 { InteractionPointType.FOOD, new ItemCategoryConfig(100, 0, 2) },
+                { InteractionPointType.HAT, new ItemCategoryConfig(20, 1, 2) },
                 { InteractionPointType.PAINT, new ItemCategoryConfig(31, 3, 2) },
                 { InteractionPointType.PLACEABLE_OBJECT, new ItemCategoryConfig(107, 0, 1) },
                 { InteractionPointType.SKIN, new ItemCategoryConfig(26, 1, 2) },

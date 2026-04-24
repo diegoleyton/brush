@@ -8,6 +8,8 @@ namespace Game.Core.Data
         PLACEABLE_OBJECT,
         PAINT,
         SKIN,
+        HAT,
+        DRESS,
         FOOD,
         FACE
     }

@@ -64,6 +64,12 @@ namespace Game.Unity.Development
         public DevelopmentInventoryCategorySettings Skin { get; private set; } = new DevelopmentInventoryCategorySettings();
 
         [field: SerializeField]
+        public DevelopmentInventoryCategorySettings Hat { get; private set; } = new DevelopmentInventoryCategorySettings();
+
+        [field: SerializeField]
+        public DevelopmentInventoryCategorySettings Dress { get; private set; } = new DevelopmentInventoryCategorySettings();
+
+        [field: SerializeField]
         public DevelopmentInventoryCategorySettings Face { get; private set; } = new DevelopmentInventoryCategorySettings();
 
         public DevelopmentInventoryCategorySettings GetCategorySettings(InteractionPointType interactionPointType)
@@ -76,8 +82,12 @@ namespace Game.Unity.Development
                     return Paint;
                 case InteractionPointType.FOOD:
                     return Food;
+                case InteractionPointType.HAT:
+                    return Hat;
                 case InteractionPointType.SKIN:
                     return Skin;
+                case InteractionPointType.DRESS:
+                    return Dress;
                 case InteractionPointType.FACE:
                     return Face;
                 default:
