@@ -88,14 +88,12 @@ namespace Game.Core.Events
     /// </summary>
     public sealed class RoomFoodAppliedEvent : IEvent
     {
-        public RoomFoodAppliedEvent(int itemId, int targetId)
+        public RoomFoodAppliedEvent(int itemId)
         {
             ItemId = itemId;
-            TargetId = targetId;
         }
 
         public int ItemId { get; }
-        public int TargetId { get; }
     }
 
     /// <summary>

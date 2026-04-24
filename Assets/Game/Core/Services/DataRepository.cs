@@ -464,11 +464,13 @@ namespace Game.Core.Services
         {
             if (CanPetEat != PetEatStatus.OK)
             {
+                NotifyPetDataApplyFailed(InteractionPointType.FOOD, itemId);
                 return;
             }
 
             PetEat();
             ConsumeInventoryItemAndNotify(InteractionPointType.FOOD, itemId);
+            NotifyPetDataApplied(InteractionPointType.FOOD, itemId);
         }
 
         public void AddPlaceableObject(int id, int quantity)

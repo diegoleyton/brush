@@ -127,6 +127,7 @@ namespace Game.Unity.RoomScene
 
             dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Subscribe<PetDataAppliedEvent>(OnPetDataApplied);
+            dispatcher_.Subscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = true;
         }
 
@@ -139,6 +140,7 @@ namespace Game.Unity.RoomScene
 
             dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Unsubscribe<PetDataAppliedEvent>(OnPetDataApplied);
+            dispatcher_.Unsubscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = false;
         }
 
@@ -205,6 +207,25 @@ namespace Game.Unity.RoomScene
             if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
             {
                 skinController_?.Refresh();
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.FOOD)
+            {
+                Debug.Log($"Pet food applied successfully. ItemId: {eventData.ItemId}");
+            }
+        }
+
+        private void OnPetDataApplyFailed(PetDataApplyFailedEvent eventData)
+        {
+            if (!initialized_)
+            {
+                return;
+            }
+
+            if (eventData.ItemType == Core.Data.InteractionPointType.FOOD)
+            {
+                Debug.LogWarning($"Pet food apply failed. ItemId: {eventData.ItemId}");
             }
         }
 
