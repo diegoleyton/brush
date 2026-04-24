@@ -122,7 +122,7 @@ MonoBehaviour:
   scrollRect_: {fileID: 0}
   resolveAncestorScrollRectIfMissing_: 1
   enableHoldToDrag_: 1
-  holdToDragDelaySeconds_: 0.3
+  holdToDragDelaySeconds_: 0.2
   holdToDragMaxDistance_: 18
 --- !u!114 &1997827079318832624
 MonoBehaviour:

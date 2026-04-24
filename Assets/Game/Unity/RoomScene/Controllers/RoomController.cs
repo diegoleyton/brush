@@ -180,6 +180,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
+            dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = true;
         }
 
@@ -193,6 +194,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
+            dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = false;
         }
 
@@ -206,12 +208,22 @@ namespace Game.Unity.RoomScene
             RefreshInventoryList();
         }
 
+        private void OnSwitchList(SwitchListEvent eventData)
+        {
+            if (eventData == null)
+            {
+                return;
+            }
+
+            selectedInventoryType_ = eventData.InteractionPointType;
+            UpdateInventoryCategoryButtons();
+        }
+
         private void SelectInventoryCategory(InteractionPointType interactionPointType)
         {
             selectedInventoryType_ = interactionPointType;
             selectionState_?.SetCurrentInteractionPointType(interactionPointType);
             RefreshInventoryList();
-            RefreshDropAreas();
         }
 
         private void RefreshInventoryList()
@@ -227,7 +239,26 @@ namespace Game.Unity.RoomScene
 
         private void RefreshDropAreas()
         {
-            dispatcher_?.Send(new ShowInteractionPointsEvent(selectedInventoryType_));
+            UpdateInventoryCategoryButtons();
+        }
+
+        private void UpdateInventoryCategoryButtons()
+        {
+            if (inventoryCategoryButtons_ == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < inventoryCategoryButtons_.Length; index++)
+            {
+                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons_[index];
+                if (binding?.Button == null)
+                {
+                    continue;
+                }
+
+                binding.Button.interactable = binding.InteractionPointType != selectedInventoryType_;
+            }
         }
 
         private List<RoomInventoryItemData> BuildInventoryItems(InteractionPointType interactionPointType)

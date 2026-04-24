@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,6 +12,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
     public sealed class UIDragScrollRouter : MonoBehaviour,
         IUIDragRouter,
         IPointerDownHandler,
+        IPointerMoveHandler,
         IPointerUpHandler,
         IInitializePotentialDragHandler,
         IBeginDragHandler,
@@ -47,8 +50,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private GestureRoute activeRoute_;
         private bool isPointerDown_;
+        private bool holdDragActivated_;
         private float pointerDownTime_;
         private Vector2 pointerDownPosition_;
+        private Vector2 lastPointerPosition_;
+        private Camera pressEventCamera_;
+        private UIDropTarget hoveredDropTarget_;
 
         public bool IsRoutingEnabled => isActiveAndEnabled;
 
@@ -62,11 +69,24 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             isPointerDown_ = true;
             pointerDownTime_ = Time.unscaledTime;
             pointerDownPosition_ = eventData.position;
+            lastPointerPosition_ = eventData.position;
+            pressEventCamera_ = eventData.pressEventCamera;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (holdDragActivated_ && activeRoute_ == GestureRoute.Draggable)
+            {
+                EndHoldDrag(eventData);
+                return;
+            }
+
             ResetPointerState();
+        }
+
+        public void OnPointerMove(PointerEventData eventData)
+        {
+            lastPointerPosition_ = eventData.position;
         }
 
         public void OnInitializePotentialDrag(PointerEventData eventData)
@@ -80,6 +100,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (holdDragActivated_)
+            {
+                return;
+            }
+
             activeRoute_ = ResolveRoute(eventData);
 
             switch (activeRoute_)
@@ -100,6 +125,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (holdDragActivated_)
+            {
+                lastPointerPosition_ = eventData.position;
+                return;
+            }
+
             switch (activeRoute_)
             {
                 case GestureRoute.ScrollRect:
@@ -118,6 +149,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (holdDragActivated_)
+            {
+                return;
+            }
+
             switch (activeRoute_)
             {
                 case GestureRoute.ScrollRect:
@@ -146,6 +182,23 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
             activeRoute_ = GestureRoute.None;
             ResetPointerState();
+        }
+
+        private void Update()
+        {
+            if (!holdDragActivated_ && ShouldStartHoldDrag())
+            {
+                BeginHoldDrag();
+            }
+
+            if (!holdDragActivated_ || activeRoute_ != GestureRoute.Draggable || draggable_ == null)
+            {
+                return;
+            }
+
+            PointerEventData eventData = CreatePointerEventData();
+            draggable_.DragFromRouter(eventData);
+            UpdateHoveredDropTarget(eventData);
         }
 
         private GestureRoute ResolveRoute(PointerEventData eventData)
@@ -219,11 +272,115 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             return Vector2.Distance(pointerDownPosition_, eventData.position) <= holdToDragMaxDistance_;
         }
 
+        private bool ShouldStartHoldDrag()
+        {
+            if (!enableHoldToDrag_ || !isPointerDown_ || holdDragActivated_ || draggable_ == null)
+            {
+                return false;
+            }
+
+            if (Time.unscaledTime - pointerDownTime_ < holdToDragDelaySeconds_)
+            {
+                return false;
+            }
+
+            return Vector2.Distance(pointerDownPosition_, lastPointerPosition_) <= holdToDragMaxDistance_;
+        }
+
+        private void BeginHoldDrag()
+        {
+            holdDragActivated_ = true;
+            activeRoute_ = GestureRoute.Draggable;
+            draggable_.BeginDragFromRouter(CreatePointerEventData());
+            UpdateHoveredDropTarget(CreatePointerEventData());
+        }
+
+        private void EndHoldDrag(PointerEventData eventData)
+        {
+            PointerEventData finalEventData = CreatePointerEventData(eventData);
+            UIDropTarget dropTarget = FindDropTarget(finalEventData);
+
+            if (dropTarget != null)
+            {
+                ExecuteEvents.Execute(dropTarget.gameObject, finalEventData, ExecuteEvents.dropHandler);
+            }
+
+            draggable_?.EndDragFromRouter(finalEventData);
+            activeRoute_ = GestureRoute.None;
+            ResetPointerState();
+        }
+
+        private void UpdateHoveredDropTarget(PointerEventData eventData)
+        {
+            UIDropTarget dropTarget = FindDropTarget(eventData);
+            if (dropTarget == hoveredDropTarget_)
+            {
+                return;
+            }
+
+            if (hoveredDropTarget_ != null)
+            {
+                draggable_?.NotifyHoverExited(hoveredDropTarget_);
+            }
+
+            hoveredDropTarget_ = dropTarget;
+
+            if (hoveredDropTarget_ != null)
+            {
+                draggable_?.NotifyHoverEntered(hoveredDropTarget_);
+            }
+        }
+
+        private UIDropTarget FindDropTarget(PointerEventData eventData)
+        {
+            if (EventSystem.current == null)
+            {
+                return null;
+            }
+
+            List<RaycastResult> raycastResults = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, raycastResults);
+
+            for (int index = 0; index < raycastResults.Count; index++)
+            {
+                UIDropTarget dropTarget =
+                    raycastResults[index].gameObject.GetComponentInParent<UIDropTarget>();
+                if (dropTarget != null)
+                {
+                    return dropTarget;
+                }
+            }
+
+            return null;
+        }
+
+        private PointerEventData CreatePointerEventData(PointerEventData source = null)
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current)
+            {
+                button = PointerEventData.InputButton.Left,
+                position = source != null ? source.position : lastPointerPosition_,
+                pressPosition = pointerDownPosition_,
+                pointerDrag = draggable_ != null ? draggable_.gameObject : null,
+                pointerCurrentRaycast = source != null ? source.pointerCurrentRaycast : default,
+                pointerPressRaycast = source != null ? source.pointerPressRaycast : default,
+                eligibleForClick = false,
+                dragging = true,
+                useDragThreshold = false
+            };
+
+            return eventData;
+        }
+
         private void ResetPointerState()
         {
             isPointerDown_ = false;
+            holdDragActivated_ = false;
             pointerDownTime_ = 0f;
             pointerDownPosition_ = Vector2.zero;
+            lastPointerPosition_ = Vector2.zero;
+            pressEventCamera_ = null;
+            hoveredDropTarget_ = null;
         }
     }
 }

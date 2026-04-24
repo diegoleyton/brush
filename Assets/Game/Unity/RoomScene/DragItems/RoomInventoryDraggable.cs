@@ -44,5 +44,25 @@ namespace Game.Unity.RoomScene
                 dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, data_));
             }
         }
+
+        public override void OnDragStarted()
+        {
+            if (dispatcher_ == null || data_ == null)
+            {
+                return;
+            }
+
+            dispatcher_.Send(new RoomInventoryDragStartedEvent(data_));
+        }
+
+        public override void OnDragEnded(bool dropAccepted)
+        {
+            if (dispatcher_ == null || data_ == null)
+            {
+                return;
+            }
+
+            dispatcher_.Send(new RoomInventoryDragEndedEvent(data_));
+        }
     }
 }

@@ -290,6 +290,20 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         {
         }
 
+        /// <summary>
+        /// Called when dragging starts.
+        /// </summary>
+        public virtual void OnDragStarted()
+        {
+        }
+
+        /// <summary>
+        /// Called when dragging ends, either successfully or unsuccessfully.
+        /// </summary>
+        public virtual void OnDragEnded(bool dropAccepted)
+        {
+        }
+
         private void BeginDrag(PointerEventData eventData)
         {
             activeDragRoot_ = ResolveDragRoot();
@@ -324,6 +338,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             }
 
             MoveToPointer(eventData);
+            OnDragStarted();
             onDragStarted_?.Invoke();
         }
 
@@ -343,6 +358,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 RestoreOriginalTransform();
             }
 
+            OnDragEnded(false);
             FinishDragState();
             onDragCancelled_?.Invoke();
         }
@@ -354,6 +370,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 DestroyActiveDragVisual();
             }
 
+            OnDragEnded(true);
             FinishDragState();
             onDragCompleted_?.Invoke();
         }

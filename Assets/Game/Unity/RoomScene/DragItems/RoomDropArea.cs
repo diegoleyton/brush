@@ -3,8 +3,8 @@ using Flowbit.Utilities.Unity.DragAndDrop;
 
 using Game.Core.Configuration;
 using Game.Core.Data;
-using Game.Core.Events;
 using Game.Unity.Definitions;
+using Game.Unity.Definitions.Events;
 
 using UnityEngine;
 using Zenject;
@@ -18,7 +18,6 @@ namespace Game.Unity.RoomScene
     public sealed class RoomDropArea : UIDropTarget
     {
         private EventDispatcher dispatcher_;
-        private IRoomInventorySelectionState selectionState_;
 
         [SerializeField]
         private InteractionPointType supportedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -44,10 +43,9 @@ namespace Game.Unity.RoomScene
         public int ParentTargetId => parentTargetId_;
 
         [Inject]
-        public void Construct(EventDispatcher dispatcher, IRoomInventorySelectionState selectionState)
+        public void Construct(EventDispatcher dispatcher)
         {
             dispatcher_ = dispatcher;
-            selectionState_ = selectionState;
         }
 
         private void Awake()
@@ -58,7 +56,7 @@ namespace Game.Unity.RoomScene
                 positionDroppedItemAtPointer: false);
 
             SubscribeToDispatcher();
-            interactionVisible_ = ShouldShowForInteractionType(selectionState_?.CurrentInteractionPointType);
+            interactionVisible_ = false;
             UpdateVisibility();
         }
 
@@ -139,13 +137,14 @@ namespace Game.Unity.RoomScene
             }
         }
 
-        private void OnShowInteractionPoints(ShowInteractionPointsEvent eventData)
+        private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent eventData)
         {
-            interactionVisible_ = ShouldShowForInteractionType(eventData.InteractionPointType);
+            interactionVisible_ = eventData?.Data != null &&
+                ShouldShowForInteractionType(eventData.Data.InteractionPointType);
             UpdateVisibility();
         }
 
-        private void OnHideInteractionPoints(HideInteractionPointsEvent _)
+        private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent _)
         {
             interactionVisible_ = false;
             UpdateVisibility();
@@ -166,8 +165,8 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Subscribe<ShowInteractionPointsEvent>(OnShowInteractionPoints);
-            dispatcher_.Subscribe<HideInteractionPointsEvent>(OnHideInteractionPoints);
+            dispatcher_.Subscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
+            dispatcher_.Subscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
             subscribed_ = true;
         }
 
@@ -178,8 +177,8 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Unsubscribe<ShowInteractionPointsEvent>(OnShowInteractionPoints);
-            dispatcher_.Unsubscribe<HideInteractionPointsEvent>(OnHideInteractionPoints);
+            dispatcher_.Unsubscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
+            dispatcher_.Unsubscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
             subscribed_ = false;
         }
     }
