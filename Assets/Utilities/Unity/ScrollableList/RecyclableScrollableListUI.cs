@@ -109,6 +109,7 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             }
 
             UpdateContentHeight();
+            ClampContentPosition();
             EnsurePoolSize();
             RefreshVisible(forceRebind: true);
         }
@@ -120,6 +121,7 @@ namespace Flowbit.Utilities.Unity.ScrollableList
         {
             InitializeIfNeeded();
             UpdateContentHeight();
+            ClampContentPosition();
             EnsurePoolSize();
             RefreshVisible(forceRebind: true);
         }
@@ -443,7 +445,7 @@ namespace Flowbit.Utilities.Unity.ScrollableList
                 return 0;
             }
 
-            float scroll = GetCurrentScroll();
+            float scroll = GetEffectiveScroll();
             float offset = Mathf.Max(0f, scroll - startPadding_);
             int index = Mathf.FloorToInt(offset / GetStride());
             int maxIndex = Mathf.Max(0, dataList_.Count - 1);
@@ -497,6 +499,11 @@ namespace Flowbit.Utilities.Unity.ScrollableList
                 : Mathf.Max(0f, -content_.anchoredPosition.x);
         }
 
+        private float GetEffectiveScroll()
+        {
+            return Mathf.Clamp(GetCurrentScroll(), 0f, GetMaxScroll());
+        }
+
         private float GetMaxScroll()
         {
             return Mathf.Max(0f, GetContentLength() - GetViewportLength());
@@ -505,6 +512,34 @@ namespace Flowbit.Utilities.Unity.ScrollableList
         private void OnScrollValueChanged(Vector2 _)
         {
             RefreshVisible(forceRebind: false);
+        }
+
+        private void ClampContentPosition()
+        {
+            if (content_ == null)
+            {
+                return;
+            }
+
+            Vector2 anchoredPosition = content_.anchoredPosition;
+            float maxScroll = GetMaxScroll();
+
+            if (direction_ == ScrollableListDirection.Vertical)
+            {
+                float clampedY = Mathf.Clamp(anchoredPosition.y, 0f, maxScroll);
+                if (!Mathf.Approximately(clampedY, anchoredPosition.y))
+                {
+                    content_.anchoredPosition = new Vector2(anchoredPosition.x, clampedY);
+                }
+            }
+            else
+            {
+                float clampedX = -Mathf.Clamp(-anchoredPosition.x, 0f, maxScroll);
+                if (!Mathf.Approximately(clampedX, anchoredPosition.x))
+                {
+                    content_.anchoredPosition = new Vector2(clampedX, anchoredPosition.y);
+                }
+            }
         }
     }
 }
