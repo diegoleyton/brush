@@ -17,7 +17,7 @@ namespace Game.Core.Rules
         private static readonly InteractionPointType[] possibleRandomRewardTypes_ =
         {
             InteractionPointType.DRESS,
-            InteractionPointType.FACE,
+            InteractionPointType.EYES,
             InteractionPointType.HAT,
             InteractionPointType.SKIN,
             InteractionPointType.PAINT,

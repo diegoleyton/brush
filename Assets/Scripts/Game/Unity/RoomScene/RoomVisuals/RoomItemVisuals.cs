@@ -25,8 +25,8 @@ namespace Game.Unity.RoomScene
                     return "Skin";
                 case InteractionPointType.DRESS:
                     return "Dress";
-                case InteractionPointType.FACE:
-                    return "Face";
+                case InteractionPointType.EYES:
+                    return "Eyes";
                 default:
                     return "Item";
             }

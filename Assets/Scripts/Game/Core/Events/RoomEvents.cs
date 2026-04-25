@@ -136,11 +136,11 @@ namespace Game.Core.Events
     }
 
     /// <summary>
-    /// Requested when a pet face should be applied from the room scene.
+    /// Requested when pet eyes should be applied from the room scene.
     /// </summary>
-    public sealed class RoomFaceAppliedEvent : IEvent
+    public sealed class RoomEyesAppliedEvent : IEvent
     {
-        public RoomFaceAppliedEvent(int itemId)
+        public RoomEyesAppliedEvent(int itemId)
         {
             ItemId = itemId;
         }

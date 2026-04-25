@@ -12,8 +12,8 @@ namespace Game.Core.Data
         {
             switch (pointType)
             {
-                case InteractionPointType.FACE:
-                    return inventory.Face;
+                case InteractionPointType.EYES:
+                    return inventory.Eyes;
                 case InteractionPointType.FOOD:
                     return inventory.Food;
                 case InteractionPointType.HAT:

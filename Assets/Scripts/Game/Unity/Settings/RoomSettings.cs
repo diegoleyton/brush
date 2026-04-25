@@ -19,6 +19,9 @@ namespace Game.Unity.Settings
     public sealed class RoomSettings : ScriptableObject
     {
         [SerializeField]
+        private int defaultEyesItemId_ = 1;
+
+        [SerializeField]
         private RectTransform defaultPlaceableObjectPrefab_;
 
         [SerializeField]
@@ -26,6 +29,8 @@ namespace Game.Unity.Settings
             new List<PlaceableObjectPrefabDefinition>();
 
         private readonly Dictionary<int, bool> supportsChildPlaceablesCache_ = new Dictionary<int, bool>();
+
+        public int DefaultEyesItemId => defaultEyesItemId_;
 
         public RectTransform ResolvePlaceableObjectPrefab(int itemId)
         {

@@ -43,7 +43,8 @@ namespace Game.Core.Data
         public long lastEatTime;
         public int eatCount;
         public long lastBrushTime;
-        public int FaceItemId = DefaultProfileState.DefaultPetFaceItemId;
+        [FormerlySerializedAs("FaceItemId")]
+        public int EyesItemId = DefaultProfileState.DefaultPetEyesItemId;
         public int SkinItemId = DefaultProfileState.DefaultPetSkinItemId;
         public int HatItemId = DefaultProfileState.DefaultPetHatItemId;
         public int DressItemId = DefaultProfileState.DefaultPetDressItemId;
@@ -131,7 +132,8 @@ namespace Game.Core.Data
         [NonSerialized]
         public Dictionary<int, int> Dress = new Dictionary<int, int>();
         [NonSerialized]
-        public Dictionary<int, int> Face = new Dictionary<int, int>();
+        [FormerlySerializedAs("Face")]
+        public Dictionary<int, int> Eyes = new Dictionary<int, int>();
 
         [SerializeField]
         private List<InventoryItemAmount> placableObjectsSerialized_ = new List<InventoryItemAmount>();
@@ -152,7 +154,8 @@ namespace Game.Core.Data
         private List<InventoryItemAmount> dressSerialized_ = new List<InventoryItemAmount>();
 
         [SerializeField]
-        private List<InventoryItemAmount> faceSerialized_ = new List<InventoryItemAmount>();
+        [FormerlySerializedAs("faceSerialized_")]
+        private List<InventoryItemAmount> eyesSerialized_ = new List<InventoryItemAmount>();
 
         public void OnBeforeSerialize()
         {
@@ -162,7 +165,7 @@ namespace Game.Core.Data
             skinSerialized_ = SerializeDictionary(Skin);
             hatSerialized_ = SerializeDictionary(Hat);
             dressSerialized_ = SerializeDictionary(Dress);
-            faceSerialized_ = SerializeDictionary(Face);
+            eyesSerialized_ = SerializeDictionary(Eyes);
         }
 
         public void OnAfterDeserialize()
@@ -173,7 +176,7 @@ namespace Game.Core.Data
             Skin = DeserializeDictionary(skinSerialized_);
             Hat = DeserializeDictionary(hatSerialized_);
             Dress = DeserializeDictionary(dressSerialized_);
-            Face = DeserializeDictionary(faceSerialized_);
+            Eyes = DeserializeDictionary(eyesSerialized_);
         }
 
         private static List<InventoryItemAmount> SerializeDictionary(Dictionary<int, int> items)

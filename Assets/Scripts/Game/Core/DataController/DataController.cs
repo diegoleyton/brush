@@ -31,7 +31,7 @@ namespace Game.Core.DataController
             dispatcher_?.Subscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
             dispatcher_?.Subscribe<RoomHatAppliedEvent>(OnRoomHatApplied);
             dispatcher_?.Subscribe<RoomDressAppliedEvent>(OnRoomDressApplied);
-            dispatcher_?.Subscribe<RoomFaceAppliedEvent>(OnRoomFaceApplied);
+            dispatcher_?.Subscribe<RoomEyesAppliedEvent>(OnRoomEyesApplied);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Game.Core.DataController
             dispatcher_?.Unsubscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
             dispatcher_?.Unsubscribe<RoomHatAppliedEvent>(OnRoomHatApplied);
             dispatcher_?.Unsubscribe<RoomDressAppliedEvent>(OnRoomDressApplied);
-            dispatcher_?.Unsubscribe<RoomFaceAppliedEvent>(OnRoomFaceApplied);
+            dispatcher_?.Unsubscribe<RoomEyesAppliedEvent>(OnRoomEyesApplied);
             disposed_ = true;
         }
 
@@ -102,9 +102,9 @@ namespace Game.Core.DataController
             repository_?.SetPetDress(eventData.ItemId);
         }
 
-        private void OnRoomFaceApplied(RoomFaceAppliedEvent eventData)
+        private void OnRoomEyesApplied(RoomEyesAppliedEvent eventData)
         {
-            repository_?.SetPetFace(eventData.ItemId);
+            repository_?.SetPetEyes(eventData.ItemId);
         }
     }
 }

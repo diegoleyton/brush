@@ -15,7 +15,7 @@ namespace Game.Core.Configuration
         private const int BlueItemId = 2;
         private const int YellowItemId = 3;
         private const int RedItemId = 4;
-        public const int DefaultPetFaceItemId = 1;
+        public const int DefaultPetEyesItemId = 1;
         public const int DefaultPetSkinItemId = 1;
         public const int DefaultPetHatItemId = 1;
         public const int DefaultPetDressItemId = 1;

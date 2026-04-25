@@ -159,10 +159,10 @@ namespace Game.Unity.Development
                 repository_.AddDress);
 
             EnsureInventoryCategory(
-                InteractionPointType.FACE,
-                repository_.CurrentProfile.InventoryData.Face,
-                settings_.Face,
-                repository_.AddFace);
+                InteractionPointType.EYES,
+                repository_.CurrentProfile.InventoryData.Eyes,
+                settings_.Eyes,
+                repository_.AddEyes);
         }
 
         private void EnsureInventoryCategory(

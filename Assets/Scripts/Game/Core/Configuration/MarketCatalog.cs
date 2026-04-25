@@ -64,7 +64,7 @@ namespace Game.Core.Configuration
                     return 22 + (tier * 5);
                 case InteractionPointType.PAINT:
                     return 12 + (tier * 3);
-                case InteractionPointType.FACE:
+                case InteractionPointType.EYES:
                     return 20 + (tier * 5);
                 case InteractionPointType.SKIN:
                     return 25 + (tier * 6);

@@ -6,6 +6,7 @@ using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.Storage;
+using Flowbit.Utilities.Unity.AssetLoader;
 using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.Logger;
 using Flowbit.Utilities.Unity.UI;
@@ -81,6 +82,15 @@ namespace Game.Unity.Installers
             Container.Bind<IGameLogger>()
                 .To<UnityGameLogger>()
                 .AsSingle();
+
+            Container.Bind<IAssetLoader>()
+                .To<AddressablesAssetLoader>()
+                .AsSingle();
+
+            Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetEyesSurfaceView>, PetEyesController, PetEyesController.Factory>();
+            Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetHatSurfaceView>, PetHatController, PetHatController.Factory>();
+            Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetSkinSurfaceView>, PetSkinController, PetSkinController.Factory>();
+            Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetDressSurfaceView>, PetDressController, PetDressController.Factory>();
 
             Container.BindInterfacesAndSelfTo<RoomInventorySelectionState>()
                 .AsSingle();

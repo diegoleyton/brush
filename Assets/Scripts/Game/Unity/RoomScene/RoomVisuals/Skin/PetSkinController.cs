@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Game.Core.Configuration;
 using Game.Core.Services;
 
+using Zenject;
+
 namespace Game.Unity.RoomScene
 {
     /// <summary>
@@ -44,6 +46,10 @@ namespace Game.Unity.RoomScene
                     Core.Data.InteractionPointType.SKIN,
                     skinItemId));
             }
+        }
+
+        public sealed class Factory : PlaceholderFactory<IReadOnlyList<PetSkinSurfaceView>, PetSkinController>
+        {
         }
     }
 }

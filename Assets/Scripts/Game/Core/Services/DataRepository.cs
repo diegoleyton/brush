@@ -286,8 +286,8 @@ namespace Game.Core.Services
                 case InteractionPointType.PAINT:
                     PaintRoomSurface(targetId, itemId);
                     return;
-                case InteractionPointType.FACE:
-                    SetPetFace(itemId);
+                case InteractionPointType.EYES:
+                    SetPetEyes(itemId);
                     return;
                 case InteractionPointType.HAT:
                     SetPetHat(itemId);
@@ -457,19 +457,19 @@ namespace Game.Core.Services
             NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, slotId, locationId);
         }
 
-        public void SetPetFace(int itemId)
+        public void SetPetEyes(int itemId)
         {
-            if (CurrentProfile.PetData.FaceItemId == itemId)
+            if (CurrentProfile.PetData.EyesItemId == itemId)
             {
-                logger_?.LogWarning($"[RoomData] Failed to apply pet face item {itemId}: already applied.");
-                NotifyPetDataApplyFailed(InteractionPointType.FACE, itemId);
+                logger_?.LogWarning($"[RoomData] Failed to apply pet eyes item {itemId}: already applied.");
+                NotifyPetDataApplyFailed(InteractionPointType.EYES, itemId);
                 return;
             }
 
-            CurrentProfile.PetData.FaceItemId = itemId;
-            logger_?.Log($"[RoomData] Applied pet face item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.FACE, itemId);
-            NotifyPetDataApplied(InteractionPointType.FACE, itemId);
+            CurrentProfile.PetData.EyesItemId = itemId;
+            logger_?.Log($"[RoomData] Applied pet eyes item {itemId}.");
+            ConsumeInventoryItemAndNotify(InteractionPointType.EYES, itemId);
+            NotifyPetDataApplied(InteractionPointType.EYES, itemId);
         }
 
         public void SetPetHat(int itemId)
@@ -575,9 +575,9 @@ namespace Game.Core.Services
             NotifyDataChanged();
         }
 
-        public void AddFace(int id, int quantity)
+        public void AddEyes(int id, int quantity)
         {
-            AddInventoryItem(CurrentProfile.InventoryData.Face, id, quantity);
+            AddInventoryItem(CurrentProfile.InventoryData.Eyes, id, quantity);
             NotifyInventoryChanged();
             NotifyDataChanged();
         }
@@ -648,7 +648,7 @@ namespace Game.Core.Services
                 lastEatTime = -1,
                 eatCount = 0,
                 lastBrushTime = -1,
-                FaceItemId = DefaultProfileState.DefaultPetFaceItemId,
+                EyesItemId = DefaultProfileState.DefaultPetEyesItemId,
                 SkinItemId = DefaultProfileState.DefaultPetSkinItemId,
                 HatItemId = DefaultProfileState.DefaultPetHatItemId,
                 DressItemId = DefaultProfileState.DefaultPetDressItemId

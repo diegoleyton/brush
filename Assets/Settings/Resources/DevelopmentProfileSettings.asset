@@ -34,6 +34,12 @@ MonoBehaviour:
   <Skin>k__BackingField:
     <FirstItemCount>k__BackingField: 6
     <AdditionalItems>k__BackingField: []
-  <Face>k__BackingField:
-    <FirstItemCount>k__BackingField: 8
+  <Hat>k__BackingField:
+    <FirstItemCount>k__BackingField: 0
+    <AdditionalItems>k__BackingField: []
+  <Dress>k__BackingField:
+    <FirstItemCount>k__BackingField: 0
+    <AdditionalItems>k__BackingField: []
+  <Eyes>k__BackingField:
+    <FirstItemCount>k__BackingField: 4
     <AdditionalItems>k__BackingField: []

@@ -27,10 +27,14 @@ namespace Game.Unity.RoomScene
         private IGameLogger logger_;
         private RoomSettings roomSettings_;
         private IObjectInstantiator instantiator_;
+        private PetEyesController.Factory eyesControllerFactory_;
+        private PetHatController.Factory hatControllerFactory_;
+        private PetSkinController.Factory skinControllerFactory_;
+        private PetDressController.Factory dressControllerFactory_;
 
         private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
         private RoomPaintSurfaceView[] paintSurfaceViews_;
-        private PetFaceSurfaceView[] faceSurfaceViews_;
+        private PetEyesSurfaceView[] eyesSurfaceViews_;
         private PetHatSurfaceView[] hatSurfaceViews_;
         private PetSkinSurfaceView[] skinSurfaceViews_;
         private PetDressSurfaceView[] dressSurfaceViews_;
@@ -39,7 +43,7 @@ namespace Game.Unity.RoomScene
         private bool subscribed_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
-        private PetFaceController faceController_;
+        private PetEyesController eyesController_;
         private PetHatController hatController_;
         private PetSkinController skinController_;
         private PetDressController dressController_;
@@ -50,6 +54,10 @@ namespace Game.Unity.RoomScene
             EventDispatcher dispatcher,
             IGameLogger logger,
             RoomSettings roomSettings,
+            PetEyesController.Factory eyesControllerFactory,
+            PetHatController.Factory hatControllerFactory,
+            PetSkinController.Factory skinControllerFactory,
+            PetDressController.Factory dressControllerFactory,
             [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
             repository_ = repository;
@@ -57,6 +65,10 @@ namespace Game.Unity.RoomScene
             logger_ = logger;
             roomSettings_ = roomSettings;
             instantiator_ = instantiator;
+            eyesControllerFactory_ = eyesControllerFactory;
+            hatControllerFactory_ = hatControllerFactory;
+            skinControllerFactory_ = skinControllerFactory;
+            dressControllerFactory_ = dressControllerFactory;
         }
 
         private void Awake()
@@ -87,10 +99,10 @@ namespace Game.Unity.RoomScene
                 repository_,
                 placeableObjectSurfaceViews_,
                 paintSurfaceViews_);
-            faceController_ = new PetFaceController(faceSurfaceViews_, repository_);
-            hatController_ = new PetHatController(hatSurfaceViews_, repository_);
-            skinController_ = new PetSkinController(skinSurfaceViews_, repository_);
-            dressController_ = new PetDressController(dressSurfaceViews_, repository_);
+            eyesController_ = eyesControllerFactory_?.Create(eyesSurfaceViews_);
+            hatController_ = hatControllerFactory_?.Create(hatSurfaceViews_);
+            skinController_ = skinControllerFactory_?.Create(skinSurfaceViews_);
+            dressController_ = dressControllerFactory_?.Create(dressSurfaceViews_);
 
             RefreshFromData();
             initialized_ = true;
@@ -124,7 +136,7 @@ namespace Game.Unity.RoomScene
         {
             placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
             paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
-            faceSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetFaceSurfaceView>(true);
+            eyesSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetEyesSurfaceView>(true);
             hatSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetHatSurfaceView>(true);
             skinSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetSkinSurfaceView>(true);
             dressSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetDressSurfaceView>(true);
@@ -213,10 +225,10 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            if (eventData.ItemType == Core.Data.InteractionPointType.FACE)
+            if (eventData.ItemType == Core.Data.InteractionPointType.EYES)
             {
-                logger_?.Log("[RoomView] Refresh pet face.");
-                faceController_?.Refresh();
+                logger_?.Log("[RoomView] Refresh pet eyes.");
+                eyesController_?.Refresh();
                 return;
             }
 
@@ -245,7 +257,7 @@ namespace Game.Unity.RoomScene
         {
             placeableObjectsController_?.Refresh();
             paintController_?.Refresh();
-            faceController_?.Refresh();
+            eyesController_?.Refresh();
             hatController_?.Refresh();
             skinController_?.Refresh();
             dressController_?.Refresh();

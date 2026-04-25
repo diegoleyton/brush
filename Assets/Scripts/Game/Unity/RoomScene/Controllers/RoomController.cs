@@ -359,8 +359,8 @@ namespace Game.Unity.RoomScene
                         }
                     },
                     {
-                        (InteractionPointType.FACE, RoomTargetKind.ROOM),
-                        eventData => dispatcher_.Send(new RoomFaceAppliedEvent(eventData.Data.ItemId))
+                        (InteractionPointType.EYES, RoomTargetKind.ROOM),
+                        eventData => dispatcher_.Send(new RoomEyesAppliedEvent(eventData.Data.ItemId))
                     },
                     {
                         (InteractionPointType.HAT, RoomTargetKind.ROOM),

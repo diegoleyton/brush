@@ -11,7 +11,7 @@ namespace Game.Core.Data
         HAT,
         DRESS,
         FOOD,
-        FACE
+        EYES
     }
 
     /// <summary>

@@ -70,7 +70,8 @@ namespace Game.Unity.Development
         public DevelopmentInventoryCategorySettings Dress { get; private set; } = new DevelopmentInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Face { get; private set; } = new DevelopmentInventoryCategorySettings();
+        [field: FormerlySerializedAs("Face")]
+        public DevelopmentInventoryCategorySettings Eyes { get; private set; } = new DevelopmentInventoryCategorySettings();
 
         public DevelopmentInventoryCategorySettings GetCategorySettings(InteractionPointType interactionPointType)
         {
@@ -88,8 +89,8 @@ namespace Game.Unity.Development
                     return Skin;
                 case InteractionPointType.DRESS:
                     return Dress;
-                case InteractionPointType.FACE:
-                    return Face;
+                case InteractionPointType.EYES:
+                    return Eyes;
                 default:
                     return null;
             }
