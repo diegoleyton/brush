@@ -62,7 +62,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Send(new RoomInventoryDragEndedEvent(data_));
+            dispatcher_.Send(new RoomInventoryDragEndedEvent(data_, dropAccepted));
         }
     }
 }

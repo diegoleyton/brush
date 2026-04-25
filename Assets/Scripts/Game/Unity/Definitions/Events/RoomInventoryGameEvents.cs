@@ -22,12 +22,14 @@ namespace Game.Unity.Definitions.Events
     /// </summary>
     public sealed class RoomInventoryDragEndedEvent : IEvent
     {
-        public RoomInventoryDragEndedEvent(RoomInventoryItemData data)
+        public RoomInventoryDragEndedEvent(RoomInventoryItemData data, bool dropAccepted)
         {
             Data = data;
+            DropAccepted = dropAccepted;
         }
 
         public RoomInventoryItemData Data { get; }
+        public bool DropAccepted { get; }
     }
 
     /// <summary>

@@ -31,6 +31,7 @@ namespace Game.Unity.RoomScene
         private PetHatController.Factory hatControllerFactory_;
         private PetSkinController.Factory skinControllerFactory_;
         private PetDressController.Factory dressControllerFactory_;
+        private PetFoodController.Factory foodControllerFactory_;
 
         private RoomPlaceableObjectSurfaceView[] placeableObjectSurfaceViews_;
         private RoomPaintSurfaceView[] paintSurfaceViews_;
@@ -38,6 +39,7 @@ namespace Game.Unity.RoomScene
         private PetHatSurfaceView[] hatSurfaceViews_;
         private PetSkinSurfaceView[] skinSurfaceViews_;
         private PetDressSurfaceView[] dressSurfaceViews_;
+        private PetView[] petViews_;
 
         private bool initialized_;
         private bool subscribed_;
@@ -47,6 +49,7 @@ namespace Game.Unity.RoomScene
         private PetHatController hatController_;
         private PetSkinController skinController_;
         private PetDressController dressController_;
+        private PetFoodController foodController_;
 
         [Inject]
         public void Construct(
@@ -58,6 +61,7 @@ namespace Game.Unity.RoomScene
             PetHatController.Factory hatControllerFactory,
             PetSkinController.Factory skinControllerFactory,
             PetDressController.Factory dressControllerFactory,
+            PetFoodController.Factory foodControllerFactory,
             [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
             repository_ = repository;
@@ -69,6 +73,7 @@ namespace Game.Unity.RoomScene
             hatControllerFactory_ = hatControllerFactory;
             skinControllerFactory_ = skinControllerFactory;
             dressControllerFactory_ = dressControllerFactory;
+            foodControllerFactory_ = foodControllerFactory;
         }
 
         private void Awake()
@@ -79,6 +84,7 @@ namespace Game.Unity.RoomScene
 
         private void OnDestroy()
         {
+            foodController_?.Dispose();
             UnsubscribeFromDispatcher();
         }
 
@@ -103,6 +109,10 @@ namespace Game.Unity.RoomScene
             hatController_ = hatControllerFactory_?.Create(hatSurfaceViews_);
             skinController_ = skinControllerFactory_?.Create(skinSurfaceViews_);
             dressController_ = dressControllerFactory_?.Create(dressSurfaceViews_);
+            if (petViews_ != null && petViews_.Length > 0 && petViews_[0] != null)
+            {
+                foodController_ = foodControllerFactory_?.Create(petViews_[0]);
+            }
 
             RefreshFromData();
             initialized_ = true;
@@ -140,6 +150,7 @@ namespace Game.Unity.RoomScene
             hatSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetHatSurfaceView>(true);
             skinSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetSkinSurfaceView>(true);
             dressSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetDressSurfaceView>(true);
+            petViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetView>(true);
         }
 
         private void SubscribeToDispatcher()

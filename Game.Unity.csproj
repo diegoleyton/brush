@@ -80,12 +80,14 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/RoomTargetKind.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetFoodController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/AssetNameResolver.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/SoundId.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/RoomItemVisuals.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/GameSoundLibrary.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomController.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ScreenBlockerImage.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetTouchController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectInstaller.cs" />

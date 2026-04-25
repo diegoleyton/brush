@@ -91,6 +91,7 @@ namespace Game.Unity.Installers
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetHatSurfaceView>, PetHatController, PetHatController.Factory>();
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetSkinSurfaceView>, PetSkinController, PetSkinController.Factory>();
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetDressSurfaceView>, PetDressController, PetDressController.Factory>();
+            Container.BindFactory<PetView, PetFoodController, PetFoodController.Factory>();
 
             Container.BindInterfacesAndSelfTo<RoomInventorySelectionState>()
                 .AsSingle();
