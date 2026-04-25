@@ -95,7 +95,7 @@ namespace Game.Unity.RoomScene
 
             if (!eventData.DropAccepted)
             {
-                petView_?.Idle();
+                petView_?.ExitFoodState();
                 ResetFoodState();
                 return;
             }
@@ -139,11 +139,12 @@ namespace Game.Unity.RoomScene
             switch (foodApplyOutcome_)
             {
                 case FoodApplyOutcome.Success:
+                    petView_?.ExitFoodState();
                     petView_?.Eat();
                     ResetFoodState();
                     return;
                 case FoodApplyOutcome.Failed:
-                    petView_?.IdleAfterDelay();
+                    petView_?.ExitFoodState(true);
                     ResetFoodState();
                     return;
             }

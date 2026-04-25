@@ -15,6 +15,7 @@ namespace Game.Unity.RoomScene
         private EventDispatcher dispatcher_;
 
         private RoomInventoryItemData data_;
+        private RoomInventoryItemData activeDragData_;
 
         [Inject]
         public void Construct(EventDispatcher dispatcher)
@@ -34,14 +35,15 @@ namespace Game.Unity.RoomScene
 
         public override void OnDropAccepted(UIDropTarget target)
         {
-            if (dispatcher_ == null || data_ == null)
+            RoomInventoryItemData dragData = activeDragData_ ?? data_;
+            if (dispatcher_ == null || dragData == null)
             {
                 return;
             }
 
             if (target is RoomDropArea dropArea)
             {
-                dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, data_));
+                dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, dragData));
             }
         }
 
@@ -52,17 +54,20 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dispatcher_.Send(new RoomInventoryDragStartedEvent(data_));
+            activeDragData_ = data_;
+            dispatcher_.Send(new RoomInventoryDragStartedEvent(activeDragData_));
         }
 
         public override void OnDragEnded(bool dropAccepted)
         {
-            if (dispatcher_ == null || data_ == null)
+            RoomInventoryItemData dragData = activeDragData_ ?? data_;
+            if (dispatcher_ == null || dragData == null)
             {
                 return;
             }
 
-            dispatcher_.Send(new RoomInventoryDragEndedEvent(data_, dropAccepted));
+            dispatcher_.Send(new RoomInventoryDragEndedEvent(dragData, dropAccepted));
+            activeDragData_ = null;
         }
     }
 }

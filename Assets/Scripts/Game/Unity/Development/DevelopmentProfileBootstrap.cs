@@ -34,6 +34,7 @@ namespace Game.Unity.Development
 
             EnsureProfile();
             EnsureMinimumCoins();
+            ResetPetTimesIfNeeded();
             EnsureInventory();
         }
 
@@ -163,6 +164,35 @@ namespace Game.Unity.Development
                 repository_.CurrentProfile.InventoryData.Eyes,
                 settings_.Eyes,
                 repository_.AddEyes);
+        }
+
+        private void ResetPetTimesIfNeeded()
+        {
+            if (repository_.CurrentProfile?.PetData == null || settings_ == null)
+            {
+                return;
+            }
+
+            if (!ShouldResetPetTimesOnStartup())
+            {
+                return;
+            }
+
+            repository_.ResetPetTimes();
+        }
+
+        private bool ShouldResetPetTimesOnStartup()
+        {
+            foreach (InteractionPointType interactionPointType in Enum.GetValues(typeof(InteractionPointType)))
+            {
+                DevelopmentInventoryCategorySettings categorySettings = settings_.GetCategorySettings(interactionPointType);
+                if (categorySettings != null && categorySettings.ResetPetTimesOnStartup)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void EnsureInventoryCategory(

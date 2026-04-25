@@ -19,6 +19,9 @@ namespace Game.Unity.Development
     public sealed class DevelopmentInventoryCategorySettings
     {
         [field: SerializeField]
+        public bool ResetPetTimesOnStartup { get; private set; } = false;
+
+        [field: SerializeField]
         public int FirstItemCount { get; private set; } = 0;
 
         [field: SerializeField]

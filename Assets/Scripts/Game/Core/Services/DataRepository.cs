@@ -276,6 +276,20 @@ namespace Game.Core.Services
             return true;
         }
 
+        public void ResetPetTimes()
+        {
+            if (CurrentProfile?.PetData == null)
+            {
+                return;
+            }
+
+            CurrentProfile.PetData.lastEatTime = -1;
+            CurrentProfile.PetData.eatCount = 0;
+            CurrentProfile.PetData.lastBrushTime = -1;
+            logger_?.Log("[PetData] Reset pet timers.");
+            NotifyDataChanged();
+        }
+
         public void SetRoomItem(int targetId, int itemId, InteractionPointType interactionPointType)
         {
             switch (interactionPointType)

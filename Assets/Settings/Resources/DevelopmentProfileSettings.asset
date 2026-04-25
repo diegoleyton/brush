@@ -19,6 +19,7 @@ MonoBehaviour:
   <ProfilePictureId>k__BackingField: 1
   <MinimumCoins>k__BackingField: 250
   <PlaceableObjects>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 12
     <AdditionalItems>k__BackingField:
     - <ItemId>k__BackingField: 20
@@ -26,20 +27,26 @@ MonoBehaviour:
     - <ItemId>k__BackingField: 29
       <Quantity>k__BackingField: 4
   <Paint>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 5
     <AdditionalItems>k__BackingField: []
   <Food>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 2
     <AdditionalItems>k__BackingField: []
   <Skin>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 6
     <AdditionalItems>k__BackingField: []
   <Hat>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 0
     <FirstItemCount>k__BackingField: 0
     <AdditionalItems>k__BackingField: []
   <Dress>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 0
     <AdditionalItems>k__BackingField: []
   <Eyes>k__BackingField:
+    <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 4
     <AdditionalItems>k__BackingField: []

@@ -71,7 +71,7 @@ namespace Game.Unity.RoomScene
 
             if (holdStarted_)
             {
-                petView_?.Idle();
+                petView_?.StopTouching();
             }
 
             ResetPointerState();
@@ -86,7 +86,7 @@ namespace Game.Unity.RoomScene
 
             if (holdStarted_)
             {
-                petView_?.Idle();
+                petView_?.StopTouching();
             }
 
             ResetPointerState();

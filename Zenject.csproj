@@ -63,7 +63,6 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
-    <Analyzer Include="/Volumes/DiegoMac2/Diego/projects/Brush/Assets/Plugins/Zenject/Source/Usage/Zenject-usage.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/ResourceProvider.cs" />
@@ -103,8 +102,8 @@
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinder/FactoryFromBinder3.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Player/PlayerInputState.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinder/FactoryFromBinder5.cs" />
-    <Compile Include="Assets/Plugins/Zenject/Source/Main/LookupId.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/Pooling/MemoryPoolBindingFinalizer.cs" />
+    <Compile Include="Assets/Plugins/Zenject/Source/Main/LookupId.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Runtime/Kernels/ProjectKernel.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryArgumentsToChoiceBinder/FactoryArgumentsToChoiceBinder10.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Runtime/AnimatorInterfaces/IAnimatorIkHandler.cs" />
@@ -134,8 +133,8 @@
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinder/FactoryFromBinder6.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame1 (Beginner)/Scripts/Misc/LevelHelper.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/MethodProviderWithContainer.cs" />
-    <Compile Include="Assets/Plugins/Zenject/Source/Runtime/Kernels/Kernel.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Misc/Explosion.cs" />
+    <Compile Include="Assets/Plugins/Zenject/Source/Runtime/Kernels/Kernel.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/ComponentProviders/GetFromPrefabComponentProvider.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Util/ReflectionTypeInfo.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinder/SubContainerBinder/FactorySubContainerBinder6.cs" />
@@ -156,8 +155,8 @@
     <Compile Include="Assets/Plugins/Zenject/Source/Factories/Pooling/Static/PoolableStaticMemoryPool.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/GetterProvider.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/PrefabProviders/PrefabProvider.cs" />
-    <Compile Include="Assets/Plugins/Zenject/OptionalExtras/Signals/Internal/Binders/DeclareSignal/SignalDeclarationBindInfo.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/ConcreteBinders/ConcreteIdBinderGeneric.cs" />
+    <Compile Include="Assets/Plugins/Zenject/OptionalExtras/Signals/Internal/Binders/DeclareSignal/SignalDeclarationBindInfo.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/IdScopeConcreteIdArgConditionCopyNonLazyBinder.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Misc/AudioPlayer.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinderBase.cs" />
@@ -219,8 +218,8 @@
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Installers/GameSettingsInstaller.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/CopyNonLazyBinder.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/PrefabProviders/PrefabProviderResource.cs" />
-    <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryArgumentsToChoiceBinder/FactoryArgumentsToChoiceBinder2.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/Signals/Internal/Binders/DeclareSignal/DeclareSignalIdRequireHandlerAsyncTickPriorityCopyBinder.cs" />
+    <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryArgumentsToChoiceBinder/FactoryArgumentsToChoiceBinder2.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/MethodMultipleProviderUntyped.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/ScopeConcreteIdArgConditionCopyNonLazyBinder.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Util/DefaultGameObjectParentInstaller.cs" />
@@ -237,8 +236,8 @@
     <Compile Include="Assets/Plugins/Zenject/Source/Install/Contexts/RunnableContext.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Main/IInstantiator.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/BindInfo/FactoryBindInfo.cs" />
-    <Compile Include="Assets/Plugins/Zenject/Source/Factories/PrefabResourceFactory.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/Signals/Internal/Binders/DeclareSignal/DeclareSignalAsyncTickPriorityCopyBinder.cs" />
+    <Compile Include="Assets/Plugins/Zenject/Source/Factories/PrefabResourceFactory.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Util/DisposeBlock.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/FromBinders/FromBinderGeneric.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Enemy/GameEvents.cs" />
@@ -307,8 +306,8 @@
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Player/PlayerDirectionHandler.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/ComponentProviders/AddToGameObjectComponentProviders/AddToGameObjectComponentProviderBase.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryToChoiceIdBinder/FactoryToChoiceIdBinder4.cs" />
-    <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Enemy/EnemyStateManager.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Runtime/AnimatorInterfaces/AnimatorInstaller.cs" />
+    <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Enemy/EnemyStateManager.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/CachedProvider.cs" />
     <Compile Include="Assets/Plugins/Zenject/Source/Providers/PoolableMemoryPoolProvider.cs" />
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/SampleGame2 (Advanced)/Scripts/Enemy/EnemyFacade.cs" />

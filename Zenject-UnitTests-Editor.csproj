@@ -63,7 +63,6 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
-    <Analyzer Include="/Volumes/DiegoMac2/Diego/projects/Brush/Assets/Plugins/Zenject/Source/Usage/Zenject-usage.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Plugins/Zenject/OptionalExtras/UnitTests/Editor/Other/TestResolveMany.cs" />
