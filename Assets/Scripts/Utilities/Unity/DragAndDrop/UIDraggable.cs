@@ -36,6 +36,9 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private bool returnToOriginOnFailedDrop_ = true;
 
         [SerializeField]
+        private bool returnToOriginOnSuccessfulDrop_ = false;
+
+        [SerializeField]
         private CanvasGroup canvasGroup_;
 
         [Header("Events")]
@@ -130,6 +133,15 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         public void SetDragVisualFactory(Func<RectTransform> dragVisualFactory)
         {
             dragVisualFactory_ = dragVisualFactory;
+        }
+
+        /// <summary>
+        /// Sets whether a successful drop should still restore the original transform.
+        /// Useful for list items that should stay in place while using a separate drag visual.
+        /// </summary>
+        public void SetReturnToOriginOnSuccessfulDrop(bool returnToOriginOnSuccessfulDrop)
+        {
+            returnToOriginOnSuccessfulDrop_ = returnToOriginOnSuccessfulDrop;
         }
 
         public void OnInitializePotentialDrag(PointerEventData eventData)
@@ -374,6 +386,10 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             if (activeDragVisualInstance_ != null)
             {
                 DestroyActiveDragVisual();
+            }
+            else if (returnToOriginOnSuccessfulDrop_)
+            {
+                RestoreOriginalTransform();
             }
 
             OnDragEnded(true);

@@ -132,7 +132,7 @@ namespace Game.Unity.RoomScene
                     ResetFoodState();
                     return;
                 case FoodApplyOutcome.Failed:
-                    petView_?.ExitFoodState(true);
+                    petView_?.ExitFoodState();
                     ResetFoodState();
                     return;
             }

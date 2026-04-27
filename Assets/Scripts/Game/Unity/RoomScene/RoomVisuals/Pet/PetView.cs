@@ -28,6 +28,8 @@ namespace Game.Unity.RoomScene
 
         private const string IdleName = "Idle";
 
+        private const string FunName = "Fun";
+
         private const string mouthEatName = "Eat";
 
         private const string mouthPostEatName = "PostEat";
@@ -42,6 +44,8 @@ namespace Game.Unity.RoomScene
 
         private const string mouthHappyName = "Happy";
 
+        private const string mouthFunName = "Fun";
+
         private readonly static Dictionary<PetEatStatus, TriggerNames> preEatTriggerNames_ = new Dictionary<PetEatStatus, TriggerNames>
         {
             {PetEatStatus.OK, new TriggerNames(PrepareToEatName, mouthPreEatName)},
@@ -55,14 +59,13 @@ namespace Game.Unity.RoomScene
         private static readonly TriggerNames eatTriggerNames_ = new TriggerNames(IdleName, mouthEatName);
         private static readonly TriggerNames postEatTriggerNames_ = new TriggerNames(IdleName, mouthPostEatName);
 
+        private static readonly TriggerNames funTriggerNames_ = new TriggerNames(FunName, mouthFunName);
+
         [SerializeField]
         private Animator bodyAnimationController_;
 
         [SerializeField]
         private Animator mouthAnimationController_;
-
-        [SerializeField]
-        private float initialAnimationDelay_ = 0.8f;
 
         [SerializeField]
         private float eatDuration_ = 3f;
@@ -83,16 +86,20 @@ namespace Game.Unity.RoomScene
         /// </summary>
         public void Eat()
         {
-            Debug.Log("exit food");
+            if (isEating_)
+            {
+                return;
+            }
+
             isEating_ = true;
             StartCoroutine(EatCoroutine());
-            SetTrigger(eatTriggerNames_, false);
+            SetTrigger(eatTriggerNames_);
         }
 
         /// <summary>
         /// Prepares the pet to receive food.
         /// </summary>
-        public void PrepareToEat(PetEatStatus peteatState, bool withDelay = false)
+        public void PrepareToEat(PetEatStatus peteatState)
         {
             isPreparingToEat_ = true;
             petEatState_ = peteatState;
@@ -101,15 +108,14 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            SetTrigger(preEatTriggerNames_[petEatState_], withDelay);
+            SetTrigger(preEatTriggerNames_[petEatState_]);
         }
 
-        public void ExitFoodState(bool withDelay = false)
+        public void ExitFoodState()
         {
-            Debug.Log("exit food");
             isEating_ = false;
             isPreparingToEat_ = false;
-            GoToNextState(withDelay);
+            GoToNextState();
         }
 
         /// <summary>
@@ -121,12 +127,14 @@ namespace Game.Unity.RoomScene
             {
                 return;
             }
+
+            SetTrigger(funTriggerNames_);
         }
 
         /// <summary>
         /// Starts the pet continuous touching reaction.
         /// </summary>
-        public void StartTouching(bool withDelay = false)
+        public void StartTouching()
         {
             isHappy_ = true;
 
@@ -135,66 +143,55 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            SetTrigger(happyTriggerNames_, withDelay);
+            SetTrigger(happyTriggerNames_);
         }
 
         /// <summary>
         /// Stops the pet continuous touching reaction.
         /// </summary>
-        public void StopTouching(bool withDelay = false)
+        public void StopTouching()
         {
             isHappy_ = false;
-            GoToNextState(withDelay);
+            GoToNextState();
         }
 
-        private void GoToNextState(bool withDelay)
+        private void GoToNextState()
         {
+            if (isEating_)
+            {
+                return;
+            }
             if (isPreparingToEat_)
             {
-                SetTrigger(preEatTriggerNames_[petEatState_], withDelay);
+                SetTrigger(preEatTriggerNames_[petEatState_]);
                 return;
             }
             if (isHappy_)
             {
-                SetTrigger(happyTriggerNames_, withDelay);
+                SetTrigger(happyTriggerNames_);
                 return;
             }
 
-            SetTrigger(iddleTriggerNames_, withDelay);
+            SetTrigger(iddleTriggerNames_);
         }
 
-        private void SetTrigger(TriggerNames triggerNames, bool withDelay)
+        private void SetTrigger(TriggerNames triggerNames)
         {
-            if (!withDelay)
+            if (triggerNames.BodyTriggerName != null)
             {
-                if (triggerNames.BodyTriggerName != null)
-                {
-                    Debug.Log("Bdy: " + triggerNames.BodyTriggerName);
-                    bodyAnimationController_.SetTrigger(triggerNames.BodyTriggerName);
-                }
-                if (triggerNames.MouthTriggerName != null)
-                {
-                    Debug.Log("Mouth: " + triggerNames.MouthTriggerName);
-                    mouthAnimationController_.SetTrigger(triggerNames.MouthTriggerName);
-                }
+                bodyAnimationController_.SetTrigger(triggerNames.BodyTriggerName);
             }
-            else
+            if (triggerNames.MouthTriggerName != null)
             {
-                StartCoroutine(SetTriggerAfterDelayCoroutine(triggerNames));
+                mouthAnimationController_.SetTrigger(triggerNames.MouthTriggerName);
             }
-        }
-
-        private IEnumerator SetTriggerAfterDelayCoroutine(TriggerNames triggerNames)
-        {
-            yield return new WaitForSeconds(initialAnimationDelay_);
-            SetTrigger(triggerNames, false);
         }
 
         private IEnumerator EatCoroutine()
         {
-            SetTrigger(eatTriggerNames_, false);
+            SetTrigger(eatTriggerNames_);
             yield return new WaitForSeconds(eatDuration_);
-            SetTrigger(postEatTriggerNames_, false);
+            SetTrigger(postEatTriggerNames_);
             yield return new WaitForSeconds(postEatDuration_);
             ExitFoodState();
         }

@@ -79,6 +79,7 @@ namespace Game.Unity.RoomScene
             }
 
             draggable_.SetData(data);
+            draggable_.SetReturnToOriginOnSuccessfulDrop(true);
 
             if (dragVisualPrefab_ != null)
             {
