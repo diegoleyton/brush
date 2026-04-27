@@ -18,18 +18,39 @@ namespace Game.Unity.RoomScene
 
         private bool hidden_ = true;
 
+        public bool IsHidden => hidden_;
+
         public void Toggle()
         {
-            hidden_ = !hidden_;
-
             if (hidden_)
             {
-                animatorController_.GoToFinalState();
+                Show();
+                return;
             }
-            else
+
+            Hide();
+        }
+
+        public void Show()
+        {
+            if (!hidden_)
             {
-                animatorController_.GoToInitialState();
+                return;
             }
+
+            hidden_ = false;
+            animatorController_.GoToInitialState();
+        }
+
+        public void Hide()
+        {
+            if (hidden_)
+            {
+                return;
+            }
+
+            hidden_ = true;
+            animatorController_.GoToFinalState();
         }
     }
 }

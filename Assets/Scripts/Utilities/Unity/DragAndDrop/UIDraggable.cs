@@ -144,6 +144,23 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             returnToOriginOnSuccessfulDrop_ = returnToOriginOnSuccessfulDrop;
         }
 
+        /// <summary>
+        /// Cleans up any transient drag presentation before the source view is recycled.
+        /// Does not dispatch drag lifecycle events.
+        /// </summary>
+        public void CleanupDragPresentation()
+        {
+            if (activeDragVisualInstance_ != null)
+            {
+                DestroyActiveDragVisual();
+            }
+
+            if (activeDraggedRectTransform_ == rectTransform_)
+            {
+                RestoreOriginalTransform();
+            }
+        }
+
         public void OnInitializePotentialDrag(PointerEventData eventData)
         {
             if (ShouldUseExternalGestureRouter())

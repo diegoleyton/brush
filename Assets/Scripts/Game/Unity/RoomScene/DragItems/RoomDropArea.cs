@@ -113,28 +113,14 @@ namespace Game.Unity.RoomScene
             switch (roomTargetKind_)
             {
                 case RoomTargetKind.ROOM:
-                    if (supportedInventoryType_ == InteractionPointType.EYES ||
-                        supportedInventoryType_ == InteractionPointType.HAT ||
-                        supportedInventoryType_ == InteractionPointType.SKIN ||
-                        supportedInventoryType_ == InteractionPointType.DRESS ||
-                        supportedInventoryType_ == InteractionPointType.FOOD)
+                    return true;
+                case RoomTargetKind.PLACEABLE_OBJECT:
+                    if (supportedInventoryType_ == InteractionPointType.PAINT && parentTargetId_ < 0)
                     {
                         return true;
                     }
 
-                    if (supportedInventoryType_ == InteractionPointType.PAINT)
-                    {
-                        return GameIds.IsRoomSurfaceId(targetId_);
-                    }
-
-                    return GameIds.IsRoomObjectLocationId(targetId_);
-                case RoomTargetKind.PLACEABLE_OBJECT:
-                    if (supportedInventoryType_ == InteractionPointType.PAINT && parentTargetId_ < 0)
-                    {
-                        return GameIds.IsRoomObjectLocationId(targetId_);
-                    }
-
-                    return GameIds.IsRoomObjectLocationId(parentTargetId_) && targetId_ > 0;
+                    return targetId_ > 0;
                 default:
                     return false;
             }

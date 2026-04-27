@@ -77,7 +77,7 @@ namespace Game.Unity.Development
                 ? "Brushy"
                 : PetName().Trim();
 
-            int pictureId = Mathf.Clamp(ProfilePictureId(), 1, GameIds.ProfilePictureCount);
+            int pictureId = Mathf.Clamp(ProfilePictureId(), 1, 10);
             repository_.CreateProfile(profileName, petName, pictureId);
         }
 

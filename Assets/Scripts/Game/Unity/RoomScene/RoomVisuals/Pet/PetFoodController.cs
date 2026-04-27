@@ -35,11 +35,20 @@ namespace Game.Unity.RoomScene
             petView_ = petView;
             dispatcher_ = dispatcher;
             repository_ = repository;
+            if (petView_ != null)
+            {
+                petView_.EatAnimationCompleted += OnEatAnimationCompleted;
+            }
             SubscribeToDispatcher();
         }
 
         public void Dispose()
         {
+            if (petView_ != null)
+            {
+                petView_.EatAnimationCompleted -= OnEatAnimationCompleted;
+            }
+
             UnsubscribeFromDispatcher();
         }
 
@@ -144,6 +153,11 @@ namespace Game.Unity.RoomScene
             foodDropAccepted_ = false;
             foodDragEnded_ = false;
             foodApplyOutcome_ = FoodApplyOutcome.None;
+        }
+
+        private void OnEatAnimationCompleted()
+        {
+            dispatcher_?.Send(new PetFoodAnimationCompletedEvent());
         }
 
         private bool IsFoodEvent(RoomInventoryItemData data)

@@ -45,10 +45,14 @@ namespace Game.Unity.RoomScene
         private bool dispatcherSubscribed_;
         private bool initialized_;
         private bool inventoryButtonsBound_;
+        private bool restoreInventoryAfterDrag_;
 
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
         private RoomInventoryListUI inventoryList_;
+
+        [SerializeField]
+        private RoomInventoryView inventoryView_;
 
         [SerializeField]
         private InteractionPointType selectedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -125,6 +129,11 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
             }
+
+            if (inventoryView_ == null)
+            {
+                inventoryView_ = GetComponentInChildren<RoomInventoryView>(true);
+            }
         }
 
         private void BindInventoryCategoryButtons()
@@ -178,6 +187,9 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Subscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
+            dispatcher_.Subscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
+            dispatcher_.Subscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
+            dispatcher_.Subscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
@@ -192,10 +204,45 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Unsubscribe<RoomInventoryDropAcceptedEvent>(OnRoomInventoryDropAccepted);
+            dispatcher_.Unsubscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
+            dispatcher_.Unsubscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
+            dispatcher_.Unsubscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = false;
+        }
+
+        private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent _)
+        {
+            restoreInventoryAfterDrag_ = inventoryView_ != null && !inventoryView_.IsHidden;
+            inventoryView_?.Hide();
+        }
+
+        private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent eventData)
+        {
+            if (eventData?.Data?.InteractionPointType == InteractionPointType.FOOD && eventData.DropAccepted)
+            {
+                return;
+            }
+
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
+        private void OnPetFoodAnimationCompleted(PetFoodAnimationCompletedEvent _)
+        {
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
+        private void RestoreInventoryAfterDragIfNeeded()
+        {
+            if (!restoreInventoryAfterDrag_)
+            {
+                return;
+            }
+
+            restoreInventoryAfterDrag_ = false;
+            inventoryView_?.Show();
         }
 
         private void OnInventoryUpdated(InventoryUpdatedEvent _)

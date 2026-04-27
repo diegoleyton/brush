@@ -46,4 +46,11 @@ namespace Game.Unity.Definitions.Events
         public RoomDropArea DropArea { get; }
         public RoomInventoryItemData Data { get; }
     }
+
+    /// <summary>
+    /// Emitted when the pet finishes its eat presentation sequence.
+    /// </summary>
+    public sealed class PetFoodAnimationCompletedEvent : IEvent
+    {
+    }
 }

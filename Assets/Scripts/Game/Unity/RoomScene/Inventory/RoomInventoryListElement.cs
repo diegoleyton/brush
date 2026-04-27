@@ -97,6 +97,7 @@ namespace Game.Unity.RoomScene
 
             if (draggable_ != null)
             {
+                draggable_.CleanupDragPresentation();
                 draggable_.ClearData();
                 draggable_.SetDragVisualFactory(null);
             }

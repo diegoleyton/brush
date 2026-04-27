@@ -215,16 +215,8 @@ namespace Game.Unity.RoomScene
                     return;
                 }
 
-                if (Game.Core.Configuration.GameIds.IsRoomSurfaceId(eventData.TargetId))
-                {
-                    logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
-                    paintController_?.RefreshPaintSurface(eventData.TargetId);
-                    return;
-                }
-
-                logger_?.Log($"[RoomView] Refresh painted object {eventData.TargetId}.");
-                paintController_?.RefreshPaintedObject(eventData.TargetId);
-                return;
+                logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
+                paintController_?.RefreshPaintSurface(eventData.TargetId);
             }
 
         }

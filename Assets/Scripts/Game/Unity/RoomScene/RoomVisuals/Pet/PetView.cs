@@ -11,6 +11,8 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class PetView : MonoBehaviour
     {
+        public event System.Action EatAnimationCompleted;
+
         private class TriggerNames
         {
             public string BodyTriggerName { get; private set; }
@@ -194,6 +196,7 @@ namespace Game.Unity.RoomScene
             SetTrigger(postEatTriggerNames_);
             yield return new WaitForSeconds(postEatDuration_);
             ExitFoodState();
+            EatAnimationCompleted?.Invoke();
         }
     }
 }

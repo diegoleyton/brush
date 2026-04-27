@@ -320,7 +320,7 @@ namespace Game.Core.Services
 
         public void SetRoomObject(int locationId, int itemId)
         {
-            if (!GameIds.IsRoomObjectLocationId(locationId) || RoomHasObject(locationId, itemId))
+            if (RoomHasObject(locationId, itemId))
             {
                 logger_?.LogWarning($"[RoomData] Failed to place object {itemId} at room location {locationId}.");
                 NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
@@ -404,13 +404,6 @@ namespace Game.Core.Services
 
         public void PaintRoomSurface(int surfaceId, int paintItemId)
         {
-            if (!GameIds.IsRoomSurfaceId(surfaceId))
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint surface {surfaceId} with item {paintItemId}: invalid surface.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
-                return;
-            }
-
             RoomPaintSurfaceState surface = GetOrCreateRoomSurface(surfaceId);
             if (surface.PaintId == paintItemId)
             {
@@ -669,7 +662,7 @@ namespace Game.Core.Services
             };
         }
 
-        private Room CreateRoom() => DefaultProfileState.CreateRoom();
+        private Room CreateRoom() => new Room();
 
         private Inventory CreateInventory() => DefaultProfileState.CreateInventory();
 

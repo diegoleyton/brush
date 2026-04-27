@@ -68,7 +68,6 @@
     <Compile Include="Assets/Scripts/Game/Core/Events/RoomEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/ProfileEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/InventoryExtensions.cs" />
-    <Compile Include="Assets/Scripts/Game/Core/Configuration/GameIds.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/PersistenceEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Reward.cs" />
     <Compile Include="Assets/Scripts/Game/Core/DataController/DataController.cs" />
