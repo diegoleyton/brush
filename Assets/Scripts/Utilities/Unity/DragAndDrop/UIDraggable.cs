@@ -106,6 +106,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         {
             if (isDragging_)
             {
+                if (dropAccepted_)
+                {
+                    FinishSuccessfulDrop();
+                    return;
+                }
+
                 CancelDrag(DragCancelReason.Disabled);
             }
         }

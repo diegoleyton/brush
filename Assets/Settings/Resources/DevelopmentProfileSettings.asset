@@ -32,7 +32,7 @@ MonoBehaviour:
     <AdditionalItems>k__BackingField: []
   <Food>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
-    <FirstItemCount>k__BackingField: 2
+    <FirstItemCount>k__BackingField: 10
     <AdditionalItems>k__BackingField: []
   <Skin>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1

@@ -1228,7 +1228,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bodyAnimationController_: {fileID: 664659418}
   mouthAnimationController_: {fileID: 1783053314}
-  idleDelay_: 0.8
+  initialAnimationDelay_: 0.8
+  eatDuration_: 2
+  postEatDuration_: 1
 --- !u!1 &666553551
 GameObject:
   m_ObjectHideFlags: 0
@@ -4181,7 +4183,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -112.10004}
+  m_AnchoredPosition: {x: 0, y: -101.5}
   m_SizeDelta: {x: 241.73999, y: 87.4}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &2013783413

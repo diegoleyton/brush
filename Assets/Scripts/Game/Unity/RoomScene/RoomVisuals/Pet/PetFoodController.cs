@@ -59,18 +59,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            switch (repository_.CanPetEat)
-            {
-                case PetEatStatus.OK:
-                    petView_.PrepareToEat();
-                    return;
-                case PetEatStatus.NO_MORE:
-                    petView_.FoodFull();
-                    return;
-                case PetEatStatus.NO_AFTER_BRUSHING:
-                    petView_.FoodClean();
-                    return;
-            }
+            petView_.PrepareToEat(repository_.CanPetEat);
         }
 
         private void OnRoomInventoryDropAccepted(RoomInventoryDropAcceptedEvent eventData)
@@ -139,7 +128,6 @@ namespace Game.Unity.RoomScene
             switch (foodApplyOutcome_)
             {
                 case FoodApplyOutcome.Success:
-                    petView_?.ExitFoodState();
                     petView_?.Eat();
                     ResetFoodState();
                     return;
