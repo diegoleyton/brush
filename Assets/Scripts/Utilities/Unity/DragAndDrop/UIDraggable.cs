@@ -73,6 +73,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private UIDropTarget hoveredTarget_;
         private bool dropAccepted_;
         private bool isDragging_;
+        private bool usedDragVisual_;
 
         /// <summary>
         /// Gets whether this element is currently being dragged.
@@ -161,7 +162,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 DestroyActiveDragVisual();
             }
 
-            if (activeDraggedRectTransform_ == rectTransform_)
+            if (!usedDragVisual_)
             {
                 RestoreOriginalTransform();
             }
@@ -363,8 +364,9 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             hoveredTarget_ = null;
             dropAccepted_ = false;
             isDragging_ = true;
+            usedDragVisual_ = ShouldUseDragVisualFactory();
 
-            if (ShouldUseDragVisualFactory())
+            if (usedDragVisual_)
             {
                 activeDraggedRectTransform_ = CreateDragVisualInstance();
             }
@@ -396,9 +398,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 return;
             }
 
-            if (activeDragVisualInstance_ != null)
+            if (usedDragVisual_)
             {
-                DestroyActiveDragVisual();
+                if (activeDragVisualInstance_ != null)
+                {
+                    DestroyActiveDragVisual();
+                }
             }
             else if (returnToOriginOnCancel_ || reason == DragCancelReason.FailedDrop)
             {
@@ -412,9 +417,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void FinishSuccessfulDrop()
         {
-            if (activeDragVisualInstance_ != null)
+            if (usedDragVisual_)
             {
-                DestroyActiveDragVisual();
+                if (activeDragVisualInstance_ != null)
+                {
+                    DestroyActiveDragVisual();
+                }
             }
             else if (returnToOriginOnSuccessfulDrop_)
             {
@@ -434,6 +442,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             activeDragRoot_ = null;
             activeDraggedRectTransform_ = null;
             activeDragVisualInstance_ = null;
+            usedDragVisual_ = false;
 
             if (canvasGroup_ != null)
             {

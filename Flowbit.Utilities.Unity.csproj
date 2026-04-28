@@ -84,6 +84,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationService.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/UI/ScrollRectExtensions.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/IAudioSourcePool.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/DayNightVisuals/DayNightVisual.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/AssetLoader/IAssetLoader.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationParams.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundLibrary.cs" />
