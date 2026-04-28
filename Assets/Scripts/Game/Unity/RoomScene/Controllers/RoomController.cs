@@ -35,6 +35,7 @@ namespace Game.Unity.RoomScene
         private bool inventoryButtonsBound_;
         private bool restoreInventoryAfterDrag_;
         private bool waitForPaintEffectAfterDrag_;
+        private bool waitForSkinEffectAfterDrag_;
 
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
@@ -191,7 +192,9 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
             dispatcher_.Subscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
             dispatcher_.Subscribe<RoomPaintEffectCompletedEvent>(OnRoomPaintEffectCompleted);
+            dispatcher_.Subscribe<PetSkinEffectCompletedEvent>(OnPetSkinEffectCompleted);
             dispatcher_.Subscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
+            dispatcher_.Subscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
@@ -211,6 +214,8 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
             dispatcher_.Unsubscribe<RoomPaintEffectCompletedEvent>(OnRoomPaintEffectCompleted);
             dispatcher_.Unsubscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
+            dispatcher_.Unsubscribe<PetSkinEffectCompletedEvent>(OnPetSkinEffectCompleted);
+            dispatcher_.Unsubscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
@@ -221,6 +226,7 @@ namespace Game.Unity.RoomScene
         {
             restoreInventoryAfterDrag_ = inventoryView_ != null && !inventoryView_.IsHidden;
             waitForPaintEffectAfterDrag_ = false;
+            waitForSkinEffectAfterDrag_ = false;
             inventoryView_?.Hide();
         }
 
@@ -234,6 +240,13 @@ namespace Game.Unity.RoomScene
             if (eventData?.Data?.InteractionPointType == InteractionPointType.PAINT &&
                 eventData.DropAccepted &&
                 waitForPaintEffectAfterDrag_)
+            {
+                return;
+            }
+
+            if (eventData?.Data?.InteractionPointType == InteractionPointType.SKIN &&
+                eventData.DropAccepted &&
+                waitForSkinEffectAfterDrag_)
             {
                 return;
             }
@@ -257,6 +270,17 @@ namespace Game.Unity.RoomScene
             RestoreInventoryAfterDragIfNeeded();
         }
 
+        private void OnPetSkinEffectCompleted(PetSkinEffectCompletedEvent _)
+        {
+            if (!waitForSkinEffectAfterDrag_)
+            {
+                return;
+            }
+
+            waitForSkinEffectAfterDrag_ = false;
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
         private void OnRoomDataItemApplyFailed(RoomDataItemApplyFailedEvent eventData)
         {
             if (eventData == null ||
@@ -267,6 +291,19 @@ namespace Game.Unity.RoomScene
             }
 
             waitForPaintEffectAfterDrag_ = false;
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
+        private void OnPetDataApplyFailed(PetDataApplyFailedEvent eventData)
+        {
+            if (eventData == null ||
+                eventData.ItemType != InteractionPointType.SKIN ||
+                !waitForSkinEffectAfterDrag_)
+            {
+                return;
+            }
+
+            waitForSkinEffectAfterDrag_ = false;
             RestoreInventoryAfterDragIfNeeded();
         }
 
@@ -381,6 +418,12 @@ namespace Game.Unity.RoomScene
                 waitForPaintEffectAfterDrag_ = true;
             }
 
+            if (eventData.Data.InteractionPointType == InteractionPointType.SKIN &&
+                eventData.DropArea.RoomTargetKind == RoomTargetKind.ROOM)
+            {
+                waitForSkinEffectAfterDrag_ = true;
+            }
+
             if (dropAcceptedHandlers_ == null)
             {
                 BuildDropAcceptedHandlers();
@@ -448,7 +491,11 @@ namespace Game.Unity.RoomScene
                     },
                     {
                         (InteractionPointType.SKIN, RoomTargetKind.ROOM),
-                        eventData => dispatcher_.Send(new RoomSkinAppliedEvent(eventData.Data.ItemId))
+                        eventData =>
+                        {
+                            dispatcher_.Send(new PetSkinDropPositionCapturedEvent(eventData.DropScreenPosition));
+                            dispatcher_.Send(new RoomSkinAppliedEvent(eventData.Data.ItemId));
+                        }
                     },
                     {
                         (InteractionPointType.DRESS, RoomTargetKind.ROOM),

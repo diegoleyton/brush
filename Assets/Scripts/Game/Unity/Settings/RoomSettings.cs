@@ -25,6 +25,9 @@ namespace Game.Unity.Settings
         private Sprite paintItemSprite_;
 
         [SerializeField]
+        private Sprite skinItemSprite_;
+
+        [SerializeField]
         private RectTransform paintSurfaceEffectPrefab_;
 
         [SerializeField]
@@ -46,6 +49,7 @@ namespace Game.Unity.Settings
 
         public int DefaultEyesItemId => defaultEyesItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
+        public Sprite SkinItemSprite => skinItemSprite_;
         public RectTransform PaintSurfaceEffectPrefab => paintSurfaceEffectPrefab_;
         public float PaintSurfaceColorTransitionDuration => paintSurfaceColorTransitionDuration_;
         public float PaintSurfaceEffectLifetimeSeconds => paintSurfaceEffectLifetimeSeconds_;

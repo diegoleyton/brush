@@ -65,6 +65,19 @@ namespace Game.Unity.Definitions.Events
     }
 
     /// <summary>
+    /// Emitted immediately before a pet skin request is sent, capturing the latest drop screen position.
+    /// </summary>
+    public sealed class PetSkinDropPositionCapturedEvent : IEvent
+    {
+        public PetSkinDropPositionCapturedEvent(Vector2 dropScreenPosition)
+        {
+            DropScreenPosition = dropScreenPosition;
+        }
+
+        public Vector2 DropScreenPosition { get; }
+    }
+
+    /// <summary>
     /// Emitted when the pet finishes its eat presentation sequence.
     /// </summary>
     public sealed class PetFoodAnimationCompletedEvent : IEvent
@@ -82,5 +95,12 @@ namespace Game.Unity.Definitions.Events
         }
 
         public int SurfaceId { get; }
+    }
+
+    /// <summary>
+    /// Emitted when the pet skin effect finishes its presentation.
+    /// </summary>
+    public sealed class PetSkinEffectCompletedEvent : IEvent
+    {
     }
 }

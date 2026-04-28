@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultEyesItemId_: 1
   paintItemSprite_: {fileID: -709768274109351568, guid: f1b4eb60bcf3d4027aac695262d8e550, type: 3}
+  skinItemSprite_: {fileID: -3846509191455527814, guid: cf89125599fe64419839ff3f282085f1, type: 3}
   paintSurfaceEffectPrefab_: {fileID: 4566969341002244396, guid: a4bf09b4895ac48f7883c9403da35b45, type: 3}
   paintSurfaceColorTransitionDuration_: 2
   paintSurfaceEffectLifetimeSeconds_: 2

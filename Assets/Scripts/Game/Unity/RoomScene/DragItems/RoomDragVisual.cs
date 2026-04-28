@@ -171,8 +171,29 @@ namespace Game.Unity.RoomScene
                     $"{nameof(RoomDragVisual)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
             }
 
+            ApplyTintedMainImage(roomSettings_.PaintItemSprite, color);
+        }
+
+        public void ApplySkinItem(Color color)
+        {
+            if (image_ == null)
+            {
+                return;
+            }
+
+            if (roomSettings_ == null || roomSettings_.SkinItemSprite == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"{nameof(RoomDragVisual)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.SkinItemSprite)} to render skin items.");
+            }
+
+            ApplyTintedMainImage(roomSettings_.SkinItemSprite, color);
+        }
+
+        private void ApplyTintedMainImage(Sprite sprite, Color color)
+        {
             SetExtraImagesAlpha(0f);
-            image_.sprite = roomSettings_.PaintItemSprite;
+            image_.sprite = sprite;
             image_.enabled = true;
             image_.color = color;
             SetImageAlpha(1f);

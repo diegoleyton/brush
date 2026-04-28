@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Core.Configuration;
 using Game.Core.Services;
 
+using UnityEngine;
 using Zenject;
 
 namespace Game.Unity.RoomScene
@@ -23,7 +24,7 @@ namespace Game.Unity.RoomScene
             repository_ = repository;
         }
 
-        public void Refresh()
+        public void Refresh(bool animate = false, Vector2? dropScreenPosition = null)
         {
             if (skinSurfaceViews_ == null)
             {
@@ -41,10 +42,18 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
-                surfaceView.ResetColor();
-                surfaceView.ApplySkinColor(RoomItemVisuals.GetItemColor(
+                Color skinColor = RoomItemVisuals.GetItemColor(
                     Core.Data.InteractionPointType.SKIN,
-                    skinItemId));
+                    skinItemId);
+
+                if (!animate)
+                {
+                    surfaceView.ResetColor();
+                    surfaceView.ApplySkinColor(skinColor, animate: false);
+                    continue;
+                }
+
+                surfaceView.ApplySkinColor(skinColor, animate: true, dropScreenPosition: dropScreenPosition);
             }
         }
 

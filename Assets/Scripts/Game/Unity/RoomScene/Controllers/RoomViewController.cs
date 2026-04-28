@@ -44,6 +44,7 @@ namespace Game.Unity.RoomScene
         private bool initialized_;
         private bool subscribed_;
         private Vector2? pendingPaintSurfaceDropPosition_;
+        private Vector2? pendingSkinDropPosition_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
         private PetEyesController eyesController_;
@@ -179,7 +180,9 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Subscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
             dispatcher_.Subscribe<RoomPaintDropPositionCapturedEvent>(OnRoomPaintDropPositionCaptured);
+            dispatcher_.Subscribe<PetSkinDropPositionCapturedEvent>(OnPetSkinDropPositionCaptured);
             dispatcher_.Subscribe<PetDataAppliedEvent>(OnPetDataApplied);
+            dispatcher_.Subscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = true;
         }
 
@@ -193,7 +196,9 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
             dispatcher_.Unsubscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
             dispatcher_.Unsubscribe<RoomPaintDropPositionCapturedEvent>(OnRoomPaintDropPositionCaptured);
+            dispatcher_.Unsubscribe<PetSkinDropPositionCapturedEvent>(OnPetSkinDropPositionCaptured);
             dispatcher_.Unsubscribe<PetDataAppliedEvent>(OnPetDataApplied);
+            dispatcher_.Unsubscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             subscribed_ = false;
         }
 
@@ -205,6 +210,16 @@ namespace Game.Unity.RoomScene
             }
 
             pendingPaintSurfaceDropPosition_ = eventData.DropScreenPosition;
+        }
+
+        private void OnPetSkinDropPositionCaptured(PetSkinDropPositionCapturedEvent eventData)
+        {
+            if (eventData == null)
+            {
+                return;
+            }
+
+            pendingSkinDropPosition_ = eventData.DropScreenPosition;
         }
 
         private void OnRoomDataItemApplied(RoomDataItemAppliedEvent eventData)
@@ -262,6 +277,16 @@ namespace Game.Unity.RoomScene
             pendingPaintSurfaceDropPosition_ = null;
         }
 
+        private void OnPetDataApplyFailed(PetDataApplyFailedEvent eventData)
+        {
+            if (eventData == null || eventData.ItemType != Core.Data.InteractionPointType.SKIN)
+            {
+                return;
+            }
+
+            pendingSkinDropPosition_ = null;
+        }
+
         private void OnPetDataApplied(PetDataAppliedEvent eventData)
         {
             if (!initialized_)
@@ -286,7 +311,9 @@ namespace Game.Unity.RoomScene
             if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
             {
                 logger_?.Log("[RoomView] Refresh pet skin.");
-                skinController_?.Refresh();
+                petViews_[0]?.Paint();
+                skinController_?.Refresh(animate: true, dropScreenPosition: pendingSkinDropPosition_);
+                pendingSkinDropPosition_ = null;
                 return;
             }
 
@@ -303,7 +330,7 @@ namespace Game.Unity.RoomScene
             paintController_?.Refresh();
             eyesController_?.Refresh();
             hatController_?.Refresh();
-            skinController_?.Refresh();
+            skinController_?.Refresh(animate: false);
             dressController_?.Refresh();
         }
     }

@@ -103,6 +103,10 @@ namespace Game.Unity.RoomScene
                 {
                     ApplyPaintItem(data.Color);
                 }
+                else if (data.InteractionPointType == InteractionPointType.SKIN)
+                {
+                    ApplySkinItem(data.Color);
+                }
                 else if (data.InteractionPointType == InteractionPointType.EYES)
                 {
                     ApplyEyes(data.ItemId);
@@ -210,6 +214,12 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            if (data_.InteractionPointType == InteractionPointType.SKIN)
+            {
+                dragVisualInstance.ApplySkinItem(data_.Color);
+                return;
+            }
+
             dragVisualInstance.SetSprite(null);
             dragVisualInstance.SetColor(data_.Color);
         }
@@ -296,8 +306,29 @@ namespace Game.Unity.RoomScene
                     $"{nameof(RoomInventoryListElement)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
             }
 
+            ApplyTintedMainImage(roomSettings_.PaintItemSprite, color);
+        }
+
+        private void ApplySkinItem(Color color)
+        {
+            if (image_ == null)
+            {
+                return;
+            }
+
+            if (roomSettings_ == null || roomSettings_.SkinItemSprite == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomInventoryListElement)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.SkinItemSprite)} to render skin items.");
+            }
+
+            ApplyTintedMainImage(roomSettings_.SkinItemSprite, color);
+        }
+
+        private void ApplyTintedMainImage(Sprite sprite, Color color)
+        {
             SetExtraImagesAlpha(0f);
-            image_.sprite = roomSettings_.PaintItemSprite;
+            image_.sprite = sprite;
             image_.enabled = true;
             image_.color = color;
             SetImageAlpha(1f);

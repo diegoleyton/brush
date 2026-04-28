@@ -12,6 +12,7 @@ namespace Game.Unity.RoomScene
     public sealed class PetView : MonoBehaviour
     {
         public event System.Action EatAnimationCompleted;
+        public event System.Action PaintAnimationCompleted;
 
         private class TriggerNames
         {
@@ -48,6 +49,8 @@ namespace Game.Unity.RoomScene
 
         private const string mouthFunName = "Fun";
 
+        private const string mouthPaintName = "Sourprise";
+
         private readonly static Dictionary<PetEatStatus, TriggerNames> preEatTriggerNames_ = new Dictionary<PetEatStatus, TriggerNames>
         {
             {PetEatStatus.OK, new TriggerNames(PrepareToEatName, mouthPreEatName)},
@@ -62,6 +65,7 @@ namespace Game.Unity.RoomScene
         private static readonly TriggerNames postEatTriggerNames_ = new TriggerNames(IdleName, mouthPostEatName);
 
         private static readonly TriggerNames funTriggerNames_ = new TriggerNames(FunName, mouthFunName);
+        private static readonly TriggerNames paintTriggerNames_ = new TriggerNames(IdleName, mouthPaintName);
 
         [SerializeField]
         private Animator bodyAnimationController_;
@@ -75,11 +79,19 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private float postEatDuration_ = 2f;
 
+        [SerializeField]
+        private float paintDuration_ = 2f;
+
+        [SerializeField]
+        private float postPaintDuration_ = 1f;
+
         private bool isHappy_ = false;
 
         private bool isPreparingToEat_ = false;
 
         private bool isEating_ = false;
+
+        private bool isPainting_ = false;
 
         private PetEatStatus petEatState_;
 
@@ -88,7 +100,7 @@ namespace Game.Unity.RoomScene
         /// </summary>
         public void Eat()
         {
-            if (isEating_)
+            if (isEating_ || isPainting_)
             {
                 return;
             }
@@ -105,7 +117,7 @@ namespace Game.Unity.RoomScene
         {
             isPreparingToEat_ = true;
             petEatState_ = peteatState;
-            if (isEating_)
+            if (isEating_ || isPainting_)
             {
                 return;
             }
@@ -121,11 +133,35 @@ namespace Game.Unity.RoomScene
         }
 
         /// <summary>
+        /// Plays the pet paint presentation.
+        /// </summary>
+        public void Paint()
+        {
+            if (isPainting_ || isEating_)
+            {
+                return;
+            }
+
+            isPainting_ = true;
+            StartCoroutine(PaintCoroutine());
+            SetTrigger(paintTriggerNames_);
+        }
+
+        /// <summary>
+        /// Exits the pet paint presentation state.
+        /// </summary>
+        public void ExitPaintState()
+        {
+            isPainting_ = false;
+            GoToNextState();
+        }
+
+        /// <summary>
         /// Plays the pet single-touch reaction.
         /// </summary>
         public void Touch()
         {
-            if (isPreparingToEat_ || isEating_)
+            if (isPreparingToEat_ || isEating_ || isPainting_)
             {
                 return;
             }
@@ -140,7 +176,7 @@ namespace Game.Unity.RoomScene
         {
             isHappy_ = true;
 
-            if (isPreparingToEat_ || isEating_)
+            if (isPreparingToEat_ || isEating_ || isPainting_)
             {
                 return;
             }
@@ -159,7 +195,7 @@ namespace Game.Unity.RoomScene
 
         private void GoToNextState()
         {
-            if (isEating_)
+            if (isEating_ || isPainting_)
             {
                 return;
             }
@@ -197,6 +233,16 @@ namespace Game.Unity.RoomScene
             yield return new WaitForSeconds(postEatDuration_);
             ExitFoodState();
             EatAnimationCompleted?.Invoke();
+        }
+
+        private IEnumerator PaintCoroutine()
+        {
+            SetTrigger(paintTriggerNames_);
+            yield return new WaitForSeconds(paintDuration_);
+            SetTrigger(funTriggerNames_);
+            yield return new WaitForSeconds(postPaintDuration_);
+            ExitPaintState();
+            PaintAnimationCompleted?.Invoke();
         }
     }
 }
