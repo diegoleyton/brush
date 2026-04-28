@@ -61,7 +61,6 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             {
                 return;
             }
-
             onDropAccepted_?.Invoke();
             draggable.OnDropAccepted(this, eventData);
         }

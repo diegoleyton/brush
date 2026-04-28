@@ -162,6 +162,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 DestroyActiveDragVisual();
             }
 
+            if (!isDragging_ && originalParent_ == null)
+            {
+                return;
+            }
+
             if (!usedDragVisual_)
             {
                 RestoreOriginalTransform();
@@ -222,6 +227,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         public void BeginDragFromRouter(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
+
+            if (isDragging_)
             {
                 return;
             }
@@ -348,6 +358,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void BeginDrag(PointerEventData eventData)
         {
+            if (isDragging_)
+            {
+                return;
+            }
+
             activeDragRoot_ = ResolveDragRoot();
             originalParent_ = rectTransform_.parent;
             originalSiblingIndex_ = rectTransform_.GetSiblingIndex();
@@ -484,7 +499,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private RectTransform ResolveDragRoot()
         {
-            if (dragRoot_ != null)
+            if (dragRoot_ != null && dragRoot_ != rectTransform_)
             {
                 return dragRoot_;
             }
@@ -549,6 +564,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
             dragCanvasGroup.blocksRaycasts = false;
             draggedRectTransform.SetAsLastSibling();
+
             return draggedRectTransform;
         }
 

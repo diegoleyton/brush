@@ -1,6 +1,8 @@
 using Flowbit.Utilities.Unity.UI;
+using Flowbit.Utilities.Core.Events;
 
 using Game.Core.Data;
+using Game.Unity.Definitions.Events;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,6 +48,8 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class RoomInventoryView : MonoBehaviour
     {
+        private EventDispatcher dispatcher_;
+
         [SerializeField]
         private UIComponentAnimatorController animatorController_;
 
@@ -68,6 +72,12 @@ namespace Game.Unity.RoomScene
         public bool IsHidden => hidden_;
 
         public IReadOnlyList<RoomInventoryCategoryButtonBinding> CategoryButtons => categoryButtons_;
+
+        [Zenject.Inject]
+        public void Construct(EventDispatcher dispatcher)
+        {
+            dispatcher_ = dispatcher;
+        }
 
         private void Awake()
         {
@@ -96,6 +106,7 @@ namespace Game.Unity.RoomScene
 
             hidden_ = false;
             animatorController_.GoToInitialState();
+            dispatcher_?.Send(new RoomInventoryOpenedEvent());
         }
 
         public void ShowWithDelay()
@@ -115,6 +126,7 @@ namespace Game.Unity.RoomScene
 
             hidden_ = true;
             animatorController_.GoToFinalState();
+            dispatcher_?.Send(new RoomInventoryClosedEvent());
         }
 
         public void SetSelectedCategory(InteractionPointType selectedInteractionPointType)

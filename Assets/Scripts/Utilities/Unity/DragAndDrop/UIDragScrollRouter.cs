@@ -172,7 +172,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                     break;
 
                 case GestureRoute.Draggable:
-                    draggable_?.EndDragFromRouter(eventData);
+                    FinalizeDraggableRoute(eventData);
                     break;
             }
 
@@ -296,6 +296,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void BeginHoldDrag()
         {
+            if (draggable_ == null || draggable_.IsDragging)
+            {
+                return;
+            }
+
             holdDragActivated_ = true;
             activeRoute_ = GestureRoute.Draggable;
             draggable_.BeginDragFromRouter(CreatePointerEventData());
@@ -304,17 +309,28 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void EndHoldDrag(PointerEventData eventData)
         {
-            PointerEventData finalEventData = CreatePointerEventData(eventData);
-            UIDropTarget dropTarget = FindDropTarget(finalEventData);
-
-            if (dropTarget != null)
-            {
-                ExecuteEvents.Execute(dropTarget.gameObject, finalEventData, ExecuteEvents.dropHandler);
-            }
-
-            draggable_?.EndDragFromRouter(finalEventData);
+            FinalizeDraggableRoute(eventData);
             activeRoute_ = GestureRoute.None;
             ResetPointerState();
+        }
+
+        private void FinalizeDraggableRoute(PointerEventData eventData)
+        {
+            PointerEventData finalEventData = CreatePointerEventData(eventData);
+            ExecuteDropIfAvailable(finalEventData);
+            draggable_?.EndDragFromRouter(finalEventData);
+        }
+
+        private void ExecuteDropIfAvailable(PointerEventData eventData)
+        {
+            UIDropTarget dropTarget = FindDropTarget(eventData);
+
+            if (dropTarget == null)
+            {
+                return;
+            }
+
+            ExecuteEvents.Execute(dropTarget.gameObject, eventData, ExecuteEvents.dropHandler);
         }
 
         private void UpdateHoveredDropTarget(PointerEventData eventData)
@@ -354,7 +370,10 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                     raycastResults[index].gameObject.GetComponentInParent<UIDropTarget>();
                 if (dropTarget != null)
                 {
-                    return dropTarget;
+                    if (draggable_ != null && dropTarget.CanAccept(draggable_))
+                    {
+                        return dropTarget;
+                    }
                 }
             }
 

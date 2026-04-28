@@ -69,6 +69,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponent.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventorySelectionState.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectsController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/NavigationGameEvents.cs" />
@@ -78,10 +79,12 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/IGameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/UISettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/RoomTargetKind.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetFoodController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/AssetNameResolver.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponentController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/SoundId.cs" />
@@ -98,6 +101,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDragData.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesSurfaceView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryToggleButtonRotation.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ScreenBlockerImage.cs" />

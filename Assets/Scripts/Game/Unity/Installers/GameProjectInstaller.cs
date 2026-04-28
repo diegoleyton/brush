@@ -21,6 +21,7 @@ using Game.Unity.Instantiator;
 using Game.Unity.RoomScene;
 using Game.Unity.Scenes;
 using Game.Unity.Settings;
+using Game.Unity.UI;
 
 using Zenject;
 
@@ -35,6 +36,7 @@ namespace Game.Unity.Installers
         private const string GameSoundLibraryResourcePath = "GameSoundLibrary";
         private const string DevelopmentProfileSettingsResourcePath = "DevelopmentProfileSettings";
         private const string RoomSettingsResourcePath = "RoomSettings";
+        private const string UISettingsResourcePath = "UISettings";
 
         public override void InstallBindings()
         {
@@ -42,6 +44,7 @@ namespace Game.Unity.Installers
             GameSoundLibrary gameSoundLibrary = LoadGameSoundLibrary();
             DevelopmentProfileSettings developmentProfileSettings = LoadDevelopmentProfileSettings();
             RoomSettings roomSettings = LoadRoomSettings();
+            UISettings uiSettings = LoadUISettings();
             GameProjectComposition composition = new GameProjectComposition(sceneSettings, gameSoundLibrary);
 
             composition.PreventScreenSleep();
@@ -51,15 +54,16 @@ namespace Game.Unity.Installers
             Container.BindInstance(gameSoundLibrary).AsSingle();
             Container.BindInstance(developmentProfileSettings).AsSingle();
             Container.BindInstance(roomSettings).AsSingle();
+            Container.BindInstance(uiSettings).AsSingle();
 
-            BindCoreServices(composition);
+            BindCoreServices(composition, uiSettings);
             BindGameData(composition);
             BindNavigation(composition);
             BindAudio(composition);
             BindDevelopmentServices();
         }
 
-        private void BindCoreServices(GameProjectComposition composition)
+        private void BindCoreServices(GameProjectComposition composition, UISettings uiSettings)
         {
             Container.Bind<IObjectInstantiator>()
                 .WithId(InstantiatorIds.Unity)
@@ -89,6 +93,17 @@ namespace Game.Unity.Installers
 
             Container.BindInterfacesAndSelfTo<InventoryDropEffectPositionTracker>()
                 .AsSingle();
+
+            if (uiSettings.AnimatedComponentControllerPrefab == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(UISettings)} requires an {nameof(UIAnimatedComponentController)} prefab reference.");
+            }
+
+            Container.Bind<UIAnimatedComponentController>()
+                .FromComponentInNewPrefab(uiSettings.AnimatedComponentControllerPrefab)
+                .AsSingle()
+                .NonLazy();
 
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetEyesSurfaceView>, PetEyesController, PetEyesController.Factory>();
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetHatSurfaceView>, PetHatController, PetHatController.Factory>();
@@ -215,6 +230,19 @@ namespace Game.Unity.Installers
         {
             RoomSettings roomSettings = UnityEngine.Resources.Load<RoomSettings>(RoomSettingsResourcePath);
             return roomSettings ?? UnityEngine.ScriptableObject.CreateInstance<RoomSettings>();
+        }
+
+        private static UISettings LoadUISettings()
+        {
+            UISettings uiSettings = UnityEngine.Resources.Load<UISettings>(UISettingsResourcePath);
+
+            if (uiSettings == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not load {nameof(UISettings)} from Resources/{UISettingsResourcePath}.");
+            }
+
+            return uiSettings;
         }
     }
 }

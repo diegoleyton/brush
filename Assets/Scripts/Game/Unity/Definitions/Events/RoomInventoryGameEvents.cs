@@ -7,6 +7,20 @@ using UnityEngine;
 namespace Game.Unity.Definitions.Events
 {
     /// <summary>
+    /// Emitted when the room inventory becomes visible.
+    /// </summary>
+    public sealed class RoomInventoryOpenedEvent : IEvent
+    {
+    }
+
+    /// <summary>
+    /// Emitted when the room inventory becomes hidden.
+    /// </summary>
+    public sealed class RoomInventoryClosedEvent : IEvent
+    {
+    }
+
+    /// <summary>
     /// Emitted when dragging starts for a room inventory item.
     /// </summary>
     public sealed class RoomInventoryDragStartedEvent : IEvent
