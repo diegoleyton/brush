@@ -12,23 +12,11 @@ using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 using Zenject;
 
 namespace Game.Unity.RoomScene
 {
-    [Serializable]
-    public sealed class RoomInventoryCategoryButtonBinding
-    {
-        public InteractionPointType InteractionPointType = InteractionPointType.PLACEABLE_OBJECT;
-        public Button Button;
-
-        [NonSerialized]
-        public UnityAction ClickAction;
-    }
-
     /// <summary>
     /// Orchestrates the room scene UI and translates visual interactions into room events.
     /// </summary>
@@ -57,10 +45,6 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private InteractionPointType selectedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
 
-        [SerializeField]
-        private RoomInventoryCategoryButtonBinding[] inventoryCategoryButtons_ =
-            Array.Empty<RoomInventoryCategoryButtonBinding>();
-
         [Inject]
         public void Construct(
             DataRepository repository,
@@ -76,6 +60,8 @@ namespace Game.Unity.RoomScene
 
         private void Awake()
         {
+            ValidateSerializedReferences();
+
             if (selectionState_ != null &&
                 selectionState_.CurrentInteractionPointType != selectedInventoryType_)
             {
@@ -121,31 +107,35 @@ namespace Game.Unity.RoomScene
         {
             if (inventoryList_ == null)
             {
-                inventoryList_ = GetComponentInChildren<RoomInventoryListUI>(true);
-            }
-
-            if (inventoryList_ == null)
-            {
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
             }
 
             if (inventoryView_ == null)
             {
-                inventoryView_ = GetComponentInChildren<RoomInventoryView>(true);
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(RoomInventoryView)} reference.");
             }
         }
 
         private void BindInventoryCategoryButtons()
         {
-            if (inventoryButtonsBound_ || inventoryCategoryButtons_ == null)
+            if (inventoryButtonsBound_ || inventoryView_ == null)
             {
                 return;
             }
 
-            for (int index = 0; index < inventoryCategoryButtons_.Length; index++)
+            IReadOnlyList<RoomInventoryCategoryButtonBinding> inventoryCategoryButtons =
+                inventoryView_.CategoryButtons;
+
+            if (inventoryCategoryButtons == null)
             {
-                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons_[index];
+                return;
+            }
+
+            for (int index = 0; index < inventoryCategoryButtons.Count; index++)
+            {
+                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons[index];
                 if (binding?.Button == null)
                 {
                     continue;
@@ -161,14 +151,23 @@ namespace Game.Unity.RoomScene
 
         private void UnbindInventoryCategoryButtons()
         {
-            if (!inventoryButtonsBound_ || inventoryCategoryButtons_ == null)
+            if (!inventoryButtonsBound_ || inventoryView_ == null)
             {
                 return;
             }
 
-            for (int index = 0; index < inventoryCategoryButtons_.Length; index++)
+            IReadOnlyList<RoomInventoryCategoryButtonBinding> inventoryCategoryButtons =
+                inventoryView_.CategoryButtons;
+
+            if (inventoryCategoryButtons == null)
             {
-                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons_[index];
+                inventoryButtonsBound_ = false;
+                return;
+            }
+
+            for (int index = 0; index < inventoryCategoryButtons.Count; index++)
+            {
+                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons[index];
                 if (binding?.Button != null && binding.ClickAction != null)
                 {
                     binding.Button.onClick.RemoveListener(binding.ClickAction);
@@ -291,21 +290,7 @@ namespace Game.Unity.RoomScene
 
         private void UpdateInventoryCategoryButtons()
         {
-            if (inventoryCategoryButtons_ == null)
-            {
-                return;
-            }
-
-            for (int index = 0; index < inventoryCategoryButtons_.Length; index++)
-            {
-                RoomInventoryCategoryButtonBinding binding = inventoryCategoryButtons_[index];
-                if (binding?.Button == null)
-                {
-                    continue;
-                }
-
-                binding.Button.interactable = binding.InteractionPointType != selectedInventoryType_;
-            }
+            inventoryView_?.SetSelectedCategory(selectedInventoryType_);
         }
 
         private List<RoomInventoryItemData> BuildInventoryItems(InteractionPointType interactionPointType)
@@ -427,6 +412,21 @@ namespace Game.Unity.RoomScene
                         eventData => dispatcher_.Send(new RoomFoodAppliedEvent(eventData.Data.ItemId))
                     }
                 };
+        }
+
+        private void ValidateSerializedReferences()
+        {
+            if (inventoryView_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(RoomInventoryView)} reference.");
+            }
+
+            if (inventoryList_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
+            }
         }
 
     }

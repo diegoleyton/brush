@@ -34,18 +34,8 @@ namespace Game.Unity.RoomScene
         {
             if (roomController_ == null)
             {
-                roomController_ = GetComponentInChildren<RoomController>(true);
-            }
-
-            if (roomController_ == null)
-            {
                 throw new System.InvalidOperationException(
                     $"{nameof(RoomSceneController)} requires a {nameof(RoomController)} reference.");
-            }
-
-            if (roomViewController_ == null)
-            {
-                roomViewController_ = GetComponentInChildren<RoomViewController>(true);
             }
 
             if (roomViewController_ == null)

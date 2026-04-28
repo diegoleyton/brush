@@ -222,11 +222,6 @@ namespace Flowbit.Utilities.Unity.ScrollableList
 
             if (scrollRect_ == null)
             {
-                scrollRect_ = GetComponentInChildren<ScrollRect>(true);
-            }
-
-            if (scrollRect_ == null)
-            {
                 throw new InvalidOperationException(
                     $"{GetType().Name} requires a {nameof(ScrollRect)} reference.");
             }

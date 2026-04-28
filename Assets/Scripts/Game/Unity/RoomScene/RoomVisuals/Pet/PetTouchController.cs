@@ -28,7 +28,8 @@ namespace Game.Unity.RoomScene
         {
             if (petView_ == null)
             {
-                petView_ = GetComponentInChildren<PetView>(true);
+                throw new System.InvalidOperationException(
+                    $"{nameof(PetTouchController)} requires a {nameof(PetView)} reference.");
             }
         }
 

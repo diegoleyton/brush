@@ -109,10 +109,7 @@ namespace Game.Unity.RoomScene
             hatController_ = hatControllerFactory_?.Create(hatSurfaceViews_);
             skinController_ = skinControllerFactory_?.Create(skinSurfaceViews_);
             dressController_ = dressControllerFactory_?.Create(dressSurfaceViews_);
-            if (petViews_ != null && petViews_.Length > 0 && petViews_[0] != null)
-            {
-                foodController_ = foodControllerFactory_?.Create(petViews_[0]);
-            }
+            foodController_ = foodControllerFactory_?.Create(petViews_[0]);
 
             RefreshFromData();
             initialized_ = true;
@@ -120,6 +117,12 @@ namespace Game.Unity.RoomScene
 
         private void ValidateSceneReferences()
         {
+            if (SurfaceViewConatiner_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomViewController)} requires a surface view container reference.");
+            }
+
             if (placeableObjectSurfaceViews_ == null || placeableObjectSurfaceViews_.Length == 0)
             {
                 throw new InvalidOperationException(
@@ -140,10 +143,22 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomViewController)} requires a {nameof(RoomSettings)} binding.");
             }
+
+            if (petViews_ == null || petViews_.Length == 0 || petViews_[0] == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomViewController)} requires at least one {nameof(PetView)} reference in the surface view container.");
+            }
         }
 
         private void SetSurfaceViews()
         {
+            if (SurfaceViewConatiner_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomViewController)} requires a surface view container reference.");
+            }
+
             placeableObjectSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPlaceableObjectSurfaceView>(true);
             paintSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<RoomPaintSurfaceView>(true);
             eyesSurfaceViews_ = SurfaceViewConatiner_.GetComponentsInChildren<PetEyesSurfaceView>(true);
