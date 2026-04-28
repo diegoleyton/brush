@@ -1,10 +1,7 @@
 using Flowbit.Utilities.Unity.UI;
 
-using Game.Core.Data;
-using Game.Core.Events;
-
 using UnityEngine;
-using System;
+using System.Collections;
 
 namespace Game.Unity.RoomScene
 {
@@ -16,7 +13,12 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private UIComponentAnimatorController animatorController_;
 
+        [SerializeField]
+        [Min(0f)]
+        private float showDelaySeconds_ = 0.5f;
+
         private bool hidden_ = true;
+        private Coroutine showCoroutine_;
 
         public bool IsHidden => hidden_;
 
@@ -33,6 +35,8 @@ namespace Game.Unity.RoomScene
 
         public void Show()
         {
+            CancelPendingShow();
+
             if (!hidden_)
             {
                 return;
@@ -42,8 +46,16 @@ namespace Game.Unity.RoomScene
             animatorController_.GoToInitialState();
         }
 
+        public void ShowWithDelay()
+        {
+            CancelPendingShow();
+            showCoroutine_ = StartCoroutine(ShowAfterDelay());
+        }
+
         public void Hide()
         {
+            CancelPendingShow();
+
             if (hidden_)
             {
                 return;
@@ -51,6 +63,28 @@ namespace Game.Unity.RoomScene
 
             hidden_ = true;
             animatorController_.GoToFinalState();
+        }
+
+        private IEnumerator ShowAfterDelay()
+        {
+            if (showDelaySeconds_ > 0f)
+            {
+                yield return new WaitForSeconds(showDelaySeconds_);
+            }
+
+            Show();
+            showCoroutine_ = null;
+        }
+
+        private void CancelPendingShow()
+        {
+            if (showCoroutine_ == null)
+            {
+                return;
+            }
+
+            StopCoroutine(showCoroutine_);
+            showCoroutine_ = null;
         }
     }
 }

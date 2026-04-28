@@ -59,6 +59,13 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         public bool IsRoutingEnabled => isActiveAndEnabled;
 
+        private void OnDisable()
+        {
+            activeRoute_ = GestureRoute.None;
+            hoveredDropTarget_ = null;
+            ResetPointerState();
+        }
+
         public void OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)

@@ -20,10 +20,11 @@ namespace Game.Unity.RoomScene
             }
 
             visual.SetParent(itemContainer_, false);
-            visual.anchorMin = new Vector2(0.5f, 0.5f);
-            visual.anchorMax = new Vector2(0.5f, 0.5f);
+            visual.anchorMin = Vector2.zero;
+            visual.anchorMax = Vector2.one;
             visual.pivot = new Vector2(0.5f, 0.5f);
-            visual.anchoredPosition = Vector2.zero;
+            visual.offsetMin = Vector2.zero;
+            visual.offsetMax = Vector2.zero;
             visual.localScale = Vector3.one;
         }
 

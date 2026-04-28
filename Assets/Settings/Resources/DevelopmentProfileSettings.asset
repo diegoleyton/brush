@@ -20,12 +20,8 @@ MonoBehaviour:
   <MinimumCoins>k__BackingField: 250
   <PlaceableObjects>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
-    <FirstItemCount>k__BackingField: 12
-    <AdditionalItems>k__BackingField:
-    - <ItemId>k__BackingField: 20
-      <Quantity>k__BackingField: 2
-    - <ItemId>k__BackingField: 29
-      <Quantity>k__BackingField: 4
+    <FirstItemCount>k__BackingField: 16
+    <AdditionalItems>k__BackingField: []
   <Paint>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 5

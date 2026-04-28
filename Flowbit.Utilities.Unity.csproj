@@ -72,8 +72,10 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/UI/ScreenBlocker.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationTarget.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/General/AutoDestroy.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/General/PlayerPrefsUtility.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/Editor/SoundAssetPreviewPlayer.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/DragAndDrop/IUIDragRouter.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/General/Editor/PlayerPrefsUtilityEditor.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/ScrollableList/BaseScrollableListElement.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Abstractions/INavigationTransitionStrategy.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/UI/LoopMove.cs" />

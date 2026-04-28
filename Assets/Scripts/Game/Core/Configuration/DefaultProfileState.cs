@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 using Game.Core.Data;
 
+using UnityEngine;
+
 namespace Game.Core.Configuration
 {
     /// <summary>
@@ -17,6 +19,8 @@ namespace Game.Core.Configuration
         public const int DefaultPetDressItemId = 1;
 
         public const bool InitialPendingReward = true;
+
+        public static readonly Color DefaultRoomSurfaceColor = Color.white;
 
         public static Inventory CreateInventory()
         {

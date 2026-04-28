@@ -13,7 +13,7 @@ namespace Game.Core.Configuration
             new Dictionary<InteractionPointType, ItemCategoryConfig>
             {
                 { InteractionPointType.DRESS, new ItemCategoryConfig(20, 1, 2) },
-                { InteractionPointType.EYES, new ItemCategoryConfig(25, 1, 2) },
+                { InteractionPointType.EYES, new ItemCategoryConfig(4, 1, 2) },
                 { InteractionPointType.FOOD, new ItemCategoryConfig(100, 0, 2) },
                 { InteractionPointType.HAT, new ItemCategoryConfig(20, 1, 2) },
                 { InteractionPointType.PAINT, new ItemCategoryConfig(31, 3, 2) },

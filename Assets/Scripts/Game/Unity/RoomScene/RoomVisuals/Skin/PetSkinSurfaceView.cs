@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+using Game.Core.Configuration;
+
 namespace Game.Unity.RoomScene
 {
     /// <summary>
@@ -11,21 +13,11 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private Image image_;
 
-        private Color defaultColor_ = Color.white;
-
-        private void Awake()
-        {
-            if (image_ != null)
-            {
-                defaultColor_ = image_.color;
-            }
-        }
-
         public void ResetColor()
         {
             if (image_ != null)
             {
-                image_.color = defaultColor_;
+                image_.color = DefaultProfileState.DefaultRoomSurfaceColor;
             }
         }
 

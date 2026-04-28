@@ -1,8 +1,10 @@
 using Flowbit.Utilities.Unity.ScrollableList;
 using Flowbit.Utilities.Unity.Instantiator;
+using Flowbit.Utilities.Unity.AssetLoader;
 
 using Game.Core.Data;
 using Game.Unity.Definitions;
+using Game.Unity.Settings;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,9 +33,21 @@ namespace Game.Unity.RoomScene
     {
         private RoomInventoryItemData data_;
         private IObjectInstantiator instantiator_;
+        private IAssetLoader assetLoader_;
+        private RoomSettings roomSettings_;
+        private IAssetLoadHandle<Sprite> activeHandle_;
+        private IAssetLoadHandle<Sprite> pendingHandle_;
+        private int loadVersion_;
+        private Sprite defaultSprite_;
 
         [SerializeField]
         private Image image_;
+
+        [SerializeField]
+        private Image extraImage1_;
+
+        [SerializeField]
+        private Image extraImage2_;
 
         [SerializeField]
         private RoomInventoryDraggable draggable_;
@@ -48,19 +62,54 @@ namespace Game.Unity.RoomScene
         private GameObject quantityTextContainer_;
 
         [Inject]
-        public void Construct([Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator instantiator)
+        public void Construct(
+            IAssetLoader assetLoader,
+            RoomSettings roomSettings,
+            [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
+            assetLoader_ = assetLoader;
+            roomSettings_ = roomSettings;
             instantiator_ = instantiator;
+        }
+
+        private void OnDestroy()
+        {
+            ReleaseHandle(ref pendingHandle_);
+            ReleaseHandle(ref activeHandle_);
+        }
+
+        private void Awake()
+        {
+            if (image_ != null)
+            {
+                defaultSprite_ = image_.sprite;
+            }
         }
 
         public override void Show(RoomInventoryItemData data)
         {
             data_ = data;
             gameObject.SetActive(true);
+            InvalidatePendingVisualLoads();
+            ResetVisualState();
 
             if (image_ != null)
             {
-                image_.color = data.Color;
+                if (data.InteractionPointType == InteractionPointType.PLACEABLE_OBJECT)
+                {
+                    ApplyPlaceableItem(data.ItemId);
+                }
+                else if (data.InteractionPointType == InteractionPointType.EYES)
+                {
+                    ApplyEyes(data.ItemId);
+                }
+                else
+                {
+                    image_.enabled = true;
+                    image_.sprite = defaultSprite_;
+                    SetImageAlpha(1f);
+                    image_.color = data.Color;
+                }
             }
 
             if (quantityText_ != null)
@@ -102,6 +151,9 @@ namespace Game.Unity.RoomScene
                 draggable_.SetDragVisualFactory(null);
             }
 
+            InvalidatePendingVisualLoads();
+            ResetVisualState();
+
             if (quantityText_ != null)
             {
                 quantityTextContainer_.SetActive(false);
@@ -118,6 +170,33 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            if (data_.InteractionPointType == InteractionPointType.PLACEABLE_OBJECT)
+            {
+                dragVisualInstance.SetColor(Color.white);
+
+                if (image_ != null && image_.sprite != null)
+                {
+                    dragVisualInstance.SetSprite(image_.sprite);
+                    return;
+                }
+
+                dragVisualInstance.ApplyPlaceableItem(data_.ItemId);
+                return;
+            }
+
+            if (data_.InteractionPointType == InteractionPointType.EYES)
+            {
+                if (extraImage1_ != null && extraImage1_.sprite != null)
+                {
+                    dragVisualInstance.SetEyesSprite(extraImage1_.sprite);
+                    return;
+                }
+
+                dragVisualInstance.ApplyEyes(data_.ItemId);
+                return;
+            }
+
+            dragVisualInstance.SetSprite(null);
             dragVisualInstance.SetColor(data_.Color);
         }
 
@@ -150,6 +229,195 @@ namespace Game.Unity.RoomScene
             }
 
             return transform.parent;
+        }
+
+        private void ApplyPlaceableItem(int itemId)
+        {
+            if (assetLoader_ == null || image_ == null)
+            {
+                return;
+            }
+
+            int requestVersion = ++loadVersion_;
+            ReleaseHandle(ref pendingHandle_);
+            image_.color = Color.white;
+            image_.sprite = defaultSprite_;
+            image_.enabled = true;
+            SetImageAlpha(0f);
+
+            string assetName = AssetNameResolver.GetPlaceableItemAssetName(itemId);
+            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
+            {
+                if (requestVersion != loadVersion_)
+                {
+                    return;
+                }
+
+                if (sprite == null)
+                {
+                    ShowMainImageFallback();
+                    pendingHandle_ = null;
+                    return;
+                }
+
+                image_.sprite = sprite;
+                image_.enabled = true;
+                SetImageAlpha(1f);
+                ReleaseHandle(ref activeHandle_);
+                activeHandle_ = pendingHandle_;
+                pendingHandle_ = null;
+            });
+        }
+
+        private void ApplyEyes(int itemId)
+        {
+            if (assetLoader_ == null)
+            {
+                return;
+            }
+
+            SetExtraImagesAlpha(0f);
+            if (image_ != null)
+            {
+                image_.sprite = defaultSprite_;
+                image_.enabled = true;
+                image_.color = Color.white;
+                SetImageAlpha(1f);
+            }
+
+            int requestVersion = ++loadVersion_;
+            StartEyesLoad(itemId, requestVersion, allowFallback: true);
+        }
+
+        private void StartEyesLoad(int itemId, int requestVersion, bool allowFallback)
+        {
+            ReleaseHandle(ref pendingHandle_);
+
+            string assetName = AssetNameResolver.GetEyeAssetName(itemId);
+            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
+            {
+                if (requestVersion != loadVersion_)
+                {
+                    return;
+                }
+
+                if (sprite != null)
+                {
+                    SetEyesSprite(sprite);
+                    ReleaseHandle(ref activeHandle_);
+                    activeHandle_ = pendingHandle_;
+                    pendingHandle_ = null;
+                    return;
+                }
+
+                pendingHandle_ = null;
+
+                if (allowFallback && roomSettings_ != null && roomSettings_.DefaultEyesItemId != itemId)
+                {
+                    StartEyesLoad(roomSettings_.DefaultEyesItemId, requestVersion, allowFallback: false);
+                    return;
+                }
+
+                ShowMainImageFallback();
+            });
+        }
+
+        private void SetEyesSprite(Sprite sprite)
+        {
+            if (extraImage1_ != null)
+            {
+                extraImage1_.sprite = sprite;
+            }
+
+            if (extraImage2_ != null)
+            {
+                extraImage2_.sprite = sprite;
+            }
+
+            SetExtraImagesAlpha(sprite != null ? 1f : 0f);
+
+            if (image_ != null)
+            {
+                SetImageAlpha(0f);
+            }
+        }
+
+        private void ResetVisualState()
+        {
+            if (image_ != null)
+            {
+                image_.sprite = defaultSprite_;
+                image_.enabled = true;
+                image_.color = Color.white;
+                SetImageAlpha(1f);
+            }
+
+            if (extraImage1_ != null)
+            {
+                extraImage1_.sprite = null;
+            }
+
+            if (extraImage2_ != null)
+            {
+                extraImage2_.sprite = null;
+            }
+
+            SetExtraImagesAlpha(0f);
+        }
+
+        private void ShowMainImageFallback()
+        {
+            if (image_ == null)
+            {
+                return;
+            }
+
+            image_.sprite = defaultSprite_;
+            image_.enabled = true;
+            image_.color = Color.white;
+            SetImageAlpha(1f);
+            SetExtraImagesAlpha(0f);
+        }
+
+        private void InvalidatePendingVisualLoads()
+        {
+            loadVersion_++;
+            ReleaseHandle(ref pendingHandle_);
+            ReleaseHandle(ref activeHandle_);
+        }
+
+        private void SetExtraImagesAlpha(float alpha)
+        {
+            SetGraphicAlpha(extraImage1_, alpha);
+            SetGraphicAlpha(extraImage2_, alpha);
+        }
+
+        private void SetImageAlpha(float alpha)
+        {
+            SetGraphicAlpha(image_, alpha);
+        }
+
+        private static void SetGraphicAlpha(Graphic graphic, float alpha)
+        {
+            if (graphic == null)
+            {
+                return;
+            }
+
+            Color color = graphic.color;
+            color.a = alpha;
+            graphic.color = color;
+        }
+
+        private static void ReleaseHandle(ref IAssetLoadHandle<Sprite> handle)
+        {
+            if (handle == null)
+            {
+                return;
+            }
+
+            handle.Release();
+            handle = null;
         }
     }
 }

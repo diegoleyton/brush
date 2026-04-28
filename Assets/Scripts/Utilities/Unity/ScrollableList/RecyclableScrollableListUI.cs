@@ -374,14 +374,14 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             if (direction_ == ScrollableListDirection.Vertical)
             {
                 elementRect.anchoredPosition = new Vector2(
-                    elementRect.anchoredPosition.x,
+                    0f,
                     -GetElementStart(dataIndex));
             }
             else
             {
                 elementRect.anchoredPosition = new Vector2(
                     GetElementStart(dataIndex),
-                    elementRect.anchoredPosition.y);
+                    0f);
             }
         }
 

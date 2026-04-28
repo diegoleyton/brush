@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 158f53446884446238b42c8ee552f815
+guid: 4a57acba0392042ea9ccf0ffdb8336d7
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -116,10 +116,10 @@ TextureImporter:
       name: bed_sheets_0
       rect:
         serializedVersion: 2
-        x: 75
-        y: 269
-        width: 360
-        height: 29
+        x: 54
+        y: 301
+        width: 406
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

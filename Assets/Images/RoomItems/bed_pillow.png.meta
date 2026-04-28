@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 494a052ff4bb84e93bb06cdd84122341
+guid: bc7434ae2a4cf43b481c28e6204570ad
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -116,10 +116,10 @@ TextureImporter:
       name: bed_pillow_0
       rect:
         serializedVersion: 2
-        x: 134
-        y: 282
-        width: 240
-        height: 108
+        x: 122
+        y: 318
+        width: 271
+        height: 123
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

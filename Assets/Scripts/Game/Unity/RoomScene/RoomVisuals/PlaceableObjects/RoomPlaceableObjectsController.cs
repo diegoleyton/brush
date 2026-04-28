@@ -65,8 +65,8 @@ namespace Game.Unity.RoomScene
                 RoomPlaceableObjectView placeableObjectView = visualInstance.GetComponent<RoomPlaceableObjectView>();
                 if (placeableObjectView != null)
                 {
-                    placeableObjectView.SetColor(
-                        RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, location.Item.ItemId));
+                    placeableObjectView.SetColor(Color.white);
+                    placeableObjectView.ApplyPlaceableItem(location.Item.ItemId);
                     placeableObjectView.ConfigureTopLevel(location.LocationId, location.Item.ItemId);
                 }
 
@@ -100,8 +100,8 @@ namespace Game.Unity.RoomScene
             RoomPlaceableObjectView placeableObjectView = visualInstance.GetComponent<RoomPlaceableObjectView>();
             if (placeableObjectView != null)
             {
-                placeableObjectView.SetColor(
-                    RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, location.Item.ItemId));
+                placeableObjectView.SetColor(Color.white);
+                placeableObjectView.ApplyPlaceableItem(location.Item.ItemId);
                 placeableObjectView.ConfigureTopLevel(location.LocationId, location.Item.ItemId);
             }
 
@@ -147,8 +147,8 @@ namespace Game.Unity.RoomScene
             RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
             if (childView != null)
             {
-                childView.SetColor(
-                    RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, slot.Item.ItemId));
+                childView.SetColor(Color.white);
+                childView.ApplyPlaceableItem(slot.Item.ItemId);
                 childView.ConfigureChild(locationId, slotId, slot.Item.ItemId);
             }
 
@@ -240,8 +240,8 @@ namespace Game.Unity.RoomScene
                 RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
                 if (childView != null)
                 {
-                    childView.SetColor(
-                        RoomItemVisuals.GetItemColor(InteractionPointType.PLACEABLE_OBJECT, slot.Item.ItemId));
+                    childView.SetColor(Color.white);
+                    childView.ApplyPlaceableItem(slot.Item.ItemId);
                     childView.ConfigureChild(location.LocationId, slot.SlotId, slot.Item.ItemId);
                 }
                 childSurfaceView.SetPlacedVisual(childVisual);

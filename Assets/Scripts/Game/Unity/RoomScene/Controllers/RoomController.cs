@@ -242,7 +242,7 @@ namespace Game.Unity.RoomScene
             }
 
             restoreInventoryAfterDrag_ = false;
-            inventoryView_?.Show();
+            inventoryView_?.ShowWithDelay();
         }
 
         private void OnInventoryUpdated(InventoryUpdatedEvent _)
@@ -312,6 +312,7 @@ namespace Game.Unity.RoomScene
         {
             Dictionary<int, int> inventoryItems =
                 repository_?.CurrentProfile?.InventoryData?.GetInventoryItems(interactionPointType);
+            int maxItemId = Core.Configuration.ItemCatalog.Get(interactionPointType).ItemCount;
 
             if (inventoryItems == null)
             {
@@ -319,7 +320,7 @@ namespace Game.Unity.RoomScene
             }
 
             return inventoryItems
-                .Where(entry => entry.Value != 0)
+                .Where(entry => entry.Value != 0 && entry.Key > 0 && entry.Key <= maxItemId)
                 .OrderBy(entry => entry.Key)
                 .Select(entry => new RoomInventoryItemData
                 {
