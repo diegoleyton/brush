@@ -45,13 +45,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colors_:
-  - {r: 1, g: 0.6179246, b: 0.6452804, a: 1}
-  - {r: 1, g: 0.750784, b: 0.61960787, a: 1}
-  - {r: 0.99937207, g: 1, b: 0.504717, a: 1}
-  - {r: 0.6303308, g: 1, b: 0.5896226, a: 1}
-  - {r: 0.6273585, g: 0.7307668, b: 1, a: 1}
-  - {r: 0.74949485, g: 0.6273585, b: 1, a: 1}
-  minimumScale_: 0.98
-  maximumScale_: 1.02
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0.759434, b: 0.7800539, a: 1}
+  - {r: 1, g: 0.82545036, b: 0.7216981, a: 1}
+  - {r: 1, g: 1, b: 0.7028302, a: 1}
+  - {r: 0.80152744, g: 1, b: 0.7783019, a: 1}
+  - {r: 0.6650944, g: 0.8761693, b: 1, a: 1}
+  - {r: 0.85122895, g: 0.7783019, b: 1, a: 1}
+  minimumScale_: 0.97
+  maximumScale_: 1.03
   scaleCycleDurationSeconds_: 1.5
-  colorCycleDurationSeconds_: 5
+  colorCycleDurationSeconds_: 0.7

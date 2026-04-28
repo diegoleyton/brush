@@ -3443,6 +3443,7 @@ GameObject:
   - component: {fileID: 690219943}
   - component: {fileID: 690219942}
   - component: {fileID: 690219945}
+  - component: {fileID: 690219946}
   m_Layer: 5
   m_Name: ToggleButton
   m_TagString: Untagged
@@ -3577,6 +3578,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image_: {fileID: 0}
+--- !u!114 &690219946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 690219940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24c259738b0594934a4c0d9cac23f73c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationDurationSeconds_: 0.3
 --- !u!1 &691742046
 GameObject:
   m_ObjectHideFlags: 0
@@ -5511,7 +5525,7 @@ MonoBehaviour:
   elementParent_: {fileID: 1660948699}
   elementPrefab_: {fileID: 1997827079318832624, guid: 2465e6acdf26640c69190d8277726aee, type: 3}
   direction_: 1
-  spacing_: 30
+  spacing_: 50
   startPadding_: 0
   endPadding_: 0
   elementSize_: 150
