@@ -22,6 +22,20 @@ namespace Game.Unity.Settings
         private int defaultEyesItemId_ = 1;
 
         [SerializeField]
+        private Sprite paintItemSprite_;
+
+        [SerializeField]
+        private RectTransform paintSurfaceEffectPrefab_;
+
+        [SerializeField]
+        [Min(0f)]
+        private float paintSurfaceColorTransitionDuration_ = 0.25f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float paintSurfaceEffectLifetimeSeconds_ = 1f;
+
+        [SerializeField]
         private RectTransform defaultPlaceableObjectPrefab_;
 
         [SerializeField]
@@ -31,6 +45,10 @@ namespace Game.Unity.Settings
         private readonly Dictionary<int, bool> supportsChildPlaceablesCache_ = new Dictionary<int, bool>();
 
         public int DefaultEyesItemId => defaultEyesItemId_;
+        public Sprite PaintItemSprite => paintItemSprite_;
+        public RectTransform PaintSurfaceEffectPrefab => paintSurfaceEffectPrefab_;
+        public float PaintSurfaceColorTransitionDuration => paintSurfaceColorTransitionDuration_;
+        public float PaintSurfaceEffectLifetimeSeconds => paintSurfaceEffectLifetimeSeconds_;
 
         public RectTransform ResolvePlaceableObjectPrefab(int itemId)
         {

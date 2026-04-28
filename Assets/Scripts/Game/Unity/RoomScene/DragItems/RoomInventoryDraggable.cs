@@ -3,6 +3,8 @@ using Flowbit.Utilities.Unity.DragAndDrop;
 
 using Game.Unity.Definitions.Events;
 
+using UnityEngine.EventSystems;
+
 using Zenject;
 
 namespace Game.Unity.RoomScene
@@ -33,7 +35,7 @@ namespace Game.Unity.RoomScene
             data_ = null;
         }
 
-        public override void OnDropAccepted(UIDropTarget target)
+        public override void OnDropAccepted(UIDropTarget target, PointerEventData eventData)
         {
             RoomInventoryItemData dragData = activeDragData_ ?? data_;
             if (dispatcher_ == null || dragData == null)
@@ -43,7 +45,7 @@ namespace Game.Unity.RoomScene
 
             if (target is RoomDropArea dropArea)
             {
-                dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, dragData));
+                dispatcher_.Send(new RoomInventoryDropAcceptedEvent(dropArea, dragData, eventData.position));
             }
         }
 

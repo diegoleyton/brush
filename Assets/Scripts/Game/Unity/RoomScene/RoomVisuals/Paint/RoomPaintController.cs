@@ -33,7 +33,7 @@ namespace Game.Unity.RoomScene
             RefreshPaintableObjects();
         }
 
-        public void RefreshPaintSurface(int surfaceId)
+        public void RefreshPaintSurface(int surfaceId, Vector2? dropScreenPosition = null)
         {
             RoomPaintSurfaceView surfaceView = FindPaintSurfaceView(surfaceId);
             if (surfaceView == null)
@@ -41,16 +41,17 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            surfaceView.ResetColor();
-
             RoomPaintSurfaceState surface = FindPaintSurfaceState(surfaceId);
             if (surface == null)
             {
+                surfaceView.ResetColor();
                 return;
             }
 
             surfaceView.ApplyPaintColor(
-                RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, surface.PaintId));
+                RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, surface.PaintId),
+                animate: true,
+                dropScreenPosition: dropScreenPosition);
         }
 
         public void RefreshPaintedObject(int locationId)
@@ -135,7 +136,8 @@ namespace Game.Unity.RoomScene
                 }
 
                 surfaceView.ApplyPaintColor(
-                    RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, surface.PaintId));
+                    RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, surface.PaintId),
+                    animate: false);
             }
         }
 

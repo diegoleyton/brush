@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: RoomSettings
   m_EditorClassIdentifier: 
   defaultEyesItemId_: 1
+  paintItemSprite_: {fileID: -709768274109351568, guid: f1b4eb60bcf3d4027aac695262d8e550, type: 3}
+  paintSurfaceEffectPrefab_: {fileID: 4566969341002244396, guid: a4bf09b4895ac48f7883c9403da35b45, type: 3}
+  paintSurfaceColorTransitionDuration_: 2
+  paintSurfaceEffectLifetimeSeconds_: 2
   defaultPlaceableObjectPrefab_: {fileID: 3020903656568588460, guid: 0bb0dfefff9214fee95f65f20ffc3b2a, type: 3}
   placeableObjectPrefabs_: []

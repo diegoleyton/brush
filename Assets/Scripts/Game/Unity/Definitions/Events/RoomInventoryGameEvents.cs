@@ -2,6 +2,8 @@ using Flowbit.Utilities.Core.Events;
 
 using Game.Unity.RoomScene;
 
+using UnityEngine;
+
 namespace Game.Unity.Definitions.Events
 {
     /// <summary>
@@ -37,14 +39,29 @@ namespace Game.Unity.Definitions.Events
     /// </summary>
     public sealed class RoomInventoryDropAcceptedEvent : IEvent
     {
-        public RoomInventoryDropAcceptedEvent(RoomDropArea dropArea, RoomInventoryItemData data)
+        public RoomInventoryDropAcceptedEvent(RoomDropArea dropArea, RoomInventoryItemData data, Vector2 dropScreenPosition)
         {
             DropArea = dropArea;
             Data = data;
+            DropScreenPosition = dropScreenPosition;
         }
 
         public RoomDropArea DropArea { get; }
         public RoomInventoryItemData Data { get; }
+        public Vector2 DropScreenPosition { get; }
+    }
+
+    /// <summary>
+    /// Emitted immediately before a room paint request is sent, capturing the latest drop screen position.
+    /// </summary>
+    public sealed class RoomPaintDropPositionCapturedEvent : IEvent
+    {
+        public RoomPaintDropPositionCapturedEvent(Vector2 dropScreenPosition)
+        {
+            DropScreenPosition = dropScreenPosition;
+        }
+
+        public Vector2 DropScreenPosition { get; }
     }
 
     /// <summary>
@@ -52,5 +69,18 @@ namespace Game.Unity.Definitions.Events
     /// </summary>
     public sealed class PetFoodAnimationCompletedEvent : IEvent
     {
+    }
+
+    /// <summary>
+    /// Emitted when the room paint surface effect finishes its presentation.
+    /// </summary>
+    public sealed class RoomPaintEffectCompletedEvent : IEvent
+    {
+        public RoomPaintEffectCompletedEvent(int surfaceId)
+        {
+            SurfaceId = surfaceId;
+        }
+
+        public int SurfaceId { get; }
     }
 }

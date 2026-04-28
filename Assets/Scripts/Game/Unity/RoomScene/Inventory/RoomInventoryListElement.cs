@@ -99,6 +99,10 @@ namespace Game.Unity.RoomScene
                 {
                     ApplyPlaceableItem(data.ItemId);
                 }
+                else if (data.InteractionPointType == InteractionPointType.PAINT)
+                {
+                    ApplyPaintItem(data.Color);
+                }
                 else if (data.InteractionPointType == InteractionPointType.EYES)
                 {
                     ApplyEyes(data.ItemId);
@@ -146,7 +150,11 @@ namespace Game.Unity.RoomScene
 
             if (draggable_ != null)
             {
-                draggable_.CleanupDragPresentation();
+                if (!draggable_.IsDragging)
+                {
+                    draggable_.CleanupDragPresentation();
+                }
+
                 draggable_.ClearData();
                 draggable_.SetDragVisualFactory(null);
             }
@@ -193,6 +201,12 @@ namespace Game.Unity.RoomScene
                 }
 
                 dragVisualInstance.ApplyEyes(data_.ItemId);
+                return;
+            }
+
+            if (data_.InteractionPointType == InteractionPointType.PAINT)
+            {
+                dragVisualInstance.ApplyPaintItem(data_.Color);
                 return;
             }
 
@@ -267,6 +281,26 @@ namespace Game.Unity.RoomScene
                 activeHandle_ = pendingHandle_;
                 pendingHandle_ = null;
             });
+        }
+
+        private void ApplyPaintItem(Color color)
+        {
+            if (image_ == null)
+            {
+                return;
+            }
+
+            if (roomSettings_ == null || roomSettings_.PaintItemSprite == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomInventoryListElement)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
+            }
+
+            SetExtraImagesAlpha(0f);
+            image_.sprite = roomSettings_.PaintItemSprite;
+            image_.enabled = true;
+            image_.color = color;
+            SetImageAlpha(1f);
         }
 
         private void ApplyEyes(int itemId)

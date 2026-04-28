@@ -62,6 +62,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private int originalSiblingIndex_;
         private Vector3 originalWorldPosition_;
         private Vector3 originalLocalScale_;
+        private Quaternion originalLocalRotation_;
+        private Vector2 originalAnchoredPosition_;
+        private Vector2 originalSizeDelta_;
+        private Vector2 originalAnchorMin_;
+        private Vector2 originalAnchorMax_;
+        private Vector2 originalPivot_;
         private bool originalBlocksRaycasts_;
 
         private UIDropTarget hoveredTarget_;
@@ -321,7 +327,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         /// <summary>
         /// Called after this draggable has been accepted by a drop target.
         /// </summary>
-        public virtual void OnDropAccepted(UIDropTarget target)
+        public virtual void OnDropAccepted(UIDropTarget target, PointerEventData eventData)
         {
         }
 
@@ -346,6 +352,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             originalSiblingIndex_ = rectTransform_.GetSiblingIndex();
             originalWorldPosition_ = rectTransform_.position;
             originalLocalScale_ = rectTransform_.localScale;
+            originalLocalRotation_ = rectTransform_.localRotation;
+            originalAnchoredPosition_ = rectTransform_.anchoredPosition;
+            originalSizeDelta_ = rectTransform_.sizeDelta;
+            originalAnchorMin_ = rectTransform_.anchorMin;
+            originalAnchorMax_ = rectTransform_.anchorMax;
+            originalPivot_ = rectTransform_.pivot;
             originalBlocksRaycasts_ = canvasGroup_ != null && canvasGroup_.blocksRaycasts;
 
             hoveredTarget_ = null;
@@ -431,10 +443,15 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void RestoreOriginalTransform()
         {
-            rectTransform_.SetParent(originalParent_, true);
+            rectTransform_.SetParent(originalParent_, false);
+            rectTransform_.anchorMin = originalAnchorMin_;
+            rectTransform_.anchorMax = originalAnchorMax_;
+            rectTransform_.pivot = originalPivot_;
+            rectTransform_.sizeDelta = originalSizeDelta_;
+            rectTransform_.anchoredPosition = originalAnchoredPosition_;
             rectTransform_.SetSiblingIndex(originalSiblingIndex_);
-            rectTransform_.position = originalWorldPosition_;
             rectTransform_.localScale = originalLocalScale_;
+            rectTransform_.localRotation = originalLocalRotation_;
         }
 
         private void MoveToPointer(PointerEventData eventData)

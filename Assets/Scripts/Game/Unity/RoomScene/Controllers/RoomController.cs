@@ -34,6 +34,7 @@ namespace Game.Unity.RoomScene
         private bool initialized_;
         private bool inventoryButtonsBound_;
         private bool restoreInventoryAfterDrag_;
+        private bool waitForPaintEffectAfterDrag_;
 
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
@@ -189,6 +190,8 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
             dispatcher_.Subscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
             dispatcher_.Subscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
+            dispatcher_.Subscribe<RoomPaintEffectCompletedEvent>(OnRoomPaintEffectCompleted);
+            dispatcher_.Subscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
@@ -206,6 +209,8 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<RoomInventoryDragStartedEvent>(OnRoomInventoryDragStarted);
             dispatcher_.Unsubscribe<RoomInventoryDragEndedEvent>(OnRoomInventoryDragEnded);
             dispatcher_.Unsubscribe<PetFoodAnimationCompletedEvent>(OnPetFoodAnimationCompleted);
+            dispatcher_.Unsubscribe<RoomPaintEffectCompletedEvent>(OnRoomPaintEffectCompleted);
+            dispatcher_.Unsubscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
@@ -215,6 +220,7 @@ namespace Game.Unity.RoomScene
         private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent _)
         {
             restoreInventoryAfterDrag_ = inventoryView_ != null && !inventoryView_.IsHidden;
+            waitForPaintEffectAfterDrag_ = false;
             inventoryView_?.Hide();
         }
 
@@ -225,11 +231,42 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            if (eventData?.Data?.InteractionPointType == InteractionPointType.PAINT &&
+                eventData.DropAccepted &&
+                waitForPaintEffectAfterDrag_)
+            {
+                return;
+            }
+
             RestoreInventoryAfterDragIfNeeded();
         }
 
         private void OnPetFoodAnimationCompleted(PetFoodAnimationCompletedEvent _)
         {
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
+        private void OnRoomPaintEffectCompleted(RoomPaintEffectCompletedEvent _)
+        {
+            if (!waitForPaintEffectAfterDrag_)
+            {
+                return;
+            }
+
+            waitForPaintEffectAfterDrag_ = false;
+            RestoreInventoryAfterDragIfNeeded();
+        }
+
+        private void OnRoomDataItemApplyFailed(RoomDataItemApplyFailedEvent eventData)
+        {
+            if (eventData == null ||
+                eventData.ItemType != InteractionPointType.PAINT ||
+                !waitForPaintEffectAfterDrag_)
+            {
+                return;
+            }
+
+            waitForPaintEffectAfterDrag_ = false;
             RestoreInventoryAfterDragIfNeeded();
         }
 
@@ -338,6 +375,12 @@ namespace Game.Unity.RoomScene
             logger_?.Log(
                 $"[RoomUI] Drop accepted. Type: {eventData.Data.InteractionPointType}, Item: {eventData.Data.ItemId}, TargetKind: {eventData.DropArea.RoomTargetKind}, Target: {eventData.DropArea.TargetId}, Parent: {eventData.DropArea.ParentTargetId}");
 
+            if (eventData.Data.InteractionPointType == InteractionPointType.PAINT &&
+                eventData.DropArea.RoomTargetKind == RoomTargetKind.ROOM)
+            {
+                waitForPaintEffectAfterDrag_ = true;
+            }
+
             if (dropAcceptedHandlers_ == null)
             {
                 BuildDropAcceptedHandlers();
@@ -370,8 +413,12 @@ namespace Game.Unity.RoomScene
                     },
                     {
                         (InteractionPointType.PAINT, RoomTargetKind.ROOM),
-                        eventData => dispatcher_.Send(
-                            new RoomPaintAppliedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId))
+                        eventData =>
+                        {
+                            dispatcher_.Send(new RoomPaintDropPositionCapturedEvent(eventData.DropScreenPosition));
+                            dispatcher_.Send(
+                                new RoomPaintAppliedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId));
+                        }
                     },
                     {
                         (InteractionPointType.PAINT, RoomTargetKind.PLACEABLE_OBJECT),

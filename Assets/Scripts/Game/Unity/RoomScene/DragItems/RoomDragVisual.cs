@@ -72,6 +72,7 @@ namespace Game.Unity.RoomScene
             if (image_ != null)
             {
                 SetExtraImagesAlpha(0f);
+                image_.color = Color.white;
                 image_.sprite = sprite;
                 image_.enabled = sprite != null;
                 SetImageAlpha(sprite != null ? 1f : 0f);
@@ -155,6 +156,26 @@ namespace Game.Unity.RoomScene
 
             int requestVersion = ++loadVersion_;
             StartEyesLoad(itemId, requestVersion, allowFallback: true);
+        }
+
+        public void ApplyPaintItem(Color color)
+        {
+            if (image_ == null)
+            {
+                return;
+            }
+
+            if (roomSettings_ == null || roomSettings_.PaintItemSprite == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"{nameof(RoomDragVisual)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
+            }
+
+            SetExtraImagesAlpha(0f);
+            image_.sprite = roomSettings_.PaintItemSprite;
+            image_.enabled = true;
+            image_.color = color;
+            SetImageAlpha(1f);
         }
 
         private void StartEyesLoad(int itemId, int requestVersion, bool allowFallback)

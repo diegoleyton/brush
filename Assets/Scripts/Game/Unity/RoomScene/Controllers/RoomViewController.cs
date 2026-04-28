@@ -1,5 +1,4 @@
 using System;
-
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Unity.Instantiator;
@@ -7,6 +6,7 @@ using Flowbit.Utilities.Unity.Instantiator;
 using Game.Core.Events;
 using Game.Core.Services;
 using Game.Unity.Definitions;
+using Game.Unity.Definitions.Events;
 using Game.Unity.Settings;
 
 using UnityEngine;
@@ -43,6 +43,7 @@ namespace Game.Unity.RoomScene
 
         private bool initialized_;
         private bool subscribed_;
+        private Vector2? pendingPaintSurfaceDropPosition_;
         private RoomPlaceableObjectsController placeableObjectsController_;
         private RoomPaintController paintController_;
         private PetEyesController eyesController_;
@@ -176,6 +177,8 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Subscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
+            dispatcher_.Subscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
+            dispatcher_.Subscribe<RoomPaintDropPositionCapturedEvent>(OnRoomPaintDropPositionCaptured);
             dispatcher_.Subscribe<PetDataAppliedEvent>(OnPetDataApplied);
             subscribed_ = true;
         }
@@ -188,8 +191,20 @@ namespace Game.Unity.RoomScene
             }
 
             dispatcher_.Unsubscribe<RoomDataItemAppliedEvent>(OnRoomDataItemApplied);
+            dispatcher_.Unsubscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
+            dispatcher_.Unsubscribe<RoomPaintDropPositionCapturedEvent>(OnRoomPaintDropPositionCaptured);
             dispatcher_.Unsubscribe<PetDataAppliedEvent>(OnPetDataApplied);
             subscribed_ = false;
+        }
+
+        private void OnRoomPaintDropPositionCaptured(RoomPaintDropPositionCapturedEvent eventData)
+        {
+            if (eventData == null)
+            {
+                return;
+            }
+
+            pendingPaintSurfaceDropPosition_ = eventData.DropScreenPosition;
         }
 
         private void OnRoomDataItemApplied(RoomDataItemAppliedEvent eventData)
@@ -231,9 +246,20 @@ namespace Game.Unity.RoomScene
                 }
 
                 logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
-                paintController_?.RefreshPaintSurface(eventData.TargetId);
+                paintController_?.RefreshPaintSurface(eventData.TargetId, pendingPaintSurfaceDropPosition_);
+                pendingPaintSurfaceDropPosition_ = null;
             }
 
+        }
+
+        private void OnRoomDataItemApplyFailed(RoomDataItemApplyFailedEvent eventData)
+        {
+            if (eventData == null || eventData.ItemType != Core.Data.InteractionPointType.PAINT)
+            {
+                return;
+            }
+
+            pendingPaintSurfaceDropPosition_ = null;
         }
 
         private void OnPetDataApplied(PetDataAppliedEvent eventData)
