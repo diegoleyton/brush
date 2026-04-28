@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using Game.Unity.Definitions;
 using Game.Core.Data;
+using Flowbit.Utilities.Unity.AssetLoader;
+using UnityEngine.UI;
+using Zenject;
+using System;
 
 namespace Game.Unity.RoomScene
 {
@@ -85,6 +89,25 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private float postPaintDuration_ = 1f;
 
+        [SerializeField]
+        private RectTransform foodVisualPrefab_;
+
+        [SerializeField]
+        private Transform mouthTarget_;
+
+        [SerializeField]
+        private Vector3 foodFinalScale_ = Vector3.one * 0.4f;
+
+        [SerializeField]
+        private float foodTravelDuration_ = 0.5f;
+
+        [SerializeField]
+        private float foodFadeDuration_ = 0.2f;
+
+        private IAssetLoader assetLoader_;
+        private IAssetLoadHandle<Sprite> pendingFoodSpriteHandle_;
+        private RectTransform activeFoodVisual_;
+
         private bool isHappy_ = false;
 
         private bool isPreparingToEat_ = false;
@@ -95,10 +118,59 @@ namespace Game.Unity.RoomScene
 
         private PetEatStatus petEatState_;
 
+        [Inject]
+        public void Construct(IAssetLoader assetLoader)
+        {
+            assetLoader_ = assetLoader;
+        }
+
+        private void Awake()
+        {
+            if (bodyAnimationController_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(PetView)} requires a body animator reference.");
+            }
+
+            if (mouthAnimationController_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(PetView)} requires a mouth animator reference.");
+            }
+
+            if (foodVisualPrefab_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(PetView)} requires a food visual prefab reference.");
+            }
+
+            if (mouthTarget_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(PetView)} requires a mouth target reference.");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (activeFoodVisual_ != null)
+            {
+                Destroy(activeFoodVisual_.gameObject);
+                activeFoodVisual_ = null;
+            }
+
+            ReleaseFoodHandle();
+        }
+
         /// <summary>
         /// Plays the pet eat presentation.
         /// </summary>
         public void Eat()
+        {
+            Eat(itemId: 0, dropScreenPosition: null);
+        }
+
+        public void Eat(int itemId, Vector2? dropScreenPosition)
         {
             if (isEating_ || isPainting_)
             {
@@ -106,8 +178,7 @@ namespace Game.Unity.RoomScene
             }
 
             isEating_ = true;
-            StartCoroutine(EatCoroutine());
-            SetTrigger(eatTriggerNames_);
+            StartCoroutine(EatCoroutine(itemId, dropScreenPosition));
         }
 
         /// <summary>
@@ -225,9 +296,17 @@ namespace Game.Unity.RoomScene
             }
         }
 
-        private IEnumerator EatCoroutine()
+        private IEnumerator EatCoroutine(int itemId, Vector2? dropScreenPosition)
         {
-            SetTrigger(eatTriggerNames_);
+            if (itemId > 0)
+            {
+                yield return StartCoroutine(PlayFoodVisualAnimation(itemId, dropScreenPosition));
+            }
+            else
+            {
+                SetTrigger(eatTriggerNames_);
+            }
+
             yield return new WaitForSeconds(eatDuration_);
             SetTrigger(postEatTriggerNames_);
             yield return new WaitForSeconds(postEatDuration_);
@@ -243,6 +322,179 @@ namespace Game.Unity.RoomScene
             yield return new WaitForSeconds(postPaintDuration_);
             ExitPaintState();
             PaintAnimationCompleted?.Invoke();
+        }
+
+        private IEnumerator PlayFoodVisualAnimation(int itemId, Vector2? dropScreenPosition)
+        {
+            if (assetLoader_ == null)
+            {
+                yield break;
+            }
+
+            string assetName = AssetNameResolver.GetFoodAssetName(itemId);
+            bool completed = false;
+            Sprite loadedSprite = null;
+
+            ReleaseFoodHandle();
+            pendingFoodSpriteHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
+            {
+                loadedSprite = sprite;
+                completed = true;
+            });
+
+            while (!completed)
+            {
+                yield return null;
+            }
+
+            if (loadedSprite == null)
+            {
+                ReleaseFoodHandle();
+                yield break;
+            }
+
+            Canvas rootCanvas = GetComponentInParent<Canvas>()?.rootCanvas;
+            RectTransform rootCanvasTransform = rootCanvas != null
+                ? rootCanvas.transform as RectTransform
+                : null;
+            RectTransform mouthRectTransform = mouthTarget_ as RectTransform;
+
+            if (rootCanvasTransform == null || mouthRectTransform == null)
+            {
+                ReleaseFoodHandle();
+                yield break;
+            }
+
+            if (activeFoodVisual_ != null)
+            {
+                Destroy(activeFoodVisual_.gameObject);
+                activeFoodVisual_ = null;
+            }
+
+            activeFoodVisual_ = Instantiate(foodVisualPrefab_, rootCanvasTransform, false);
+            activeFoodVisual_.SetAsLastSibling();
+
+            Image foodImage = activeFoodVisual_.GetComponentInChildren<Image>(true);
+            if (foodImage == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(PetView)} food visual prefab requires an Image.");
+            }
+
+            foodImage.sprite = loadedSprite;
+            foodImage.color = Color.white;
+
+            Vector2 startPosition = ResolveFoodStartAnchoredPosition(rootCanvasTransform, rootCanvas, dropScreenPosition);
+            Vector2 targetPosition = ResolveRectTransformAnchoredPosition(rootCanvasTransform, rootCanvas, mouthRectTransform);
+            Vector3 startScale = activeFoodVisual_.localScale;
+
+            float travelDuration = Mathf.Max(0f, foodTravelDuration_);
+            if (travelDuration <= 0f)
+            {
+                activeFoodVisual_.anchoredPosition = targetPosition;
+                activeFoodVisual_.localScale = foodFinalScale_;
+            }
+            else
+            {
+                float elapsed = 0f;
+                while (elapsed < travelDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / travelDuration);
+                    activeFoodVisual_.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, t);
+                    activeFoodVisual_.localScale = Vector3.Lerp(startScale, foodFinalScale_, t);
+                    yield return null;
+                }
+            }
+
+            activeFoodVisual_.anchoredPosition = targetPosition;
+            activeFoodVisual_.localScale = foodFinalScale_;
+
+            float fadeDuration = Mathf.Max(0f, foodFadeDuration_);
+            SetTrigger(eatTriggerNames_);
+
+            if (fadeDuration > 0f)
+            {
+                float elapsed = 0f;
+                Color startColor = foodImage.color;
+                while (elapsed < fadeDuration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / fadeDuration);
+                    Color color = startColor;
+                    color.a = Mathf.Lerp(1f, 0f, t);
+                    foodImage.color = color;
+                    yield return null;
+                }
+            }
+
+            Destroy(activeFoodVisual_.gameObject);
+            activeFoodVisual_ = null;
+            ReleaseFoodHandle();
+        }
+
+        private Vector2 ResolveFoodStartAnchoredPosition(
+            RectTransform rootCanvasTransform,
+            Canvas rootCanvas,
+            Vector2? dropScreenPosition)
+        {
+            if (!dropScreenPosition.HasValue)
+            {
+                return ResolveRectTransformAnchoredPosition(rootCanvasTransform, rootCanvas, rectTransform: transform as RectTransform);
+            }
+
+            Camera eventCamera = rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? rootCanvas.worldCamera
+                : null;
+
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    rootCanvasTransform,
+                    dropScreenPosition.Value,
+                    eventCamera,
+                    out Vector2 localPoint))
+            {
+                return localPoint;
+            }
+
+            return ResolveRectTransformAnchoredPosition(rootCanvasTransform, rootCanvas, rectTransform: transform as RectTransform);
+        }
+
+        private static Vector2 ResolveRectTransformAnchoredPosition(
+            RectTransform rootCanvasTransform,
+            Canvas rootCanvas,
+            RectTransform rectTransform)
+        {
+            if (rootCanvasTransform == null || rootCanvas == null || rectTransform == null)
+            {
+                return Vector2.zero;
+            }
+
+            Camera eventCamera = rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? rootCanvas.worldCamera
+                : null;
+
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(eventCamera, rectTransform.position);
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    rootCanvasTransform,
+                    screenPoint,
+                    eventCamera,
+                    out Vector2 localPoint))
+            {
+                return localPoint;
+            }
+
+            return Vector2.zero;
+        }
+
+        private void ReleaseFoodHandle()
+        {
+            if (pendingFoodSpriteHandle_ == null)
+            {
+                return;
+            }
+
+            pendingFoodSpriteHandle_.Release();
+            pendingFoodSpriteHandle_ = null;
         }
     }
 }

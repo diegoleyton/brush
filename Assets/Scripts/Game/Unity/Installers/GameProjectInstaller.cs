@@ -87,6 +87,9 @@ namespace Game.Unity.Installers
                 .To<AddressablesAssetLoader>()
                 .AsSingle();
 
+            Container.BindInterfacesAndSelfTo<InventoryDropEffectPositionTracker>()
+                .AsSingle();
+
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetEyesSurfaceView>, PetEyesController, PetEyesController.Factory>();
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetHatSurfaceView>, PetHatController, PetHatController.Factory>();
             Container.BindFactory<System.Collections.Generic.IReadOnlyList<PetSkinSurfaceView>, PetSkinController, PetSkinController.Factory>();

@@ -105,6 +105,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectInstaller.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/InventoryDropEffectPositionTracker.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />

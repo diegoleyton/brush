@@ -99,6 +99,10 @@ namespace Game.Unity.RoomScene
                 {
                     ApplyPlaceableItem(data.ItemId);
                 }
+                else if (data.InteractionPointType == InteractionPointType.FOOD)
+                {
+                    ApplyFoodItem(data.ItemId);
+                }
                 else if (data.InteractionPointType == InteractionPointType.PAINT)
                 {
                     ApplyPaintItem(data.Color);
@@ -196,6 +200,18 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            if (data_.InteractionPointType == InteractionPointType.FOOD)
+            {
+                if (image_ != null && image_.sprite != null)
+                {
+                    dragVisualInstance.SetSprite(image_.sprite);
+                    return;
+                }
+
+                dragVisualInstance.ApplyFoodItem(data_.ItemId);
+                return;
+            }
+
             if (data_.InteractionPointType == InteractionPointType.EYES)
             {
                 if (extraImage1_ != null && extraImage1_.sprite != null)
@@ -270,6 +286,45 @@ namespace Game.Unity.RoomScene
             SetImageAlpha(0f);
 
             string assetName = AssetNameResolver.GetPlaceableItemAssetName(itemId);
+            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
+            {
+                if (requestVersion != loadVersion_)
+                {
+                    return;
+                }
+
+                if (sprite == null)
+                {
+                    ShowMainImageFallback();
+                    pendingHandle_ = null;
+                    return;
+                }
+
+                image_.sprite = sprite;
+                image_.enabled = true;
+                SetImageAlpha(1f);
+                ReleaseHandle(ref activeHandle_);
+                activeHandle_ = pendingHandle_;
+                pendingHandle_ = null;
+            });
+        }
+
+        private void ApplyFoodItem(int itemId)
+        {
+            if (assetLoader_ == null || image_ == null)
+            {
+                return;
+            }
+
+            int requestVersion = ++loadVersion_;
+            ReleaseHandle(ref pendingHandle_);
+            image_.color = Color.white;
+            image_.sprite = defaultSprite_;
+            image_.enabled = true;
+            SetImageAlpha(1f);
+            SetExtraImagesAlpha(0f);
+
+            string assetName = AssetNameResolver.GetFoodAssetName(itemId);
             pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
             {
                 if (requestVersion != loadVersion_)

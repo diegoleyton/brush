@@ -3301,6 +3301,13 @@ MonoBehaviour:
   mouthAnimationController_: {fileID: 1783053314}
   eatDuration_: 2
   postEatDuration_: 1
+  paintDuration_: 2
+  postPaintDuration_: 1
+  foodVisualPrefab_: {fileID: 1055747028244619095, guid: 86b77e08a666e4ac7acd3be7c2072576, type: 3}
+  mouthTarget_: {fileID: 1783053311}
+  foodFinalScale_: {x: 0.4, y: 0.4, z: 0.4}
+  foodTravelDuration_: 0.5
+  foodFadeDuration_: 0.2
 --- !u!1 &666553551
 GameObject:
   m_ObjectHideFlags: 0

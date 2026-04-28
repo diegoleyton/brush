@@ -503,7 +503,11 @@ namespace Game.Unity.RoomScene
                     },
                     {
                         (InteractionPointType.FOOD, RoomTargetKind.ROOM),
-                        eventData => dispatcher_.Send(new RoomFoodAppliedEvent(eventData.Data.ItemId))
+                        eventData =>
+                        {
+                            dispatcher_.Send(new PetFoodDropPositionCapturedEvent(eventData.DropScreenPosition));
+                            dispatcher_.Send(new RoomFoodAppliedEvent(eventData.Data.ItemId));
+                        }
                     }
                 };
         }

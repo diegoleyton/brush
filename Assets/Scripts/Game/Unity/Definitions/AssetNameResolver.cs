@@ -6,6 +6,7 @@ namespace Game.Unity.Definitions
     public static class AssetNameResolver
     {
         private const string EYES_ASSET_PREFIX = "eyes_";
+        private const string FOOD_ASSET_PREFIX = "food_";
         private const string PLACEABLE_ITEM_ASSET_PREFIX = "item_";
 
         /// <summary>
@@ -14,6 +15,14 @@ namespace Game.Unity.Definitions
         public static string GetEyeAssetName(int id)
         {
             return EYES_ASSET_PREFIX + id;
+        }
+
+        /// <summary>
+        /// Get the food asset name for an id.
+        /// </summary>
+        public static string GetFoodAssetName(int id)
+        {
+            return FOOD_ASSET_PREFIX + id;
         }
 
         /// <summary>

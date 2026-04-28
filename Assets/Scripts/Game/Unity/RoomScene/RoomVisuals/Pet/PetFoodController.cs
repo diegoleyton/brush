@@ -3,8 +3,8 @@ using Flowbit.Utilities.Core.Events;
 using Game.Core.Data;
 using Game.Core.Events;
 using Game.Core.Services;
+using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
-
 using Zenject;
 
 namespace Game.Unity.RoomScene
@@ -24,17 +24,24 @@ namespace Game.Unity.RoomScene
         private readonly PetView petView_;
         private readonly EventDispatcher dispatcher_;
         private readonly DataRepository repository_;
+        private readonly InventoryDropEffectPositionTracker dropEffectPositionTracker_;
 
         private bool isFoodDragActive_;
         private bool foodDropAccepted_;
         private bool foodDragEnded_;
+        private int foodItemId_;
         private FoodApplyOutcome foodApplyOutcome_;
 
-        public PetFoodController(PetView petView, EventDispatcher dispatcher, DataRepository repository)
+        public PetFoodController(
+            PetView petView,
+            EventDispatcher dispatcher,
+            DataRepository repository,
+            InventoryDropEffectPositionTracker dropEffectPositionTracker)
         {
             petView_ = petView;
             dispatcher_ = dispatcher;
             repository_ = repository;
+            dropEffectPositionTracker_ = dropEffectPositionTracker;
             if (petView_ != null)
             {
                 petView_.EatAnimationCompleted += OnEatAnimationCompleted;
@@ -79,6 +86,7 @@ namespace Game.Unity.RoomScene
             }
 
             foodDropAccepted_ = true;
+            foodItemId_ = eventData.Data.ItemId;
             TryFinalizeFoodInteraction();
         }
 
@@ -137,7 +145,9 @@ namespace Game.Unity.RoomScene
             switch (foodApplyOutcome_)
             {
                 case FoodApplyOutcome.Success:
-                    petView_?.Eat();
+                    petView_?.Eat(
+                        foodItemId_,
+                        dropEffectPositionTracker_?.Consume(InteractionPointType.FOOD, RoomTargetKind.ROOM));
                     ResetFoodState();
                     return;
                 case FoodApplyOutcome.Failed:
@@ -152,6 +162,7 @@ namespace Game.Unity.RoomScene
             isFoodDragActive_ = false;
             foodDropAccepted_ = false;
             foodDragEnded_ = false;
+            foodItemId_ = 0;
             foodApplyOutcome_ = FoodApplyOutcome.None;
         }
 

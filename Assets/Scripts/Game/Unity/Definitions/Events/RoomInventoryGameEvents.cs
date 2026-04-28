@@ -78,6 +78,19 @@ namespace Game.Unity.Definitions.Events
     }
 
     /// <summary>
+    /// Emitted immediately before a pet food request is sent, capturing the latest drop screen position.
+    /// </summary>
+    public sealed class PetFoodDropPositionCapturedEvent : IEvent
+    {
+        public PetFoodDropPositionCapturedEvent(Vector2 dropScreenPosition)
+        {
+            DropScreenPosition = dropScreenPosition;
+        }
+
+        public Vector2 DropScreenPosition { get; }
+    }
+
+    /// <summary>
     /// Emitted when the pet finishes its eat presentation sequence.
     /// </summary>
     public sealed class PetFoodAnimationCompletedEvent : IEvent

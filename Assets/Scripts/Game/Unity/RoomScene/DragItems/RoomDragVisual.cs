@@ -138,6 +138,44 @@ namespace Game.Unity.RoomScene
             });
         }
 
+        public void ApplyFoodItem(int itemId)
+        {
+            if (assetLoader_ == null || image_ == null)
+            {
+                return;
+            }
+
+            int requestVersion = ++loadVersion_;
+            ReleaseHandle(ref pendingHandle_);
+            SetExtraImagesAlpha(0f);
+            image_.sprite = defaultSprite_;
+            image_.enabled = true;
+            image_.color = Color.white;
+            SetImageAlpha(1f);
+
+            string assetName = AssetNameResolver.GetFoodAssetName(itemId);
+            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
+            {
+                if (requestVersion != loadVersion_)
+                {
+                    return;
+                }
+
+                if (sprite == null)
+                {
+                    pendingHandle_ = null;
+                    return;
+                }
+
+                image_.sprite = sprite;
+                image_.enabled = true;
+                SetImageAlpha(1f);
+                ReleaseHandle(ref activeHandle_);
+                activeHandle_ = pendingHandle_;
+                pendingHandle_ = null;
+            });
+        }
+
         public void ApplyEyes(int itemId)
         {
             if (assetLoader_ == null)

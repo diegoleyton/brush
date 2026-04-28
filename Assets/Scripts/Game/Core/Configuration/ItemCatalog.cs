@@ -14,7 +14,7 @@ namespace Game.Core.Configuration
             {
                 { InteractionPointType.DRESS, new ItemCategoryConfig(20, 1, 2) },
                 { InteractionPointType.EYES, new ItemCategoryConfig(4, 1, 2) },
-                { InteractionPointType.FOOD, new ItemCategoryConfig(100, 0, 2) },
+                { InteractionPointType.FOOD, new ItemCategoryConfig(16, 0, 2) },
                 { InteractionPointType.HAT, new ItemCategoryConfig(20, 1, 2) },
                 { InteractionPointType.PAINT, new ItemCategoryConfig(31, 3, 2) },
                 { InteractionPointType.PLACEABLE_OBJECT, new ItemCategoryConfig(107, 0, 1) },
