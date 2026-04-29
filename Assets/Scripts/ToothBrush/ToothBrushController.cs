@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.UI;
-
 using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;
@@ -62,6 +61,8 @@ public class ToothbrushingScene : SceneBase
     [SerializeField] private Sprite brushBack;
     [SerializeField] private Sprite brushBack2;
     [SerializeField] private LoopMovement brushAnim_;
+
+    [SerializeField] private Image[] brushImages_;
 
     [Header("Animation Settings")]
     [SerializeField] private float moveDuration = 0.5f;
@@ -148,6 +149,14 @@ public class ToothbrushingScene : SceneBase
             SetPetColor(skinColor);
         }
 
+        int brushPaintItemId = dataRepository_ != null
+            ? dataRepository_.GetRoomSurfacePaintId(RoomSurfaceIds.Toothbrush)
+            : DefaultProfileState.NoPaintItemId;
+        Color brushColor = brushPaintItemId > DefaultProfileState.NoPaintItemId
+            ? RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, brushPaintItemId)
+            : DefaultProfileState.DefaultRoomSurfaceColor;
+        SetBrushColor(brushColor);
+
         Play();
     }
 
@@ -187,6 +196,25 @@ public class ToothbrushingScene : SceneBase
         }
 
         petImage_.color = color;
+    }
+
+    private void SetBrushColor(Color color)
+    {
+        if (brushImages_ == null)
+        {
+            return;
+        }
+
+        for (int index = 0; index < brushImages_.Length; index++)
+        {
+            Image brushGraphic = brushImages_[index];
+            if (brushGraphic == null)
+            {
+                continue;
+            }
+
+            brushGraphic.color = color;
+        }
     }
 
     private IEnumerator BrushAll()

@@ -6,6 +6,7 @@ using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.Storage;
+using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
@@ -111,7 +112,9 @@ namespace Game.Unity.Installers
         /// <summary>
         /// Creates the base navigation service.
         /// </summary>
-        public INavigationService CreateNavigationService(EventDispatcher dispatcher)
+        public INavigationService CreateNavigationService(
+            EventDispatcher dispatcher,
+            IObjectInstantiator prefabInstantiator)
         {
             GameSceneTransitionBase sceneTransitionNext =
                 CreatePersistentPrefab(sceneSettings_.TransitionNext);
@@ -133,7 +136,8 @@ namespace Game.Unity.Installers
                 sceneTransitionPrev,
                 popupTransitionOpen,
                 popupTransitionClose,
-                dispatcher);
+                dispatcher,
+                prefabInstantiator);
         }
 
         /// <summary>

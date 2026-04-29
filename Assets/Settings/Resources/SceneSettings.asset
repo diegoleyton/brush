@@ -21,6 +21,10 @@ MonoBehaviour:
     SceneName: BrushScene
     TargetType: 0
     Prefab: {fileID: 0}
+  - SceneType: 2
+    SceneName: ConfirmPopup
+    TargetType: 1
+    Prefab: {fileID: 5699784235750688586, guid: e3f1616d29e5642fd8b2dda926fa0061, type: 3}
   <TransitionNext>k__BackingField: {fileID: 0}
   <TransitionPrev>k__BackingField: {fileID: 0}
   <PopupTransitionOpen>k__BackingField: {fileID: 0}

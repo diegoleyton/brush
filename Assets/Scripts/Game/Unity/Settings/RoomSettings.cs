@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 
+using Flowbit.Utilities.Unity.UI;
+using Game.Unity.RoomScene;
+
 using UnityEngine;
 
 namespace Game.Unity.Settings
@@ -31,6 +34,9 @@ namespace Game.Unity.Settings
         private RectTransform paintSurfaceEffectPrefab_;
 
         [SerializeField]
+        private RoomDropVisual roomDropAreaVisibility_;
+
+        [SerializeField]
         [Min(0f)]
         private float paintSurfaceColorTransitionDuration_ = 0.25f;
 
@@ -51,6 +57,7 @@ namespace Game.Unity.Settings
         public Sprite PaintItemSprite => paintItemSprite_;
         public Sprite SkinItemSprite => skinItemSprite_;
         public RectTransform PaintSurfaceEffectPrefab => paintSurfaceEffectPrefab_;
+        public RoomDropVisual RoomDropAreaVisibility => roomDropAreaVisibility_;
         public float PaintSurfaceColorTransitionDuration => paintSurfaceColorTransitionDuration_;
         public float PaintSurfaceEffectLifetimeSeconds => paintSurfaceEffectLifetimeSeconds_;
 

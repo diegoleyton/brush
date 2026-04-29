@@ -151,7 +151,10 @@ namespace Game.Unity.Installers
         private void BindNavigation(GameProjectComposition composition)
         {
             Container.Bind<INavigationService>()
-                .FromMethod(ctx => composition.CreateNavigationService(ctx.Container.Resolve<EventDispatcher>()))
+                .FromMethod(ctx =>
+                    composition.CreateNavigationService(
+                        ctx.Container.Resolve<EventDispatcher>(),
+                        ctx.Container.ResolveId<IObjectInstantiator>(InstantiatorIds.Dependency)))
                 .AsSingle();
 
             Container.Bind<IGameNavigationService>()

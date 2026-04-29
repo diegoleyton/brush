@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Unity.Instantiator;
 
 namespace Flowbit.Utilities.Navigation
 {
@@ -20,6 +21,7 @@ namespace Flowbit.Utilities.Navigation
         private readonly INavigationTransitionStrategy popupOpenTransitionStrategy_;
         private readonly INavigationTransitionStrategy popupCloseTransitionStrategy_;
         private readonly EventDispatcher eventDispatcher_;
+        private readonly IObjectInstantiator prefabInstantiator_;
         private readonly Stack<NavigationHistoryEntry> sceneHistory_;
         private readonly Dictionary<string, ResolvedNavigationNode> openedPrefabs_;
         private readonly Dictionary<string, GameObject> openedPrefabInstances_;
@@ -38,7 +40,8 @@ namespace Flowbit.Utilities.Navigation
             INavigationTransitionStrategy backTransitionStrategy,
             INavigationTransitionStrategy popupOpenTransitionStrategy,
             INavigationTransitionStrategy popupCloseTransitionStrategy,
-            EventDispatcher eventDispatcher)
+            EventDispatcher eventDispatcher,
+            IObjectInstantiator prefabInstantiator = null)
         {
             prefabMap_ = prefabMap ?? throw new ArgumentNullException(nameof(prefabMap));
             prefabParent_ = prefabParent;
@@ -48,6 +51,7 @@ namespace Flowbit.Utilities.Navigation
             popupOpenTransitionStrategy_ = popupOpenTransitionStrategy;
             popupCloseTransitionStrategy_ = popupCloseTransitionStrategy;
             eventDispatcher_ = eventDispatcher ?? throw new ArgumentNullException(nameof(eventDispatcher));
+            prefabInstantiator_ = prefabInstantiator;
 
             sceneHistory_ = new Stack<NavigationHistoryEntry>();
             openedPrefabs_ = new Dictionary<string, ResolvedNavigationNode>();
@@ -380,7 +384,9 @@ namespace Flowbit.Utilities.Navigation
                     $"No prefab was registered for navigation target '{target.Id}'.");
             }
 
-            GameObject instance = UnityEngine.Object.Instantiate(prefab, prefabParent_);
+            GameObject instance = prefabInstantiator_ != null
+                ? prefabInstantiator_.InstantiatePrefab(prefab, prefabParent_)
+                : UnityEngine.Object.Instantiate(prefab, prefabParent_);
 
             if (!instance.TryGetComponent(out INavigationNode node))
             {

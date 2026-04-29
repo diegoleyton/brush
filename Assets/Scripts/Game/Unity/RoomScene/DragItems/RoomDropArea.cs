@@ -1,13 +1,16 @@
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.DragAndDrop;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;
 using Game.Core.Data;
+using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 using Game.Unity.Settings;
 
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Game.Unity.RoomScene
@@ -19,6 +22,7 @@ namespace Game.Unity.RoomScene
     public sealed class RoomDropArea : UIDropTarget
     {
         private EventDispatcher dispatcher_;
+        private DataRepository repository_;
         private RoomSettings roomSettings_;
 
         [SerializeField]
@@ -33,10 +37,13 @@ namespace Game.Unity.RoomScene
         private int parentTargetId_ = -1;
 
         [SerializeField]
-        private GameObject visibilityRoot_;
+        private bool useVisibility_;
+
+        private RoomDropVisual visibilityController_;
 
         private bool dropEnabled_ = true;
         private bool interactionVisible_;
+        private bool isPointerOver_;
         private bool subscribed_;
 
         public InteractionPointType SupportedInventoryType => supportedInventoryType_;
@@ -45,9 +52,10 @@ namespace Game.Unity.RoomScene
         public int ParentTargetId => parentTargetId_;
 
         [Inject]
-        public void Construct(EventDispatcher dispatcher, RoomSettings roomSettings)
+        public void Construct(EventDispatcher dispatcher, DataRepository repository, RoomSettings roomSettings)
         {
             dispatcher_ = dispatcher;
+            repository_ = repository;
             roomSettings_ = roomSettings;
         }
 
@@ -58,6 +66,7 @@ namespace Game.Unity.RoomScene
                 resetAnchoredPositionOnDrop: true,
                 positionDroppedItemAtPointer: false);
 
+            CreateVisibilityControllerIfNeeded();
             SubscribeToDispatcher();
             interactionVisible_ = false;
             UpdateVisibility();
@@ -71,6 +80,26 @@ namespace Game.Unity.RoomScene
         public override bool CanAccept(UIDraggable draggable)
         {
             return interactionVisible_ && dropEnabled_ && HasValidTargetConfiguration() && base.CanAccept(draggable);
+        }
+
+        public override void OnDragHoverEntered(UIDraggable draggable)
+        {
+            isPointerOver_ = true;
+
+            if (CanShowVisibilityFeedback())
+            {
+                visibilityController_?.Highlight(true);
+            }
+        }
+
+        public override void OnDragHoverExited(UIDraggable draggable)
+        {
+            isPointerOver_ = false;
+
+            if (CanShowVisibilityFeedback())
+            {
+                visibilityController_?.Highlight(false);
+            }
         }
 
         public void SetTargetIds(int targetId, int parentTargetId = -1)
@@ -141,26 +170,169 @@ namespace Game.Unity.RoomScene
                 return false;
             }
 
-            if (supportedInventoryType_ != InteractionPointType.PLACEABLE_OBJECT ||
-                roomTargetKind_ != RoomTargetKind.PLACEABLE_OBJECT)
+            if (!CanApplyDraggedItem(data))
+            {
+                return false;
+            }
+
+            if (supportedInventoryType_ == InteractionPointType.PLACEABLE_OBJECT &&
+                roomTargetKind_ == RoomTargetKind.PLACEABLE_OBJECT)
+            {
+                return roomSettings_ == null || !roomSettings_.SupportsChildPlaceables(data.ItemId);
+            }
+
+            return true;
+        }
+
+        private bool CanApplyDraggedItem(RoomInventoryItemData data)
+        {
+            if (repository_ == null)
             {
                 return true;
             }
 
-            return roomSettings_ == null || !roomSettings_.SupportsChildPlaceables(data.ItemId);
+            switch (supportedInventoryType_)
+            {
+                case InteractionPointType.PLACEABLE_OBJECT:
+                    return CanApplyPlaceableObject(data.ItemId);
+                case InteractionPointType.PAINT:
+                    return CanApplyPaint(data.ItemId);
+                case InteractionPointType.EYES:
+                case InteractionPointType.SKIN:
+                case InteractionPointType.HAT:
+                case InteractionPointType.DRESS:
+                    return repository_.GetAppliedPetItemId(supportedInventoryType_) != data.ItemId;
+                case InteractionPointType.FOOD:
+                    return repository_.CanPetEat == PetEatStatus.OK;
+                default:
+                    return true;
+            }
+        }
+
+        private bool CanApplyPlaceableObject(int itemId)
+        {
+            switch (roomTargetKind_)
+            {
+                case RoomTargetKind.ROOM:
+                    return !repository_.RoomHasObject(targetId_, itemId);
+                case RoomTargetKind.PLACEABLE_OBJECT:
+                    return !repository_.RoomChildSlotContainsObject(parentTargetId_, targetId_, itemId);
+                default:
+                    return true;
+            }
+        }
+
+        private bool CanApplyPaint(int itemId)
+        {
+            switch (roomTargetKind_)
+            {
+                case RoomTargetKind.ROOM:
+                    return !repository_.RoomSurfaceHasPaint(targetId_, itemId);
+                case RoomTargetKind.PLACEABLE_OBJECT:
+                    if (parentTargetId_ < 0)
+                    {
+                        return !repository_.RoomObjectHasPaint(targetId_, itemId);
+                    }
+
+                    return !repository_.RoomChildSlotHasPaint(parentTargetId_, targetId_, itemId);
+                default:
+                    return true;
+            }
         }
 
         private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent _)
         {
             interactionVisible_ = false;
+            isPointerOver_ = false;
             UpdateVisibility();
         }
 
         private void UpdateVisibility()
         {
-            if (visibilityRoot_ != null)
+            if (visibilityController_ == null)
             {
-                visibilityRoot_.SetActive(interactionVisible_ && dropEnabled_ && HasValidTargetConfiguration());
+                return;
+            }
+
+            bool shouldShow = CanShowVisibilityFeedback();
+            visibilityController_?.gameObject.SetActive(shouldShow);
+
+            if (!shouldShow)
+            {
+                return;
+            }
+
+            visibilityController_?.Highlight(isPointerOver_);
+        }
+
+        private bool CanShowVisibilityFeedback()
+        {
+            return interactionVisible_ && dropEnabled_ && HasValidTargetConfiguration();
+        }
+
+        private void CreateVisibilityControllerIfNeeded()
+        {
+            if (!useVisibility_)
+            {
+                return;
+            }
+
+            if (roomSettings_ == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"{nameof(RoomDropArea)} requires a {nameof(RoomSettings)} binding.");
+            }
+
+            if (roomSettings_.RoomDropAreaVisibility == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"{nameof(RoomSettings)} requires a {nameof(RoomSettings.RoomDropAreaVisibility)} prefab reference.");
+            }
+
+            visibilityController_ = Instantiate(roomSettings_.RoomDropAreaVisibility, transform, false);
+
+            RectTransform visibilityRectTransform = visibilityController_.transform as RectTransform;
+            if (visibilityRectTransform == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"{nameof(RoomDropArea)} visibility prefab must use a {nameof(RectTransform)}.");
+            }
+
+            visibilityRectTransform.anchorMin = Vector2.zero;
+            visibilityRectTransform.anchorMax = Vector2.one;
+            visibilityRectTransform.offsetMin = Vector2.zero;
+            visibilityRectTransform.offsetMax = Vector2.zero;
+            visibilityRectTransform.anchoredPosition = Vector2.zero;
+            visibilityRectTransform.localScale = Vector3.one;
+            visibilityRectTransform.SetAsLastSibling();
+            DisableVisibilityRaycasts(visibilityController_.gameObject);
+            visibilityController_.Highlight(false);
+            visibilityController_.gameObject.SetActive(false);
+        }
+
+        private static void DisableVisibilityRaycasts(GameObject visibilityObject)
+        {
+            if (visibilityObject == null)
+            {
+                return;
+            }
+
+            CanvasGroup canvasGroup = visibilityObject.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = visibilityObject.AddComponent<CanvasGroup>();
+            }
+
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
+
+            Graphic[] graphics = visibilityObject.GetComponentsInChildren<Graphic>(true);
+            for (int index = 0; index < graphics.Length; index++)
+            {
+                if (graphics[index] != null)
+                {
+                    graphics[index].raycastTarget = false;
+                }
             }
         }
 

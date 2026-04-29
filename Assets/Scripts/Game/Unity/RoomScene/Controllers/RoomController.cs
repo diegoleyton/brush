@@ -117,7 +117,11 @@ namespace Game.Unity.RoomScene
                     $"{nameof(RoomController)} requires a {nameof(IGameNavigationService)} dependency.");
             }
 
-            navigationService_.Navigate(SceneType.BrushScene);
+            navigationService_.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(() =>
+            {
+                Debug.LogWarning("WIIIIIIIII");
+                navigationService_.Navigate(SceneType.BrushScene);
+            }, null));
         }
 
         private void ValidateSceneReferences()

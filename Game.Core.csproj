@@ -82,6 +82,7 @@
     <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/DefaultProfileState.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/PersistentGameDataService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/RoomSurfaceIds.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/AppEvents.cs" />
   </ItemGroup>
   <ItemGroup>

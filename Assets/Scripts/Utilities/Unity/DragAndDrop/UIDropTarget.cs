@@ -42,16 +42,24 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             return draggable != null && isActiveAndEnabled;
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        public virtual void OnPointerEnter(PointerEventData eventData)
         {
             UIDraggable draggable = ResolveDraggable(eventData);
             draggable?.NotifyHoverEntered(this);
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public virtual void OnPointerExit(PointerEventData eventData)
         {
             UIDraggable draggable = ResolveDraggable(eventData);
             draggable?.NotifyHoverExited(this);
+        }
+
+        public virtual void OnDragHoverEntered(UIDraggable draggable)
+        {
+        }
+
+        public virtual void OnDragHoverExited(UIDraggable draggable)
+        {
         }
 
         public void OnDrop(PointerEventData eventData)

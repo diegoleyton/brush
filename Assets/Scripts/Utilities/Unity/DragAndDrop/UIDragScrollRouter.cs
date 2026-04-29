@@ -56,6 +56,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private Vector2 lastPointerPosition_;
         private Camera pressEventCamera_;
         private UIDropTarget hoveredDropTarget_;
+        private IUIDragCancelArea hoveredCancelArea_;
 
         public bool IsRoutingEnabled => isActiveAndEnabled;
 
@@ -193,12 +194,14 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void Update()
         {
+            UpdatePointerPositionFromMouse();
+
             if (!holdDragActivated_ && ShouldStartHoldDrag())
             {
                 BeginHoldDrag();
             }
 
-            if (!holdDragActivated_ || activeRoute_ != GestureRoute.Draggable || draggable_ == null)
+            if (activeRoute_ != GestureRoute.Draggable || draggable_ == null || !draggable_.IsDragging)
             {
                 return;
             }
@@ -206,6 +209,13 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             PointerEventData eventData = CreatePointerEventData();
             draggable_.DragFromRouter(eventData);
             UpdateHoveredDropTarget(eventData);
+
+            if (!Input.GetMouseButton(0))
+            {
+                FinalizeDraggableRoute(eventData);
+                activeRoute_ = GestureRoute.None;
+                ResetPointerState();
+            }
         }
 
         private GestureRoute ResolveRoute(PointerEventData eventData)
@@ -335,6 +345,22 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         private void UpdateHoveredDropTarget(PointerEventData eventData)
         {
+            IUIDragCancelArea cancelArea = FindCancelArea(eventData);
+            if (!ReferenceEquals(cancelArea, hoveredCancelArea_))
+            {
+                if (hoveredCancelArea_ != null)
+                {
+                    hoveredCancelArea_.OnDragHoverExited(draggable_);
+                }
+
+                hoveredCancelArea_ = cancelArea;
+
+                if (hoveredCancelArea_ != null)
+                {
+                    hoveredCancelArea_.OnDragHoverEntered(draggable_);
+                }
+            }
+
             UIDropTarget dropTarget = FindDropTarget(eventData);
             if (dropTarget == hoveredDropTarget_)
             {
@@ -344,6 +370,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             if (hoveredDropTarget_ != null)
             {
                 draggable_?.NotifyHoverExited(hoveredDropTarget_);
+                hoveredDropTarget_.OnDragHoverExited(draggable_);
             }
 
             hoveredDropTarget_ = dropTarget;
@@ -351,6 +378,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             if (hoveredDropTarget_ != null)
             {
                 draggable_?.NotifyHoverEntered(hoveredDropTarget_);
+                hoveredDropTarget_.OnDragHoverEntered(draggable_);
             }
         }
 
@@ -366,6 +394,13 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
             for (int index = 0; index < raycastResults.Count; index++)
             {
+                IUIDragCancelArea cancelArea =
+                    raycastResults[index].gameObject.GetComponentInParent<IUIDragCancelArea>();
+                if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
+                {
+                    return null;
+                }
+
                 UIDropTarget dropTarget =
                     raycastResults[index].gameObject.GetComponentInParent<UIDropTarget>();
                 if (dropTarget != null)
@@ -374,6 +409,29 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                     {
                         return dropTarget;
                     }
+                }
+            }
+
+            return null;
+        }
+
+        private IUIDragCancelArea FindCancelArea(PointerEventData eventData)
+        {
+            if (EventSystem.current == null)
+            {
+                return null;
+            }
+
+            List<RaycastResult> raycastResults = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, raycastResults);
+
+            for (int index = 0; index < raycastResults.Count; index++)
+            {
+                IUIDragCancelArea cancelArea =
+                    raycastResults[index].gameObject.GetComponentInParent<IUIDragCancelArea>();
+                if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
+                {
+                    return cancelArea;
                 }
             }
 
@@ -398,8 +456,34 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             return eventData;
         }
 
+        private void UpdatePointerPositionFromMouse()
+        {
+            if (!Input.mousePresent)
+            {
+                return;
+            }
+
+            if (!isPointerDown_ && activeRoute_ != GestureRoute.Draggable)
+            {
+                return;
+            }
+
+            lastPointerPosition_ = Input.mousePosition;
+        }
+
         private void ResetPointerState()
         {
+            if (hoveredDropTarget_ != null)
+            {
+                draggable_?.NotifyHoverExited(hoveredDropTarget_);
+                hoveredDropTarget_.OnDragHoverExited(draggable_);
+            }
+
+            if (hoveredCancelArea_ != null)
+            {
+                hoveredCancelArea_.OnDragHoverExited(draggable_);
+            }
+
             isPointerDown_ = false;
             holdDragActivated_ = false;
             pointerDownTime_ = 0f;
@@ -407,6 +491,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             lastPointerPosition_ = Vector2.zero;
             pressEventCamera_ = null;
             hoveredDropTarget_ = null;
+            hoveredCancelArea_ = null;
         }
     }
 }

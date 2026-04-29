@@ -22,6 +22,7 @@ namespace Game.Unity.RoomScene
         private RectTransform rectTransform_;
         private Coroutine rotationCoroutine_;
         private bool subscribed_;
+        private float targetZRotation_ = ClosedZRotation;
 
         [SerializeField]
         [Min(0f)]
@@ -36,8 +37,13 @@ namespace Game.Unity.RoomScene
         private void Awake()
         {
             rectTransform_ = GetComponent<RectTransform>();
-            SetRotationImmediate(ClosedZRotation);
+            SetRotationImmediate(targetZRotation_);
             SubscribeToDispatcher();
+        }
+
+        private void OnEnable()
+        {
+            SetRotationImmediate(targetZRotation_);
         }
 
         private void OnDestroy()
@@ -57,8 +63,17 @@ namespace Game.Unity.RoomScene
 
         private void AnimateTo(float targetZRotation)
         {
+            targetZRotation_ = targetZRotation;
+
             if (rectTransform_ == null)
             {
+                return;
+            }
+
+            if (!isActiveAndEnabled)
+            {
+                SetRotationImmediate(targetZRotation_);
+                rotationCoroutine_ = null;
                 return;
             }
 
@@ -69,12 +84,12 @@ namespace Game.Unity.RoomScene
 
             if (rotationDurationSeconds_ <= 0f)
             {
-                SetRotationImmediate(targetZRotation);
+                SetRotationImmediate(targetZRotation_);
                 rotationCoroutine_ = null;
                 return;
             }
 
-            rotationCoroutine_ = StartCoroutine(AnimateRotation(targetZRotation));
+            rotationCoroutine_ = StartCoroutine(AnimateRotation(targetZRotation_));
         }
 
         private IEnumerator AnimateRotation(float targetZRotation)

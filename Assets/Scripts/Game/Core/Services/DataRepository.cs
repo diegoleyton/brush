@@ -252,6 +252,46 @@ namespace Game.Core.Services
             return surface != null && surface.PaintId == paintItemId;
         }
 
+        public bool RoomObjectHasPaint(int locationId, int paintItemId)
+        {
+            PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
+            return roomObject != null && roomObject.PaintId == paintItemId;
+        }
+
+        public bool RoomChildSlotHasPaint(int locationId, int slotId, int paintItemId)
+        {
+            PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
+            return slot?.Item != null && slot.Item.PaintId == paintItemId;
+        }
+
+        public int GetRoomSurfacePaintId(int surfaceId)
+        {
+            RoomPaintSurfaceState surface = FindRoomSurface(surfaceId);
+            return surface?.PaintId ?? DefaultProfileState.NoPaintItemId;
+        }
+
+        public int GetAppliedPetItemId(InteractionPointType interactionPointType)
+        {
+            if (CurrentProfile?.PetData == null)
+            {
+                return 0;
+            }
+
+            switch (interactionPointType)
+            {
+                case InteractionPointType.EYES:
+                    return CurrentProfile.PetData.EyesItemId;
+                case InteractionPointType.SKIN:
+                    return CurrentProfile.PetData.SkinItemId;
+                case InteractionPointType.HAT:
+                    return CurrentProfile.PetData.HatItemId;
+                case InteractionPointType.DRESS:
+                    return CurrentProfile.PetData.DressItemId;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(interactionPointType), interactionPointType, null);
+            }
+        }
+
         public void PetEat()
         {
             if ((Now - CurrentProfile.PetData.lastEatTime) > GameRules.EatLimitWindowSeconds)

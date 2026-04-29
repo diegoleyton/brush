@@ -8,7 +8,8 @@ namespace Game.Unity.Definitions
     public enum SceneType
     {
         RoomScene,
-        BrushScene
+        BrushScene,
+        ConfirmPopup
     }
 
     public static class SceneTypeExtension
@@ -16,7 +17,8 @@ namespace Game.Unity.Definitions
         private static Dictionary<SceneType, string> typeToId_ = new()
         {
             {SceneType.RoomScene, "RoomScene"},
-            {SceneType.BrushScene, "BrushScene"}
+            {SceneType.BrushScene, "BrushScene"},
+            {SceneType.ConfirmPopup, "ConfirmPopup"}
         };
 
         public static string GeTInstruction(this SceneType sceneType)
