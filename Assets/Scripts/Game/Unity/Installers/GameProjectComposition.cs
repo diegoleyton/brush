@@ -13,7 +13,6 @@ using Game.Core.DataController;
 using Game.Core.Services;
 using Game.Unity.Audio;
 using Game.Unity.Scenes;
-using Game.Unity.Scenes.Transitions;
 using Game.Core.Data;
 
 using UnityEngine;

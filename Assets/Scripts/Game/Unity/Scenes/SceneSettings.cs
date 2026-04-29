@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Flowbit.Utilities.Navigation;
 using Game.Unity.Definitions;
-using Game.Unity.Scenes.Transitions;
 using UnityEngine;
 
 namespace Game.Unity.Scenes

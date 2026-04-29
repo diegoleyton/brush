@@ -2,7 +2,7 @@ using System.Collections;
 using Flowbit.Utilities.Navigation;
 using UnityEngine;
 
-namespace Game.Unity.Scenes.Transitions
+namespace Game.Unity.Scenes
 {
     /// <summary>
     /// Base class for game navigation transitions.

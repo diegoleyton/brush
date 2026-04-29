@@ -610,6 +610,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneType_: 2
+  <Root>k__BackingField: {fileID: 6203258851444996488}
+  <Canvas>k__BackingField: {fileID: 7024784282280638375}
 --- !u!1 &6657775532725376399
 GameObject:
   m_ObjectHideFlags: 0

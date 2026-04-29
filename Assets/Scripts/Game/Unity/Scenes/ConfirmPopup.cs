@@ -31,7 +31,6 @@ namespace Game.Unity.Scenes
 
             if (TryGetConfirmPopupParams(out ConfirmPopupParams popupParams))
             {
-                Debug.LogWarning("WAAAAAAAAA1 : TryGetConfirmPopupParams");
                 onAccept_ = popupParams.OnAccept;
                 onCancel_ = popupParams.OnCancel;
             }
@@ -39,29 +38,25 @@ namespace Game.Unity.Scenes
 
         public void Accept()
         {
-            Debug.LogWarning("WAAAAAAAAA2 : Accept");
             Resolve(true);
         }
 
         public void Cancel()
         {
-            Debug.LogWarning("WAAAAAAAAA3 : Cancel");
             Resolve(false);
         }
 
         private void Resolve(bool accepted)
         {
-            Debug.LogWarning("WAAAAAAAAA4 : Resolve 1");
             if (resolved_)
             {
                 return;
             }
 
-            Debug.LogWarning($"WAAAAAAAAA4 : Resolve 2: {(onAccept_ != null)}, {(onCancel_ != null)}");
             resolved_ = true;
             Action callback = accepted ? onAccept_ : onCancel_;
-            Close();
             callback?.Invoke();
+            Close();
         }
 
         private bool TryGetConfirmPopupParams(out ConfirmPopupParams popupParams)

@@ -25,8 +25,8 @@ MonoBehaviour:
     SceneName: ConfirmPopup
     TargetType: 1
     Prefab: {fileID: 5699784235750688586, guid: e3f1616d29e5642fd8b2dda926fa0061, type: 3}
-  <TransitionNext>k__BackingField: {fileID: 0}
-  <TransitionPrev>k__BackingField: {fileID: 0}
-  <PopupTransitionOpen>k__BackingField: {fileID: 0}
-  <PopupTransitionClose>k__BackingField: {fileID: 0}
+  <TransitionNext>k__BackingField: {fileID: 8873921252752505752, guid: 2fdcc266e14be49caa427ba278f7f8f6, type: 3}
+  <TransitionPrev>k__BackingField: {fileID: 8380803026297557488, guid: 91a36af228fc64c389b6805989376f10, type: 3}
+  <PopupTransitionOpen>k__BackingField: {fileID: 5875002038121400883, guid: 8830391a1fcd44d338427b765178364d, type: 3}
+  <PopupTransitionClose>k__BackingField: {fileID: 4692385658913340313, guid: 41b9c6865e0724606ab5da7880253578, type: 3}
   <ScreenBlockerImage>k__BackingField: {fileID: 5116018908037045819, guid: b9ce9dcf4314542e7b64909e454fcd76, type: 3}

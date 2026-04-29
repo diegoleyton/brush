@@ -78,7 +78,6 @@ public class ToothbrushingScene : SceneBase
 
     [Header("Background")]
     [SerializeField] private Image petImage_;
-    [SerializeField] private GameObject pausePopup_;
 
     private RectTransform brushImageTransform;
     private float brushImageStartY;
@@ -109,13 +108,12 @@ public class ToothbrushingScene : SceneBase
 
     public void Pause()
     {
-        pausePopup_.SetActive(true);
+        NavigationService.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(NavigationService.Back, Play));
         PauseInt(PauseType.PAUSE_MENU);
     }
 
     public void Play()
     {
-        pausePopup_.SetActive(false);
         Continue(PauseType.PAUSE_MENU);
 
         if (started_)
@@ -139,7 +137,6 @@ public class ToothbrushingScene : SceneBase
     protected override void Initialize()
     {
         brushAnim_.Pause();
-        pausePopup_.SetActive(false);
         started_ = false;
 
         if (dataRepository_?.CurrentProfile?.PetData != null)
@@ -417,8 +414,7 @@ public class ToothbrushingScene : SceneBase
             brushAnim_ == null ||
             leftTransitionTransform_ == null ||
             rightTransitionTransform_ == null ||
-            petImage_ == null ||
-            pausePopup_ == null)
+            petImage_ == null)
         {
             throw new InvalidOperationException(
                 $"{nameof(ToothbrushingScene)} is missing one or more required serialized references.");

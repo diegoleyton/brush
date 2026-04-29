@@ -119,7 +119,6 @@ namespace Game.Unity.RoomScene
 
             navigationService_.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(() =>
             {
-                Debug.LogWarning("WIIIIIIIII");
                 navigationService_.Navigate(SceneType.BrushScene);
             }, null));
         }
