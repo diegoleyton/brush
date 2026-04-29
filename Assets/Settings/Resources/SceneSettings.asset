@@ -17,6 +17,10 @@ MonoBehaviour:
     SceneName: RoomScene
     TargetType: 0
     Prefab: {fileID: 0}
+  - SceneType: 1
+    SceneName: BrushScene
+    TargetType: 0
+    Prefab: {fileID: 0}
   <TransitionNext>k__BackingField: {fileID: 0}
   <TransitionPrev>k__BackingField: {fileID: 0}
   <PopupTransitionOpen>k__BackingField: {fileID: 0}

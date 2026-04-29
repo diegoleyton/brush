@@ -78,7 +78,6 @@
     <Compile Include="Assets/Scripts/Game/Core/Data/Data.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/MarketCatalog.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Economy.cs" />
-    <Compile Include="Assets/Scripts/Game/Core/Configuration/MetaDataUtils.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Definitions.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/DefaultProfileState.cs" />

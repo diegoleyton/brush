@@ -10,6 +10,7 @@ using Game.Core.Events;
 using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
+using Game.Unity.Scenes;
 
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -29,6 +30,7 @@ namespace Game.Unity.RoomScene
         private EventDispatcher dispatcher_;
         private RoomInventorySelectionState selectionState_;
         private IGameLogger logger_;
+        private IGameNavigationService navigationService_;
 
         private bool dispatcherSubscribed_;
         private bool initialized_;
@@ -52,12 +54,14 @@ namespace Game.Unity.RoomScene
             DataRepository repository,
             EventDispatcher dispatcher,
             RoomInventorySelectionState selectionState,
-            IGameLogger logger)
+            IGameLogger logger,
+            IGameNavigationService navigationService)
         {
             repository_ = repository;
             dispatcher_ = dispatcher;
             selectionState_ = selectionState;
             logger_ = logger;
+            navigationService_ = navigationService;
         }
 
         private void Awake()
@@ -103,6 +107,17 @@ namespace Game.Unity.RoomScene
             RefreshInventoryList();
             RefreshDropAreas();
             initialized_ = true;
+        }
+
+        public void GoToBrushScene()
+        {
+            if (navigationService_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(IGameNavigationService)} dependency.");
+            }
+
+            navigationService_.Navigate(SceneType.BrushScene);
         }
 
         private void ValidateSceneReferences()

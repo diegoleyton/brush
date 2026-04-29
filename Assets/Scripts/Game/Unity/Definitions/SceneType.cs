@@ -7,14 +7,16 @@ namespace Game.Unity.Definitions
     /// </summary>
     public enum SceneType
     {
-        RoomScene
+        RoomScene,
+        BrushScene
     }
 
     public static class SceneTypeExtension
     {
         private static Dictionary<SceneType, string> typeToId_ = new()
         {
-            {SceneType.RoomScene, "RoomScene"}
+            {SceneType.RoomScene, "RoomScene"},
+            {SceneType.BrushScene, "BrushScene"}
         };
 
         public static string GeTInstruction(this SceneType sceneType)
