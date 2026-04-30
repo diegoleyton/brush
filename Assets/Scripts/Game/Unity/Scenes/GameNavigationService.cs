@@ -54,20 +54,17 @@ namespace Game.Unity.Scenes
             SceneType sceneType,
             NavigationParams navigationParams = null)
         {
-            var target = sceneSettings_.GetTarget(sceneType);
-            coroutineService_.StartCoroutine(
-                navigationService_.Navigate(
-                    target,
-                    navigationParams));
+            NavigateInternal(sceneType, navigationParams, addCurrentSceneToHistory: true);
+        }
 
-            if (target.TargetType == NavigationTargetType.Scene)
-            {
-                eventDispatcher_?.Send(new OnNextScene(sceneType));
-            }
-            else
-            {
-                eventDispatcher_?.Send(new OnPopupOpen());
-            }
+        /// <summary>
+        /// Navigates to the given type without adding the current scene to navigation history.
+        /// </summary>
+        public void NavigateWithoutHistory(
+            SceneType sceneType,
+            NavigationParams navigationParams = null)
+        {
+            NavigateInternal(sceneType, navigationParams, addCurrentSceneToHistory: false);
         }
 
         /// <summary>
@@ -93,6 +90,27 @@ namespace Game.Unity.Scenes
         /// Navigates to the previous node
         /// </summary>
         public bool CanGoBack => navigationService_.CanGoBack;
+
+        private void NavigateInternal(
+            SceneType sceneType,
+            NavigationParams navigationParams,
+            bool addCurrentSceneToHistory)
+        {
+            var target = sceneSettings_.GetTarget(sceneType);
+            coroutineService_.StartCoroutine(
+                addCurrentSceneToHistory
+                    ? navigationService_.Navigate(target, navigationParams)
+                    : navigationService_.NavigateWithoutHistory(target, navigationParams));
+
+            if (target.TargetType == NavigationTargetType.Scene)
+            {
+                eventDispatcher_?.Send(new OnNextScene(sceneType));
+            }
+            else
+            {
+                eventDispatcher_?.Send(new OnPopupOpen());
+            }
+        }
 
         private void OnNavigationTransitionStarted(NavigationTransitionStartedEvent e)
         {

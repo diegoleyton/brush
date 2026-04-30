@@ -1,31 +1,16 @@
 fileFormatVersion: 2
-guid: b795ba8d2fed54ec1aff7587ef6b941d
+guid: 558f36eddb243455cb326a0b97134035
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1928831523495889984
-    second: cartoon_firework_2_0
+      213: 5092039505193034669
+    second: gift copy 2_0
   - first:
-      213: 6456994770943042647
-    second: cartoon_firework_2_1
+      213: -8051216065041488424
+    second: gift copy 2_1
   - first:
-      213: -5779010149411305667
-    second: cartoon_firework_2_2
-  - first:
-      213: -7382585978390906078
-    second: cartoon_firework_2_3
-  - first:
-      213: -7704774349919151252
-    second: cartoon_firework_2_4
-  - first:
-      213: 9169576955350618738
-    second: cartoon_firework_2_5
-  - first:
-      213: -1122114226942621042
-    second: cartoon_firework_2_6
-  - first:
-      213: -9188701837264684968
-    second: cartoon_firework_2_7
+      213: 5723777036419064544
+    second: gift copy 2_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -67,7 +52,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -134,13 +119,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cartoon_firework_2_0
+      name: gift copy 2_0
       rect:
         serializedVersion: 2
-        x: 243
-        y: 401
-        width: 42
-        height: 110
+        x: 0
+        y: 1
+        width: 420
+        height: 419
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,151 +134,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04c4c8d1d0694ca10800000000000000
-      internalID: 1928831523495889984
+      spriteID: da3694183fe8aa640800000000000000
+      internalID: 5092039505193034669
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cartoon_firework_2_1
+      name: gift copy 2_1
       rect:
         serializedVersion: 2
-        x: 266
-        y: 101
-        width: 281
-        height: 399
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7546d96988adb9950800000000000000
-      internalID: 6456994770943042647
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_2
-      rect:
-        serializedVersion: 2
-        x: 388
-        y: 436
-        width: 32
-        height: 28
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d3746fa33e4dccfa0800000000000000
-      internalID: -5779010149411305667
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_3
-      rect:
-        serializedVersion: 2
-        x: 408
-        y: 420
-        width: 30
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 22bfa32da29cb8990800000000000000
-      internalID: -7382585978390906078
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_4
-      rect:
-        serializedVersion: 2
-        x: 61
-        y: 0
-        width: 236
-        height: 410
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c6b1786ec84231590800000000000000
-      internalID: -7704774349919151252
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_5
-      rect:
-        serializedVersion: 2
-        x: 497
-        y: 110
-        width: 227
-        height: 300
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 272184c88a1e04f70800000000000000
-      internalID: 9169576955350618738
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_6
-      rect:
-        serializedVersion: 2
-        x: 608
-        y: 394
-        width: 14
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e8a4ca94e037d60f0800000000000000
-      internalID: -1122114226942621042
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cartoon_firework_2_7
-      rect:
-        serializedVersion: 2
-        x: 636
-        y: 391
-        width: 33
+        x: 259
+        y: 378
+        width: 20
         height: 30
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -303,8 +156,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 858fbd2ec5c2b7080800000000000000
-      internalID: -9188701837264684968
+      spriteID: 8d5a84165a5544090800000000000000
+      internalID: -8051216065041488424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gift copy 2_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 115
+        width: 31
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e2eb4583e0fe6f40800000000000000
+      internalID: 5723777036419064544
       vertices: []
       indices: 
       edges: []
@@ -313,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -322,7 +197,10 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      gift copy 2_0: 5092039505193034669
+      gift copy 2_1: -8051216065041488424
+      gift copy 2_2: 5723777036419064544
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

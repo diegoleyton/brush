@@ -96,6 +96,22 @@ namespace Flowbit.Utilities.Navigation
         /// </summary>
         public IEnumerator Navigate(NavigationTarget target, NavigationParams navigationParams = null)
         {
+            return NavigateInternal(target, navigationParams, addCurrentSceneToHistory: true);
+        }
+
+        /// <summary>
+        /// Navigates to the given target without adding the current scene to navigation history.
+        /// </summary>
+        public IEnumerator NavigateWithoutHistory(NavigationTarget target, NavigationParams navigationParams = null)
+        {
+            return NavigateInternal(target, navigationParams, addCurrentSceneToHistory: false);
+        }
+
+        private IEnumerator NavigateInternal(
+            NavigationTarget target,
+            NavigationParams navigationParams,
+            bool addCurrentSceneToHistory)
+        {
             if (target == null)
             {
                 throw new ArgumentNullException(nameof(target));
@@ -106,7 +122,7 @@ namespace Flowbit.Utilities.Navigation
                 switch (target.TargetType)
                 {
                     case NavigationTargetType.Scene:
-                        yield return NavigateToScene(target, navigationParams);
+                        yield return NavigateToScene(target, navigationParams, addCurrentSceneToHistory);
                         yield break;
 
                     case NavigationTargetType.Prefab:
@@ -270,7 +286,10 @@ namespace Flowbit.Utilities.Navigation
             currentSceneNode_ = new ResolvedNavigationNode(target, node, navigationParams);
         }
 
-        private IEnumerator NavigateToScene(NavigationTarget target, NavigationParams navigationParams)
+        private IEnumerator NavigateToScene(
+            NavigationTarget target,
+            NavigationParams navigationParams,
+            bool addCurrentSceneToHistory)
         {
             NavigationTransitionContext prepareContext =
                 new NavigationTransitionContext(currentSceneNode_?.Target, currentSceneNode_?.Node, navigationParams);
@@ -280,7 +299,7 @@ namespace Flowbit.Utilities.Navigation
                 yield return navigateTransitionStrategy_.PrepareTransition(prepareContext);
             }
 
-            if (currentSceneNode_ != null)
+            if (addCurrentSceneToHistory && currentSceneNode_ != null)
             {
                 sceneHistory_.Push(
                     new NavigationHistoryEntry(currentSceneNode_.Target, currentSceneNode_.NavigationParams));

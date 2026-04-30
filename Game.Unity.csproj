@@ -65,6 +65,7 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/ToothBrushEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectsController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/NavigationGameEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/PausableAnim.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PopupBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListUI.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/IGameNavigationService.cs" />
@@ -97,11 +99,13 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PopupTransformTransition.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneSettings.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/ToothBrushController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragCancelArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDraggable.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/AudioReactor.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/SceneType.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ConfirmPopup.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/DirtFadeOutSequence.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDragData.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesSurfaceView.cs" />
@@ -109,16 +113,19 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ScreenBlockerImage.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/LoopMovement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetTouchController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectInstaller.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/InventoryDropEffectPositionTracker.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardsScene.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropVisual.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/BrushTimer.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectComposition.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/PersistentGameDataLifetime.cs" />

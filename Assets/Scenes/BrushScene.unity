@@ -1994,7 +1994,7 @@ MonoBehaviour:
   - {fileID: 174596310}
   - {fileID: 994375752}
   - {fileID: 595931421}
-  moveDuration: 8
+  moveDuration: 0.5
   transitionDuration: 0.2
   initialWaitDuration: 3
   zoneWaitDuration: 1
@@ -2031,7 +2031,6 @@ MonoBehaviour:
   leftTransitionTransform_: {fileID: 7512525801943116953}
   rightTransitionTransform_: {fileID: 4510296629659290852}
   petImage_: {fileID: 7275333017276813725}
-  pausePopup_: {fileID: 0}
 --- !u!222 &1887917200770439472
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4667,7 +4666,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1835030606764855049}
-        m_TargetAssemblyTypeName: ToothbrushingScene, Assembly-CSharp
+        m_TargetAssemblyTypeName: Game.Unity.ToothBrush.ToothbrushingScene, Assembly-CSharp
         m_MethodName: Pause
         m_Mode: 1
         m_Arguments:

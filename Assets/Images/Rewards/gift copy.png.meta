@@ -1,13 +1,19 @@
 fileFormatVersion: 2
-guid: 47a5cfb997b264029a3a5d56d691f395
+guid: faa9aa19172984e93a9895236bf250a9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4027701586423134179
-    second: cartoon_firework_3_0
+      213: -700941576917336896
+    second: gift copy_0
   - first:
-      213: -8806139061998353299
-    second: cartoon_firework_3_1
+      213: 6043199529369172153
+    second: gift copy_1
+  - first:
+      213: 4467929366111949434
+    second: gift copy_2
+  - first:
+      213: 7358231639902992643
+    second: gift copy_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +55,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -116,13 +122,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cartoon_firework_3_0
+      name: gift copy_0
       rect:
         serializedVersion: 2
-        x: 41
+        x: 18
         y: 0
-        width: 681
-        height: 512
+        width: 394
+        height: 418
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,20 +137,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3e73700d04545e730800000000000000
-      internalID: 4027701586423134179
+      spriteID: 0cc3a8b7951c546f0800000000000000
+      internalID: -700941576917336896
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cartoon_firework_3_1
+      name: gift copy_1
       rect:
         serializedVersion: 2
-        x: 368
-        y: 447
-        width: 33
-        height: 28
+        x: 347
+        y: 334
+        width: 34
+        height: 70
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,8 +159,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d6485e61e2f4ac580800000000000000
-      internalID: -8806139061998353299
+      spriteID: 9b87bd624f1cdd350800000000000000
+      internalID: 6043199529369172153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gift copy_2
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 174
+        width: 24
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7293ac1616410e30800000000000000
+      internalID: 4467929366111949434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gift copy_3
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 188
+        width: 28
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 309357fd0b0bd1660800000000000000
+      internalID: 7358231639902992643
       vertices: []
       indices: 
       edges: []
@@ -163,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -172,7 +222,11 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      gift copy_0: -700941576917336896
+      gift copy_1: 6043199529369172153
+      gift copy_2: 4467929366111949434
+      gift copy_3: 7358231639902992643
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

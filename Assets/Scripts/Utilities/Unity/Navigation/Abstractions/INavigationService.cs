@@ -23,6 +23,11 @@ namespace Flowbit.Utilities.Navigation
         IEnumerator Navigate(NavigationTarget target, NavigationParams navigationParams = null);
 
         /// <summary>
+        /// Navigates to the given target without adding the current scene to navigation history.
+        /// </summary>
+        IEnumerator NavigateWithoutHistory(NavigationTarget target, NavigationParams navigationParams = null);
+
+        /// <summary>
         /// Navigates back to the previous scene in the history.
         /// </summary>
         IEnumerator Back();

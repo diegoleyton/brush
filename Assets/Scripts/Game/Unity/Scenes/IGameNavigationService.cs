@@ -9,6 +9,7 @@ namespace Game.Unity.Scenes
     public interface IGameNavigationService
     {
         void Navigate(SceneType sceneType, NavigationParams navigationParams = null);
+        void NavigateWithoutHistory(SceneType sceneType, NavigationParams navigationParams = null);
         void Back();
         void Close(SceneType sceneType);
         bool CanGoBack { get; }

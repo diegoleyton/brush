@@ -38,6 +38,7 @@ namespace Game.Unity.RoomScene
         private bool restoreInventoryAfterDrag_;
         private bool waitForPaintEffectAfterDrag_;
         private bool waitForSkinEffectAfterDrag_;
+        private bool rewardSceneNavigationRequested_;
 
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
@@ -84,6 +85,7 @@ namespace Game.Unity.RoomScene
             if (initialized_)
             {
                 RefreshDropAreas();
+                TryOpenRewardsSceneIfPending();
             }
         }
 
@@ -107,6 +109,7 @@ namespace Game.Unity.RoomScene
             RefreshInventoryList();
             RefreshDropAreas();
             initialized_ = true;
+            TryOpenRewardsSceneIfPending();
         }
 
         public void GoToBrushScene()
@@ -214,6 +217,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<RoomDataItemApplyFailedEvent>(OnRoomDataItemApplyFailed);
             dispatcher_.Subscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
+            dispatcher_.Subscribe<PendingRewardEvent>(OnPendingRewardChanged);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = true;
@@ -235,6 +239,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<PetSkinEffectCompletedEvent>(OnPetSkinEffectCompleted);
             dispatcher_.Unsubscribe<PetDataApplyFailedEvent>(OnPetDataApplyFailed);
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
+            dispatcher_.Unsubscribe<PendingRewardEvent>(OnPendingRewardChanged);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = false;
@@ -344,6 +349,12 @@ namespace Game.Unity.RoomScene
         private void OnProfileSwitched(ProfileSwitchedEvent _)
         {
             RefreshInventoryList();
+            TryOpenRewardsSceneIfPending();
+        }
+
+        private void OnPendingRewardChanged(PendingRewardEvent _)
+        {
+            TryOpenRewardsSceneIfPending();
         }
 
         private void OnSwitchList(SwitchListEvent eventData)
@@ -543,6 +554,29 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
             }
+        }
+
+        private void TryOpenRewardsSceneIfPending()
+        {
+            if (!initialized_ || !isActiveAndEnabled || navigationService_ == null)
+            {
+                return;
+            }
+
+            bool hasPendingReward = repository_?.CurrentProfile?.PendingReward == true;
+            if (!hasPendingReward)
+            {
+                rewardSceneNavigationRequested_ = false;
+                return;
+            }
+
+            if (rewardSceneNavigationRequested_)
+            {
+                return;
+            }
+
+            rewardSceneNavigationRequested_ = true;
+            navigationService_.Navigate(SceneType.RewardsScene);
         }
 
     }

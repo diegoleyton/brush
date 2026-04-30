@@ -9,7 +9,8 @@ namespace Game.Unity.Definitions
     {
         RoomScene,
         BrushScene,
-        ConfirmPopup
+        ConfirmPopup,
+        RewardsScene
     }
 
     public static class SceneTypeExtension
@@ -18,7 +19,8 @@ namespace Game.Unity.Definitions
         {
             {SceneType.RoomScene, "RoomScene"},
             {SceneType.BrushScene, "BrushScene"},
-            {SceneType.ConfirmPopup, "ConfirmPopup"}
+            {SceneType.ConfirmPopup, "ConfirmPopup"},
+            {SceneType.RewardsScene, "RewardsScene"}
         };
 
         public static string GeTInstruction(this SceneType sceneType)
