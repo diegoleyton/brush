@@ -2,10 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Flowbit.Utilities.Unity.AssetLoader;
-
-using Game.Unity.Definitions;
-
 using Zenject;
+using Game.Unity.Definitions;
 
 namespace Game.Unity.RoomScene
 {
@@ -23,8 +21,6 @@ namespace Game.Unity.RoomScene
         private int loadVersion_;
 
         private RoomDropArea[] dropAreas_;
-        private RoomPlaceableChildSurfaceView[] childSurfaceViews_;
-
         [Inject]
         public void Construct(IAssetLoader assetLoader)
         {
@@ -95,78 +91,17 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
-                if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    (dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT ||
-                     dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT))
+                if (dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT ||
+                    dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT)
                 {
                     dropArea.SetDropEnabled(false);
                 }
             }
-
-            for (int index = 0; index < childSurfaceViews_.Length; index++)
-            {
-                RoomPlaceableChildSurfaceView surfaceView = childSurfaceViews_[index];
-                if (surfaceView == null)
-                {
-                    continue;
-                }
-            }
-        }
-
-        public void ConfigureChild(int parentLocationId, int parentSlotId, int itemId)
-        {
-            for (int index = 0; index < dropAreas_.Length; index++)
-            {
-                RoomDropArea dropArea = dropAreas_[index];
-                if (dropArea == null)
-                {
-                    continue;
-                }
-
-                if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    (dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT ||
-                     dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT))
-                {
-                    dropArea.SetDropEnabled(false);
-                }
-            }
-
-            for (int index = 0; index < childSurfaceViews_.Length; index++)
-            {
-                RoomPlaceableChildSurfaceView surfaceView = childSurfaceViews_[index];
-                if (surfaceView == null)
-                {
-                    continue;
-                }
-
-                surfaceView.ClearPlacedVisual();
-            }
-
-        }
-
-        public RoomPlaceableChildSurfaceView FindChildSurfaceView(int slotId)
-        {
-            for (int index = 0; index < childSurfaceViews_.Length; index++)
-            {
-                RoomPlaceableChildSurfaceView surfaceView = childSurfaceViews_[index];
-                if (surfaceView != null && surfaceView.SlotId == slotId)
-                {
-                    return surfaceView;
-                }
-            }
-
-            return null;
-        }
-
-        private bool HasChildSurfaceView(int slotId)
-        {
-            return FindChildSurfaceView(slotId) != null;
         }
 
         private void ResolveReferences()
         {
             dropAreas_ = GetComponentsInChildren<RoomDropArea>(true);
-            childSurfaceViews_ = GetComponentsInChildren<RoomPlaceableChildSurfaceView>(true);
         }
 
         private static void ReleaseHandle(ref IAssetLoadHandle<Sprite> handle)

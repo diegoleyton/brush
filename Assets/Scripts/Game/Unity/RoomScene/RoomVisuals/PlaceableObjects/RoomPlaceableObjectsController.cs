@@ -71,7 +71,6 @@ namespace Game.Unity.RoomScene
                 }
 
                 surfaceView.SetPlacedVisual(visualInstance);
-                ApplyChildObjects(location, placeableObjectView);
             }
         }
 
@@ -106,53 +105,6 @@ namespace Game.Unity.RoomScene
             }
 
             surfaceView.SetPlacedVisual(visualInstance);
-            ApplyChildObjects(location, placeableObjectView);
-        }
-
-        public void RefreshChildPlaceableObject(int locationId, int slotId)
-        {
-            PlacedRoomObjectLocation location = FindPlacedObjectLocation(locationId);
-            if (location?.Item == null)
-            {
-                return;
-            }
-
-            RoomPlaceableObjectSurfaceView surfaceView = FindSurfaceView(locationId);
-            RoomPlaceableObjectView parentView = surfaceView?.GetPlacedVisualComponent<RoomPlaceableObjectView>();
-            if (parentView == null)
-            {
-                return;
-            }
-
-            RoomPlaceableChildSurfaceView childSurfaceView = parentView.FindChildSurfaceView(slotId);
-            if (childSurfaceView == null)
-            {
-                return;
-            }
-
-            childSurfaceView.ClearPlacedVisual();
-
-            PlacedChildObjectSlot slot = FindChildSlot(location, slotId);
-            if (slot?.Item == null)
-            {
-                return;
-            }
-
-            RectTransform childVisual = CreateVisualInstance(slot.Item.ItemId);
-            if (childVisual == null)
-            {
-                return;
-            }
-
-            RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
-            if (childView != null)
-            {
-                childView.SetColor(Color.white);
-                childView.ApplyPlaceableItem(slot.Item.ItemId);
-                childView.ConfigureChild(locationId, slotId, slot.Item.ItemId);
-            }
-
-            childSurfaceView.SetPlacedVisual(childVisual);
         }
 
         private void ClearAllPlaceableObjectAreas()
@@ -210,44 +162,6 @@ namespace Game.Unity.RoomScene
             return instance;
         }
 
-        private void ApplyChildObjects(PlacedRoomObjectLocation location, RoomPlaceableObjectView parentView)
-        {
-            if (location?.Item?.ChildObjects == null || parentView == null)
-            {
-                return;
-            }
-
-            for (int index = 0; index < location.Item.ChildObjects.Count; index++)
-            {
-                PlacedChildObjectSlot slot = location.Item.ChildObjects[index];
-                if (slot?.Item == null)
-                {
-                    continue;
-                }
-
-                RoomPlaceableChildSurfaceView childSurfaceView = parentView.FindChildSurfaceView(slot.SlotId);
-                if (childSurfaceView == null)
-                {
-                    continue;
-                }
-
-                RectTransform childVisual = CreateVisualInstance(slot.Item.ItemId);
-                if (childVisual == null)
-                {
-                    continue;
-                }
-
-                RoomPlaceableObjectView childView = childVisual.GetComponent<RoomPlaceableObjectView>();
-                if (childView != null)
-                {
-                    childView.SetColor(Color.white);
-                    childView.ApplyPlaceableItem(slot.Item.ItemId);
-                    childView.ConfigureChild(location.LocationId, slot.SlotId, slot.Item.ItemId);
-                }
-                childSurfaceView.SetPlacedVisual(childVisual);
-            }
-        }
-
         private PlacedRoomObjectLocation FindPlacedObjectLocation(int locationId)
         {
             List<PlacedRoomObjectLocation> placeableObjects = repository_?.CurrentProfile?.RoomData?.PlaceableObjects;
@@ -262,25 +176,6 @@ namespace Game.Unity.RoomScene
                 if (location != null && location.LocationId == locationId)
                 {
                     return location;
-                }
-            }
-
-            return null;
-        }
-
-        private static PlacedChildObjectSlot FindChildSlot(PlacedRoomObjectLocation location, int slotId)
-        {
-            if (location?.Item?.ChildObjects == null)
-            {
-                return null;
-            }
-
-            for (int index = 0; index < location.Item.ChildObjects.Count; index++)
-            {
-                PlacedChildObjectSlot slot = location.Item.ChildObjects[index];
-                if (slot != null && slot.SlotId == slotId)
-                {
-                    return slot;
                 }
             }
 

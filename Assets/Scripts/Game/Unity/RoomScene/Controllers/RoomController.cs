@@ -23,8 +23,7 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class RoomController : MonoBehaviour
     {
-        private Dictionary<(InteractionPointType, RoomTargetKind), Action<RoomInventoryDropAcceptedEvent>>
-            dropAcceptedHandlers_;
+        private Dictionary<InteractionPointType, Action<RoomInventoryDropAcceptedEvent>> dropAcceptedHandlers_;
 
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
@@ -439,16 +438,14 @@ namespace Game.Unity.RoomScene
             }
 
             logger_?.Log(
-                $"[RoomUI] Drop accepted. Type: {eventData.Data.InteractionPointType}, Item: {eventData.Data.ItemId}, TargetKind: {eventData.DropArea.RoomTargetKind}, Target: {eventData.DropArea.TargetId}, Parent: {eventData.DropArea.ParentTargetId}");
+                $"[RoomUI] Drop accepted. Type: {eventData.Data.InteractionPointType}, Item: {eventData.Data.ItemId}, Target: {eventData.DropArea.TargetId}");
 
-            if (eventData.Data.InteractionPointType == InteractionPointType.PAINT &&
-                eventData.DropArea.RoomTargetKind == RoomTargetKind.ROOM)
+            if (eventData.Data.InteractionPointType == InteractionPointType.PAINT)
             {
                 waitForPaintEffectAfterDrag_ = true;
             }
 
-            if (eventData.Data.InteractionPointType == InteractionPointType.SKIN &&
-                eventData.DropArea.RoomTargetKind == RoomTargetKind.ROOM)
+            if (eventData.Data.InteractionPointType == InteractionPointType.SKIN)
             {
                 waitForSkinEffectAfterDrag_ = true;
             }
@@ -459,7 +456,7 @@ namespace Game.Unity.RoomScene
             }
 
             if (dropAcceptedHandlers_.TryGetValue(
-                    (eventData.Data.InteractionPointType, eventData.DropArea.RoomTargetKind),
+                    eventData.Data.InteractionPointType,
                     out Action<RoomInventoryDropAcceptedEvent> handler))
             {
                 handler.Invoke(eventData);
@@ -469,15 +466,15 @@ namespace Game.Unity.RoomScene
         private void BuildDropAcceptedHandlers()
         {
             dropAcceptedHandlers_ =
-                new Dictionary<(InteractionPointType, RoomTargetKind), Action<RoomInventoryDropAcceptedEvent>>
+                new Dictionary<InteractionPointType, Action<RoomInventoryDropAcceptedEvent>>
                 {
                     {
-                        (InteractionPointType.PLACEABLE_OBJECT, RoomTargetKind.ROOM),
+                        InteractionPointType.PLACEABLE_OBJECT,
                         eventData => dispatcher_.Send(
                             new RoomObjectPlacedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId))
                     },
                     {
-                        (InteractionPointType.PAINT, RoomTargetKind.ROOM),
+                        InteractionPointType.PAINT,
                         eventData =>
                         {
                             dispatcher_.Send(new RoomPaintDropPositionCapturedEvent(eventData.DropScreenPosition));
@@ -486,15 +483,15 @@ namespace Game.Unity.RoomScene
                         }
                     },
                     {
-                        (InteractionPointType.EYES, RoomTargetKind.ROOM),
+                        InteractionPointType.EYES,
                         eventData => dispatcher_.Send(new RoomEyesAppliedEvent(eventData.Data.ItemId))
                     },
                     {
-                        (InteractionPointType.HAT, RoomTargetKind.ROOM),
+                        InteractionPointType.HAT,
                         eventData => dispatcher_.Send(new RoomHatAppliedEvent(eventData.Data.ItemId))
                     },
                     {
-                        (InteractionPointType.SKIN, RoomTargetKind.ROOM),
+                        InteractionPointType.SKIN,
                         eventData =>
                         {
                             dispatcher_.Send(new PetSkinDropPositionCapturedEvent(eventData.DropScreenPosition));
@@ -502,11 +499,11 @@ namespace Game.Unity.RoomScene
                         }
                     },
                     {
-                        (InteractionPointType.DRESS, RoomTargetKind.ROOM),
+                        InteractionPointType.DRESS,
                         eventData => dispatcher_.Send(new RoomDressAppliedEvent(eventData.Data.ItemId))
                     },
                     {
-                        (InteractionPointType.FOOD, RoomTargetKind.ROOM),
+                        InteractionPointType.FOOD,
                         eventData =>
                         {
                             dispatcher_.Send(new PetFoodDropPositionCapturedEvent(eventData.DropScreenPosition));

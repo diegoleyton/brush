@@ -147,7 +147,7 @@ namespace Game.Unity.RoomScene
                 case FoodApplyOutcome.Success:
                     petView_?.Eat(
                         foodItemId_,
-                        dropEffectPositionTracker_?.Consume(InteractionPointType.FOOD, RoomTargetKind.ROOM));
+                        dropEffectPositionTracker_?.Consume(InteractionPointType.FOOD));
                     ResetFoodState();
                     return;
                 case FoodApplyOutcome.Failed:

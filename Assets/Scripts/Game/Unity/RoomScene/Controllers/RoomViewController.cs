@@ -106,7 +106,6 @@ namespace Game.Unity.RoomScene
                 instantiator_);
             paintController_ = new RoomPaintController(
                 repository_,
-                placeableObjectSurfaceViews_,
                 paintSurfaceViews_);
             eyesController_ = eyesControllerFactory_?.Create(eyesSurfaceViews_);
             hatController_ = hatControllerFactory_?.Create(hatSurfaceViews_);
@@ -210,7 +209,6 @@ namespace Game.Unity.RoomScene
             {
                 logger_?.Log($"[RoomView] Refresh placeable object {eventData.TargetId}.");
                 placeableObjectsController_?.RefreshPlaceableObject(eventData.TargetId);
-                paintController_?.RefreshPaintedObject(eventData.TargetId);
                 return;
             }
 
@@ -219,7 +217,7 @@ namespace Game.Unity.RoomScene
                 logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
                 paintController_?.RefreshPaintSurface(
                     eventData.TargetId,
-                    dropEffectPositionTracker_?.Consume(Core.Data.InteractionPointType.PAINT, RoomTargetKind.ROOM));
+                    dropEffectPositionTracker_?.Consume(Core.Data.InteractionPointType.PAINT));
             }
 
         }
@@ -231,7 +229,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.PAINT, RoomTargetKind.ROOM);
+            dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.PAINT);
         }
 
         private void OnPetDataApplyFailed(PetDataApplyFailedEvent eventData)
@@ -243,12 +241,12 @@ namespace Game.Unity.RoomScene
 
             if (eventData.ItemType == Core.Data.InteractionPointType.SKIN)
             {
-                dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.SKIN, RoomTargetKind.ROOM);
+                dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.SKIN);
             }
 
             if (eventData.ItemType == Core.Data.InteractionPointType.FOOD)
             {
-                dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.FOOD, RoomTargetKind.ROOM);
+                dropEffectPositionTracker_?.Clear(Core.Data.InteractionPointType.FOOD);
             }
         }
 
@@ -280,8 +278,7 @@ namespace Game.Unity.RoomScene
                 skinController_?.Refresh(
                     animate: true,
                     dropScreenPosition: dropEffectPositionTracker_?.Consume(
-                        Core.Data.InteractionPointType.SKIN,
-                        RoomTargetKind.ROOM));
+                        Core.Data.InteractionPointType.SKIN));
                 return;
             }
 

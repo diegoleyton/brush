@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-
-using Flowbit.Utilities.Unity.UI;
 using Game.Unity.RoomScene;
-
 using UnityEngine;
 
 namespace Game.Unity.Settings
@@ -51,8 +48,6 @@ namespace Game.Unity.Settings
         private List<PlaceableObjectPrefabDefinition> placeableObjectPrefabs_ =
             new List<PlaceableObjectPrefabDefinition>();
 
-        private readonly Dictionary<int, bool> supportsChildPlaceablesCache_ = new Dictionary<int, bool>();
-
         public int DefaultEyesItemId => defaultEyesItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
         public Sprite SkinItemSprite => skinItemSprite_;
@@ -73,21 +68,6 @@ namespace Game.Unity.Settings
             }
 
             return defaultPlaceableObjectPrefab_;
-        }
-
-        public bool SupportsChildPlaceables(int itemId)
-        {
-            if (supportsChildPlaceablesCache_.TryGetValue(itemId, out bool cachedValue))
-            {
-                return cachedValue;
-            }
-
-            RectTransform prefab = ResolvePlaceableObjectPrefab(itemId);
-            bool supportsChildPlaceables =
-                prefab != null && prefab.GetComponentInChildren<Game.Unity.RoomScene.RoomPlaceableChildSurfaceView>(true) != null;
-
-            supportsChildPlaceablesCache_[itemId] = supportsChildPlaceables;
-            return supportsChildPlaceables;
         }
     }
 }

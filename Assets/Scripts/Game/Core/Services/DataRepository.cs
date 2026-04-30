@@ -240,28 +240,10 @@ namespace Game.Core.Services
             return roomObject?.Item != null && roomObject.Item.ItemId == itemId;
         }
 
-        public bool RoomChildSlotContainsObject(int locationId, int slotId, int itemId)
-        {
-            PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
-            return slot?.Item != null && slot.Item.ItemId == itemId;
-        }
-
         public bool RoomSurfaceHasPaint(int surfaceId, int paintItemId)
         {
             RoomPaintSurfaceState surface = FindRoomSurface(surfaceId);
             return surface != null && surface.PaintId == paintItemId;
-        }
-
-        public bool RoomObjectHasPaint(int locationId, int paintItemId)
-        {
-            PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            return roomObject != null && roomObject.PaintId == paintItemId;
-        }
-
-        public bool RoomChildSlotHasPaint(int locationId, int slotId, int paintItemId)
-        {
-            PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
-            return slot?.Item != null && slot.Item.PaintId == paintItemId;
         }
 
         public int GetRoomSurfacePaintId(int surfaceId)
@@ -394,54 +376,6 @@ namespace Game.Core.Services
             NotifyDataChanged();
         }
 
-        public void SetChildRoomObject(int locationId, int slotId, int itemId)
-        {
-            PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            if (roomObject == null)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to place child object {itemId} at {locationId}/{slotId}: parent missing.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
-                return;
-            }
-
-            PlacedChildObjectSlot slot = GetOrCreateRoomChildSlot(locationId, slotId);
-            if (slot.Item != null && slot.Item.ItemId == itemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to place child object {itemId} at {locationId}/{slotId}: same item already present.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
-                return;
-            }
-
-            if (slot.Item != null)
-            {
-                AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, slot.Item.ItemId, 1);
-            }
-
-            slot.Item = new PlacedChildRoomObject
-            {
-                ItemId = itemId,
-                PaintId = DefaultProfileState.NoPaintItemId
-            };
-
-            logger_?.Log($"[RoomData] Placed child object {itemId} at {locationId}/{slotId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
-            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, slotId, locationId);
-        }
-
-        public void RemoveChildRoomObject(int locationId, int slotId)
-        {
-            PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
-            if (slot?.Item == null)
-            {
-                return;
-            }
-
-            AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, slot.Item.ItemId, 1);
-            slot.Item = null;
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
         public void PaintRoomSurface(int surfaceId, int paintItemId)
         {
             RoomPaintSurfaceState surface = GetOrCreateRoomSurface(surfaceId);
@@ -456,52 +390,6 @@ namespace Game.Core.Services
             logger_?.Log($"[RoomData] Painted surface {surfaceId} with item {paintItemId}.");
             ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
             NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, surfaceId);
-        }
-
-        public void PaintRoomObject(int locationId, int paintItemId)
-        {
-            PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            if (roomObject == null)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint object at location {locationId} with item {paintItemId}: object missing.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
-                return;
-            }
-
-            if (roomObject.PaintId == paintItemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint object at location {locationId} with item {paintItemId}: already applied.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, locationId);
-                return;
-            }
-
-            roomObject.PaintId = paintItemId;
-            logger_?.Log($"[RoomData] Painted object at location {locationId} with item {paintItemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
-            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, locationId);
-        }
-
-        public void PaintChildRoomObject(int locationId, int slotId, int paintItemId)
-        {
-            PlacedChildObjectSlot slot = FindRoomChildSlot(locationId, slotId);
-            if (slot?.Item == null)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint child object at {locationId}/{slotId} with item {paintItemId}: child missing.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
-                return;
-            }
-
-            if (slot.Item.PaintId == paintItemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint child object at {locationId}/{slotId} with item {paintItemId}: already applied.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, slotId, locationId);
-                return;
-            }
-
-            slot.Item.PaintId = paintItemId;
-            logger_?.Log($"[RoomData] Painted child object at {locationId}/{slotId} with item {paintItemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
-            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, slotId, locationId);
         }
 
         public void SetPetEyes(int itemId)
@@ -643,19 +531,17 @@ namespace Game.Core.Services
         private void NotifyRoomDataItemApplied(
             InteractionPointType itemType,
             int itemId,
-            int targetId,
-            int parentTargetId = -1)
+            int targetId)
         {
-            dispatcher_.Send(new RoomDataItemAppliedEvent(itemType, itemId, targetId, parentTargetId));
+            dispatcher_.Send(new RoomDataItemAppliedEvent(itemType, itemId, targetId));
         }
 
         private void NotifyRoomDataItemApplyFailed(
             InteractionPointType itemType,
             int itemId,
-            int targetId,
-            int parentTargetId = -1)
+            int targetId)
         {
-            dispatcher_.Send(new RoomDataItemApplyFailedEvent(itemType, itemId, targetId, parentTargetId));
+            dispatcher_.Send(new RoomDataItemApplyFailedEvent(itemType, itemId, targetId));
         }
 
         private void NotifyPetDataApplied(InteractionPointType itemType, int itemId)
@@ -746,17 +632,6 @@ namespace Game.Core.Services
             }
 
             AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, roomObject.ItemId, 1);
-
-            for (int index = 0; index < roomObject.ChildObjects.Count; index++)
-            {
-                PlacedChildRoomObject childObject = roomObject.ChildObjects[index].Item;
-                if (childObject == null)
-                {
-                    continue;
-                }
-
-                AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, childObject.ItemId, 1);
-            }
         }
 
         private PlacedRoomObject GetPlacedRoomObject(int locationId) => FindRoomObject(locationId)?.Item;
@@ -788,39 +663,6 @@ namespace Game.Core.Services
             PlacedRoomObjectLocation newObject = new PlacedRoomObjectLocation { LocationId = locationId };
             CurrentProfile.RoomData.PlaceableObjects.Add(newObject);
             return newObject;
-        }
-
-        private PlacedChildObjectSlot FindRoomChildSlot(int locationId, int slotId)
-        {
-            PlacedRoomObject roomObject = GetPlacedRoomObject(locationId);
-            if (roomObject == null)
-            {
-                return null;
-            }
-
-            for (int index = 0; index < roomObject.ChildObjects.Count; index++)
-            {
-                PlacedChildObjectSlot slot = roomObject.ChildObjects[index];
-                if (slot.SlotId == slotId)
-                {
-                    return slot;
-                }
-            }
-
-            return null;
-        }
-
-        private PlacedChildObjectSlot GetOrCreateRoomChildSlot(int locationId, int slotId)
-        {
-            PlacedChildObjectSlot existingSlot = FindRoomChildSlot(locationId, slotId);
-            if (existingSlot != null)
-            {
-                return existingSlot;
-            }
-
-            PlacedChildObjectSlot newSlot = new PlacedChildObjectSlot { SlotId = slotId };
-            GetPlacedRoomObject(locationId).ChildObjects.Add(newSlot);
-            return newSlot;
         }
 
         private RoomPaintSurfaceState FindRoomSurface(int surfaceId)

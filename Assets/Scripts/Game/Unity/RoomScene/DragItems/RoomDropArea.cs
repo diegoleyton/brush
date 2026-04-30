@@ -5,7 +5,6 @@ using Flowbit.Utilities.Unity.UI;
 using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;
-using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 using Game.Unity.Settings;
 
@@ -29,12 +28,7 @@ namespace Game.Unity.RoomScene
         private InteractionPointType supportedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
 
         [SerializeField]
-        private RoomTargetKind roomTargetKind_ = RoomTargetKind.ROOM;
-
-        [SerializeField]
         private int targetId_;
-
-        private int parentTargetId_ = -1;
 
         [SerializeField]
         private bool useVisibility_;
@@ -47,9 +41,7 @@ namespace Game.Unity.RoomScene
         private bool subscribed_;
 
         public InteractionPointType SupportedInventoryType => supportedInventoryType_;
-        public RoomTargetKind RoomTargetKind => roomTargetKind_;
         public int TargetId => targetId_;
-        public int ParentTargetId => parentTargetId_;
 
         [Inject]
         public void Construct(EventDispatcher dispatcher, DataRepository repository, RoomSettings roomSettings)
@@ -102,22 +94,9 @@ namespace Game.Unity.RoomScene
             }
         }
 
-        public void SetTargetIds(int targetId, int parentTargetId = -1)
-        {
-            targetId_ = targetId;
-            parentTargetId_ = parentTargetId;
-            RefreshVisibility();
-        }
-
         public void SetTargetId(int targetId)
         {
             targetId_ = targetId;
-            RefreshVisibility();
-        }
-
-        public void SetParentTargetId(int parentTargetId)
-        {
-            parentTargetId_ = parentTargetId;
             RefreshVisibility();
         }
 
@@ -139,15 +118,7 @@ namespace Game.Unity.RoomScene
 
         private bool HasValidTargetConfiguration()
         {
-            switch (roomTargetKind_)
-            {
-                case RoomTargetKind.ROOM:
-                    return true;
-                case RoomTargetKind.PLACEABLE_OBJECT:
-                    return false;
-                default:
-                    return false;
-            }
+            return true;
         }
 
         private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent eventData)
@@ -200,24 +171,12 @@ namespace Game.Unity.RoomScene
 
         private bool CanApplyPlaceableObject(int itemId)
         {
-            switch (roomTargetKind_)
-            {
-                case RoomTargetKind.ROOM:
-                    return !repository_.RoomHasObject(targetId_, itemId);
-                default:
-                    return false;
-            }
+            return !repository_.RoomHasObject(targetId_, itemId);
         }
 
         private bool CanApplyPaint(int itemId)
         {
-            switch (roomTargetKind_)
-            {
-                case RoomTargetKind.ROOM:
-                    return !repository_.RoomSurfaceHasPaint(targetId_, itemId);
-                default:
-                    return false;
-            }
+            return !repository_.RoomSurfaceHasPaint(targetId_, itemId);
         }
 
         private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent _)

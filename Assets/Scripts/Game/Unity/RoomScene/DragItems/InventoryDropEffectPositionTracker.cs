@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Flowbit.Utilities.Core.Events;
 
 using Game.Core.Data;
-using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 
 using UnityEngine;
@@ -16,8 +15,8 @@ namespace Game.Unity.RoomScene
     public sealed class InventoryDropEffectPositionTracker : System.IDisposable
     {
         private readonly EventDispatcher dispatcher_;
-        private readonly Dictionary<(InteractionPointType, RoomTargetKind), Vector2> positions_ =
-            new Dictionary<(InteractionPointType, RoomTargetKind), Vector2>();
+        private readonly Dictionary<InteractionPointType, Vector2> positions_ =
+            new Dictionary<InteractionPointType, Vector2>();
 
         public InventoryDropEffectPositionTracker(EventDispatcher dispatcher)
         {
@@ -30,20 +29,20 @@ namespace Game.Unity.RoomScene
             UnsubscribeFromDispatcher();
         }
 
-        public Vector2? Consume(InteractionPointType itemType, RoomTargetKind targetKind)
+        public Vector2? Consume(InteractionPointType itemType)
         {
-            if (!positions_.TryGetValue((itemType, targetKind), out Vector2 position))
+            if (!positions_.TryGetValue(itemType, out Vector2 position))
             {
                 return null;
             }
 
-            positions_.Remove((itemType, targetKind));
+            positions_.Remove(itemType);
             return position;
         }
 
-        public void Clear(InteractionPointType itemType, RoomTargetKind targetKind)
+        public void Clear(InteractionPointType itemType)
         {
-            positions_.Remove((itemType, targetKind));
+            positions_.Remove(itemType);
         }
 
         private void OnRoomPaintDropPositionCaptured(RoomPaintDropPositionCapturedEvent eventData)
@@ -53,7 +52,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            positions_[(InteractionPointType.PAINT, RoomTargetKind.ROOM)] = eventData.DropScreenPosition;
+            positions_[InteractionPointType.PAINT] = eventData.DropScreenPosition;
         }
 
         private void OnPetSkinDropPositionCaptured(PetSkinDropPositionCapturedEvent eventData)
@@ -63,7 +62,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            positions_[(InteractionPointType.SKIN, RoomTargetKind.ROOM)] = eventData.DropScreenPosition;
+            positions_[InteractionPointType.SKIN] = eventData.DropScreenPosition;
         }
 
         private void OnPetFoodDropPositionCaptured(PetFoodDropPositionCapturedEvent eventData)
@@ -73,7 +72,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            positions_[(InteractionPointType.FOOD, RoomTargetKind.ROOM)] = eventData.DropScreenPosition;
+            positions_[InteractionPointType.FOOD] = eventData.DropScreenPosition;
         }
 
         private void SubscribeToDispatcher()

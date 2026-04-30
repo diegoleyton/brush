@@ -79,27 +79,6 @@ namespace Game.Core.Data
     {
         public int ItemId;
         public int PaintId = DefaultProfileState.NoPaintItemId;
-        public List<PlacedChildObjectSlot> ChildObjects = new List<PlacedChildObjectSlot>();
-    }
-
-    /// <summary>
-    /// A named child slot within a room object.
-    /// </summary>
-    [Serializable]
-    public class PlacedChildObjectSlot
-    {
-        public int SlotId;
-        public PlacedChildRoomObject Item;
-    }
-
-    /// <summary>
-    /// A second-level object placed inside a parent room object.
-    /// </summary>
-    [Serializable]
-    public class PlacedChildRoomObject
-    {
-        public int ItemId;
-        public int PaintId = DefaultProfileState.NoPaintItemId;
     }
 
     /// <summary>
