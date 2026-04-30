@@ -208,18 +208,6 @@ namespace Game.Unity.RoomScene
 
             if (eventData.ItemType == Core.Data.InteractionPointType.PLACEABLE_OBJECT)
             {
-                if (eventData.ParentTargetId >= 0)
-                {
-                    logger_?.Log($"[RoomView] Refresh placeable child {eventData.ParentTargetId}/{eventData.TargetId}.");
-                    placeableObjectsController_?.RefreshChildPlaceableObject(
-                        eventData.ParentTargetId,
-                        eventData.TargetId);
-                    paintController_?.RefreshPaintedChildObject(
-                        eventData.ParentTargetId,
-                        eventData.TargetId);
-                    return;
-                }
-
                 logger_?.Log($"[RoomView] Refresh placeable object {eventData.TargetId}.");
                 placeableObjectsController_?.RefreshPlaceableObject(eventData.TargetId);
                 paintController_?.RefreshPaintedObject(eventData.TargetId);
@@ -228,15 +216,6 @@ namespace Game.Unity.RoomScene
 
             if (eventData.ItemType == Core.Data.InteractionPointType.PAINT)
             {
-                if (eventData.ParentTargetId >= 0)
-                {
-                    logger_?.Log($"[RoomView] Refresh painted child {eventData.ParentTargetId}/{eventData.TargetId}.");
-                    paintController_?.RefreshPaintedChildObject(
-                        eventData.ParentTargetId,
-                        eventData.TargetId);
-                    return;
-                }
-
                 logger_?.Log($"[RoomView] Refresh painted surface {eventData.TargetId}.");
                 paintController_?.RefreshPaintSurface(
                     eventData.TargetId,

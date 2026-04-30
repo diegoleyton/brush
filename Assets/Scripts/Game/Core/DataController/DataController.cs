@@ -23,10 +23,7 @@ namespace Game.Core.DataController
             dispatcher_ = dispatcher;
 
             dispatcher_?.Subscribe<RoomObjectPlacedEvent>(OnRoomObjectPlaced);
-            dispatcher_?.Subscribe<RoomChildObjectPlacedEvent>(OnRoomChildObjectPlaced);
             dispatcher_?.Subscribe<RoomPaintAppliedEvent>(OnRoomPaintApplied);
-            dispatcher_?.Subscribe<RoomObjectPaintAppliedEvent>(OnRoomObjectPaintApplied);
-            dispatcher_?.Subscribe<RoomChildObjectPaintAppliedEvent>(OnRoomChildObjectPaintApplied);
             dispatcher_?.Subscribe<RoomFoodAppliedEvent>(OnRoomFoodApplied);
             dispatcher_?.Subscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
             dispatcher_?.Subscribe<RoomHatAppliedEvent>(OnRoomHatApplied);
@@ -45,10 +42,7 @@ namespace Game.Core.DataController
             }
 
             dispatcher_?.Unsubscribe<RoomObjectPlacedEvent>(OnRoomObjectPlaced);
-            dispatcher_?.Unsubscribe<RoomChildObjectPlacedEvent>(OnRoomChildObjectPlaced);
             dispatcher_?.Unsubscribe<RoomPaintAppliedEvent>(OnRoomPaintApplied);
-            dispatcher_?.Unsubscribe<RoomObjectPaintAppliedEvent>(OnRoomObjectPaintApplied);
-            dispatcher_?.Unsubscribe<RoomChildObjectPaintAppliedEvent>(OnRoomChildObjectPaintApplied);
             dispatcher_?.Unsubscribe<RoomFoodAppliedEvent>(OnRoomFoodApplied);
             dispatcher_?.Unsubscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
             dispatcher_?.Unsubscribe<RoomHatAppliedEvent>(OnRoomHatApplied);
@@ -62,24 +56,9 @@ namespace Game.Core.DataController
             repository_?.SetRoomObject(eventData.TargetId, eventData.ItemId);
         }
 
-        private void OnRoomChildObjectPlaced(RoomChildObjectPlacedEvent eventData)
-        {
-            repository_?.SetChildRoomObject(eventData.LocationId, eventData.SlotId, eventData.ItemId);
-        }
-
         private void OnRoomPaintApplied(RoomPaintAppliedEvent eventData)
         {
             repository_?.PaintRoomSurface(eventData.TargetId, eventData.ItemId);
-        }
-
-        private void OnRoomObjectPaintApplied(RoomObjectPaintAppliedEvent eventData)
-        {
-            repository_?.PaintRoomObject(eventData.LocationId, eventData.ItemId);
-        }
-
-        private void OnRoomChildObjectPaintApplied(RoomChildObjectPaintAppliedEvent eventData)
-        {
-            repository_?.PaintChildRoomObject(eventData.LocationId, eventData.SlotId, eventData.ItemId);
         }
 
         private void OnRoomFoodApplied(RoomFoodAppliedEvent eventData)

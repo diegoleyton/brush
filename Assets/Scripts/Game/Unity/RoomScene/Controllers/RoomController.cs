@@ -477,37 +477,12 @@ namespace Game.Unity.RoomScene
                             new RoomObjectPlacedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId))
                     },
                     {
-                        (InteractionPointType.PLACEABLE_OBJECT, RoomTargetKind.PLACEABLE_OBJECT),
-                        eventData => dispatcher_.Send(new RoomChildObjectPlacedEvent(
-                            eventData.Data.ItemId,
-                            eventData.DropArea.ParentTargetId,
-                            eventData.DropArea.TargetId))
-                    },
-                    {
                         (InteractionPointType.PAINT, RoomTargetKind.ROOM),
                         eventData =>
                         {
                             dispatcher_.Send(new RoomPaintDropPositionCapturedEvent(eventData.DropScreenPosition));
                             dispatcher_.Send(
                                 new RoomPaintAppliedEvent(eventData.Data.ItemId, eventData.DropArea.TargetId));
-                        }
-                    },
-                    {
-                        (InteractionPointType.PAINT, RoomTargetKind.PLACEABLE_OBJECT),
-                        eventData =>
-                        {
-                            if (eventData.DropArea.ParentTargetId >= 0)
-                            {
-                                dispatcher_.Send(new RoomChildObjectPaintAppliedEvent(
-                                    eventData.Data.ItemId,
-                                    eventData.DropArea.ParentTargetId,
-                                    eventData.DropArea.TargetId));
-                                return;
-                            }
-
-                            dispatcher_.Send(new RoomObjectPaintAppliedEvent(
-                                eventData.Data.ItemId,
-                                eventData.DropArea.TargetId));
                         }
                     },
                     {

@@ -96,18 +96,10 @@ namespace Game.Unity.RoomScene
                 }
 
                 if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT)
+                    (dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT ||
+                     dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT))
                 {
-                    dropArea.SetParentTargetId(locationId);
-                    dropArea.SetDropEnabled(HasChildSurfaceView(dropArea.TargetId));
-                    continue;
-                }
-
-                if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT)
-                {
-                    dropArea.SetTargetIds(locationId, -1);
-                    dropArea.SetDropEnabled(true);
+                    dropArea.SetDropEnabled(false);
                 }
             }
 
@@ -132,18 +124,10 @@ namespace Game.Unity.RoomScene
                 }
 
                 if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT)
+                    (dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PLACEABLE_OBJECT ||
+                     dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT))
                 {
-                    dropArea.SetParentTargetId(parentLocationId);
                     dropArea.SetDropEnabled(false);
-                    continue;
-                }
-
-                if (dropArea.RoomTargetKind == Definitions.RoomTargetKind.PLACEABLE_OBJECT &&
-                    dropArea.SupportedInventoryType == Core.Data.InteractionPointType.PAINT)
-                {
-                    dropArea.SetTargetIds(parentSlotId, parentLocationId);
-                    dropArea.SetDropEnabled(true);
                 }
             }
 

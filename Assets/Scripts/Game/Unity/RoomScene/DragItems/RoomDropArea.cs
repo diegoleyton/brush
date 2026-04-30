@@ -144,12 +144,7 @@ namespace Game.Unity.RoomScene
                 case RoomTargetKind.ROOM:
                     return true;
                 case RoomTargetKind.PLACEABLE_OBJECT:
-                    if (supportedInventoryType_ == InteractionPointType.PAINT && parentTargetId_ < 0)
-                    {
-                        return true;
-                    }
-
-                    return targetId_ > 0;
+                    return false;
                 default:
                     return false;
             }
@@ -173,12 +168,6 @@ namespace Game.Unity.RoomScene
             if (!CanApplyDraggedItem(data))
             {
                 return false;
-            }
-
-            if (supportedInventoryType_ == InteractionPointType.PLACEABLE_OBJECT &&
-                roomTargetKind_ == RoomTargetKind.PLACEABLE_OBJECT)
-            {
-                return roomSettings_ == null || !roomSettings_.SupportsChildPlaceables(data.ItemId);
             }
 
             return true;
@@ -215,10 +204,8 @@ namespace Game.Unity.RoomScene
             {
                 case RoomTargetKind.ROOM:
                     return !repository_.RoomHasObject(targetId_, itemId);
-                case RoomTargetKind.PLACEABLE_OBJECT:
-                    return !repository_.RoomChildSlotContainsObject(parentTargetId_, targetId_, itemId);
                 default:
-                    return true;
+                    return false;
             }
         }
 
@@ -228,15 +215,8 @@ namespace Game.Unity.RoomScene
             {
                 case RoomTargetKind.ROOM:
                     return !repository_.RoomSurfaceHasPaint(targetId_, itemId);
-                case RoomTargetKind.PLACEABLE_OBJECT:
-                    if (parentTargetId_ < 0)
-                    {
-                        return !repository_.RoomObjectHasPaint(targetId_, itemId);
-                    }
-
-                    return !repository_.RoomChildSlotHasPaint(parentTargetId_, targetId_, itemId);
                 default:
-                    return true;
+                    return false;
             }
         }
 
