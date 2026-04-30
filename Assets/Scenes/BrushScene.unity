@@ -1414,7 +1414,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a188a2147b45c456a9ff30218da6ce66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target_: {fileID: 994375752}
+  bar_: {fileID: 994375752}
+  background_: {fileID: 8588564111442638651}
+  lightBackColor_: {r: 1, g: 1, b: 1, a: 1}
+  darkBackColor_: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
+  brightnessLimit_: 0.9
 --- !u!224 &989324265192366025
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1932,7 +1936,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a188a2147b45c456a9ff30218da6ce66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target_: {fileID: 174596310}
+  bar_: {fileID: 174596310}
+  background_: {fileID: 4652825066442342208}
+  lightBackColor_: {r: 1, g: 1, b: 1, a: 1}
+  darkBackColor_: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
+  brightnessLimit_: 0.9
 --- !u!224 &1810326071707903714
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1990,10 +1998,11 @@ MonoBehaviour:
   brushAnim_: {fileID: 3566242412495837580}
   brushImages_:
   - {fileID: 2572192804630328951}
-  - {fileID: 553819117105833923}
-  - {fileID: 174596310}
-  - {fileID: 994375752}
-  - {fileID: 595931421}
+  brushTimers_:
+  - {fileID: 2867867526129694668}
+  - {fileID: 1809629811692002701}
+  - {fileID: 898770756416451628}
+  - {fileID: 3812624967964048489}
   moveDuration: 0.5
   transitionDuration: 0.2
   initialWaitDuration: 3
@@ -2582,7 +2591,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a188a2147b45c456a9ff30218da6ce66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target_: {fileID: 553819117105833923}
+  bar_: {fileID: 553819117105833923}
+  background_: {fileID: 113531473899674575}
+  lightBackColor_: {r: 1, g: 1, b: 1, a: 1}
+  darkBackColor_: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
+  brightnessLimit_: 0.9
 --- !u!114 &2878816349097153111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3084,7 +3097,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a188a2147b45c456a9ff30218da6ce66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target_: {fileID: 595931421}
+  bar_: {fileID: 595931421}
+  background_: {fileID: 8654383703519588572}
+  lightBackColor_: {r: 1, g: 1, b: 1, a: 1}
+  darkBackColor_: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
+  brightnessLimit_: 0.9
 --- !u!222 &3847143926070470528
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3268,21 +3285,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1735529758740934571}
   m_CullTransparentMesh: 1
---- !u!114 &4367785876478651298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6437718160929989662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c02ff8130b0f4c9d80be65f5fafe6f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  topColor: {r: 1, g: 1, b: 1, a: 1}
-  bottomColor: {r: 1, g: 1, b: 1, a: 1}
-  horizontal: 0
 --- !u!222 &4394793194227913482
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3803,7 +3805,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform_: {fileID: 2532130561674164220}
-  loopMoveSpeed: 3
+  loopMoveSpeed: 5
   loopDistance: 5
   loopRotSpeed: 0
   loopRot: 0
@@ -3829,7 +3831,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform_: {fileID: 455968977948213179}
-  loopMoveSpeed: 3
+  loopMoveSpeed: 5
   loopDistance: 5
   loopRotSpeed: 0
   loopRot: 0
@@ -4355,7 +4357,6 @@ GameObject:
   - component: {fileID: 8673052839651272053}
   - component: {fileID: 3362376583669867201}
   - component: {fileID: 7275333017276813725}
-  - component: {fileID: 4367785876478651298}
   m_Layer: 5
   m_Name: FrontMouth
   m_TagString: Untagged
@@ -4446,8 +4447,8 @@ MonoBehaviour:
   rectTransform_: {fileID: 5108338315594673413}
   loopMoveSpeed: 0
   loopDistance: 0
-  loopRotSpeed: 1
-  loopRot: 7
+  loopRotSpeed: 1.5
+  loopRot: 2
   direction: 1
 --- !u!114 &6642198389747621249
 MonoBehaviour:

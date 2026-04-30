@@ -48,6 +48,17 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         [Min(0f)]
         private float holdToDragMaxDistance_ = 18f;
 
+        [Header("Drop Detection")]
+        [SerializeField]
+        private Vector2 dropDetectionOffset_ = new Vector2(0f, 100f);
+
+        [SerializeField]
+        private bool applyDropDetectionOffsetOnTouchOnly_ = false;
+
+        [SerializeField]
+        [Min(1)]
+        private int dropDetectionSamples_ = 4;
+
         private GestureRoute activeRoute_;
         private bool isPointerDown_;
         private bool holdDragActivated_;
@@ -389,23 +400,30 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 return null;
             }
 
-            List<RaycastResult> raycastResults = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(eventData, raycastResults);
-
-            for (int index = 0; index < raycastResults.Count; index++)
+            List<Vector2> samplePositions = GetDropDetectionSamplePositions(eventData.position);
+            for (int sampleIndex = 0; sampleIndex < samplePositions.Count; sampleIndex++)
             {
-                IUIDragCancelArea cancelArea =
-                    raycastResults[index].gameObject.GetComponentInParent<IUIDragCancelArea>();
-                if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
-                {
-                    return null;
-                }
+                List<RaycastResult> raycastResults = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(
+                    CreateDropDetectionEventData(eventData, samplePositions[sampleIndex]),
+                    raycastResults);
 
-                UIDropTarget dropTarget =
-                    raycastResults[index].gameObject.GetComponentInParent<UIDropTarget>();
-                if (dropTarget != null)
+                for (int index = 0; index < raycastResults.Count; index++)
                 {
-                    if (draggable_ != null && dropTarget.CanAccept(draggable_))
+                    GameObject hitObject = raycastResults[index].gameObject;
+                    if (IsDraggedObjectHit(hitObject))
+                    {
+                        continue;
+                    }
+
+                    IUIDragCancelArea cancelArea = hitObject.GetComponentInParent<IUIDragCancelArea>();
+                    if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
+                    {
+                        return null;
+                    }
+
+                    UIDropTarget dropTarget = hitObject.GetComponentInParent<UIDropTarget>();
+                    if (dropTarget != null && draggable_ != null && dropTarget.CanAccept(draggable_))
                     {
                         return dropTarget;
                     }
@@ -422,16 +440,27 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 return null;
             }
 
-            List<RaycastResult> raycastResults = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(eventData, raycastResults);
-
-            for (int index = 0; index < raycastResults.Count; index++)
+            List<Vector2> samplePositions = GetDropDetectionSamplePositions(eventData.position);
+            for (int sampleIndex = 0; sampleIndex < samplePositions.Count; sampleIndex++)
             {
-                IUIDragCancelArea cancelArea =
-                    raycastResults[index].gameObject.GetComponentInParent<IUIDragCancelArea>();
-                if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
+                List<RaycastResult> raycastResults = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(
+                    CreateDropDetectionEventData(eventData, samplePositions[sampleIndex]),
+                    raycastResults);
+
+                for (int index = 0; index < raycastResults.Count; index++)
                 {
-                    return cancelArea;
+                    GameObject hitObject = raycastResults[index].gameObject;
+                    if (IsDraggedObjectHit(hitObject))
+                    {
+                        continue;
+                    }
+
+                    IUIDragCancelArea cancelArea = hitObject.GetComponentInParent<IUIDragCancelArea>();
+                    if (cancelArea != null && draggable_ != null && cancelArea.CanCancel(draggable_))
+                    {
+                        return cancelArea;
+                    }
                 }
             }
 
@@ -454,6 +483,49 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             };
 
             return eventData;
+        }
+
+        private PointerEventData CreateDropDetectionEventData(PointerEventData source, Vector2 dropDetectionPosition)
+        {
+            PointerEventData eventData = CreatePointerEventData(source);
+            eventData.position = dropDetectionPosition;
+            return eventData;
+        }
+
+        private List<Vector2> GetDropDetectionSamplePositions(Vector2 pointerPosition)
+        {
+            List<Vector2> samplePositions = new List<Vector2>();
+
+            if (applyDropDetectionOffsetOnTouchOnly_ && !ShouldApplyTouchDropDetectionOffset())
+            {
+                samplePositions.Add(pointerPosition);
+                return samplePositions;
+            }
+
+            int sampleCount = Mathf.Max(1, dropDetectionSamples_);
+            for (int sampleIndex = 1; sampleIndex <= sampleCount; sampleIndex++)
+            {
+                float t = sampleCount == 1 ? 1f : (float)sampleIndex / sampleCount;
+                samplePositions.Add(pointerPosition + (dropDetectionOffset_ * t));
+            }
+
+            return samplePositions;
+        }
+
+        private static bool ShouldApplyTouchDropDetectionOffset()
+        {
+            return Application.isMobilePlatform || Input.touchCount > 0;
+        }
+
+        private bool IsDraggedObjectHit(GameObject hitObject)
+        {
+            if (hitObject == null || draggable_ == null)
+            {
+                return false;
+            }
+
+            Transform draggableTransform = draggable_.transform;
+            return hitObject.transform == draggableTransform || hitObject.transform.IsChildOf(draggableTransform);
         }
 
         private void UpdatePointerPositionFromMouse()

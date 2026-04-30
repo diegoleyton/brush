@@ -77,6 +77,7 @@ namespace Game.Unity.ToothBrush
         [SerializeField] private LoopMovement brushAnim_;
 
         [SerializeField] private Image[] brushImages_;
+        [SerializeField] private BrushTimer[] brushTimers_;
 
         [Header("Animation Settings")]
         [SerializeField] private float moveDuration = 0.5f;
@@ -122,7 +123,7 @@ namespace Game.Unity.ToothBrush
 
         public void Pause()
         {
-            NavigationService.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(NavigationService.Back, Play));
+            NavigationService.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(Play, NavigationService.Back));
             PauseInt(PauseType.PAUSE_MENU);
         }
 
@@ -220,6 +221,17 @@ namespace Game.Unity.ToothBrush
                 }
 
                 brushGraphic.color = color;
+            }
+
+            for (int index = 0; index < brushTimers_.Length; index++)
+            {
+                BrushTimer brushTimers = brushTimers_[index];
+                if (brushTimers == null)
+                {
+                    continue;
+                }
+
+                brushTimers.SetColor(color);
             }
         }
 

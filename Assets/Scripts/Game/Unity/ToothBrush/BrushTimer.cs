@@ -9,16 +9,36 @@ namespace Game.Unity.ToothBrush
     /// </summary>
     public class BrushTimer : PausableAnim
     {
-        [SerializeField] Image target_;
+        [SerializeField] Image bar_;
+        [SerializeField] Image background_;
+        [SerializeField] Color lightBackColor_ = Color.white;
+        [SerializeField] Color darkBackColor_ = Color.black;
+
+        [SerializeField] float brightnessLimit_ = 0.7f;
 
         public void StartTimer(float duration)
         {
             StartCoroutine(UpdateBar(duration));
         }
 
+        public void SetColor(Color color)
+        {
+            bar_.color = color;
+            if (background_ != null)
+            {
+                background_.color = ShouldUseDarkBackground(color) ? darkBackColor_ : lightBackColor_;
+            }
+        }
+
+        private bool ShouldUseDarkBackground(Color color)
+        {
+            float brightness = (0.299f * color.r) + (0.587f * color.g) + (0.114f * color.b);
+            return brightness >= brightnessLimit_;
+        }
+
         private IEnumerator UpdateBar(float duration)
         {
-            if (target_ == null || duration <= 0f)
+            if (bar_ == null || duration <= 0f)
                 yield break;
 
             // Save initial scale
@@ -39,13 +59,13 @@ namespace Game.Unity.ToothBrush
                 float t = Mathf.Clamp01(elapsed / duration);
 
                 // Lerp X scale from start to 0
-                target_.fillAmount = Mathf.Lerp(startScale, endScale, t);
+                bar_.fillAmount = Mathf.Lerp(startScale, endScale, t);
 
                 yield return null;
             }
 
             // Ensure it ends exactly at 0
-            target_.fillAmount = endScale;
+            bar_.fillAmount = endScale;
         }
     }
 }
