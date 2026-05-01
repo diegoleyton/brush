@@ -26,6 +26,7 @@ namespace Game.Core.Data
         public string Name;
         public int ProfilePictureId;
         public int Coins = DefaultProfileState.InitialCoins;
+        public float BrushSessionDurationMinutes = DefaultProfileState.DefaultBrushSessionDurationMinutes;
         public Pet PetData = new Pet();
         public Room RoomData = new Room();
         public Inventory InventoryData = new Inventory();

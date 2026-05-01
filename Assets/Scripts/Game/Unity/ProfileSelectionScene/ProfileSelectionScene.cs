@@ -102,6 +102,15 @@ namespace Game.Unity.ProfileSelectionScene
             NavigationService.Navigate(SceneType.RoomScene);
         }
 
+        public void GoToProfileManagementScene()
+        {
+            NavigationService.Navigate(
+                SceneType.PasswordPopup,
+                new PasswordPopupParams(
+                    onAccepted: () => NavigationService.Navigate(SceneType.ProfileManagementScene),
+                    onCancelled: null));
+        }
+
         private void OnProfileSwitched(ProfileSwitchedEvent _)
         {
             RefreshProfileButtons();

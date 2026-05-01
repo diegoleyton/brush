@@ -10,8 +10,10 @@ namespace Game.Unity.Definitions
         RoomScene,
         BrushScene,
         ConfirmPopup,
+        PasswordPopup,
         RewardsScene,
-        ProfileSelectionScene
+        ProfileSelectionScene,
+        ProfileManagementScene
     }
 
     public static class SceneTypeExtension
@@ -21,8 +23,10 @@ namespace Game.Unity.Definitions
             {SceneType.RoomScene, "RoomScene"},
             {SceneType.BrushScene, "BrushScene"},
             {SceneType.ConfirmPopup, "ConfirmPopup"},
+            {SceneType.PasswordPopup, "PasswordPopup"},
             {SceneType.RewardsScene, "RewardsScene"},
-            {SceneType.ProfileSelectionScene, "ProfileSelectionScene"}
+            {SceneType.ProfileSelectionScene, "ProfileSelectionScene"},
+            {SceneType.ProfileManagementScene, "ProfileManagementScene"}
         };
 
         public static string GeTInstruction(this SceneType sceneType)

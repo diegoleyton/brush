@@ -26,11 +26,19 @@ MonoBehaviour:
     TargetType: 1
     Prefab: {fileID: 5699784235750688586, guid: e3f1616d29e5642fd8b2dda926fa0061, type: 3}
   - SceneType: 3
+    SceneName: PasswordPopup
+    TargetType: 1
+    Prefab: {fileID: 5699784235750688586, guid: 9d20766c20fa4935b1948f09d6bb5fd8, type: 3}
+  - SceneType: 4
     SceneName: RewardsScene
     TargetType: 0
     Prefab: {fileID: 0}
-  - SceneType: 4
+  - SceneType: 5
     SceneName: ProfileSelectionScene
+    TargetType: 0
+    Prefab: {fileID: 0}
+  - SceneType: 6
+    SceneName: ProfileManagementScene
     TargetType: 0
     Prefab: {fileID: 0}
   <TransitionNext>k__BackingField: {fileID: 8873921252752505752, guid: 2fdcc266e14be49caa427ba278f7f8f6, type: 3}

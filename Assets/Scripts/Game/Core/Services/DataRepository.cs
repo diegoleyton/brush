@@ -63,6 +63,7 @@ namespace Game.Core.Services
             {
                 Name = name,
                 ProfilePictureId = pictureId,
+                BrushSessionDurationMinutes = DefaultProfileState.DefaultBrushSessionDurationMinutes,
                 PetData = CreatePet(petName),
                 RoomData = CreateRoom(),
                 InventoryData = CreateInventory(),
@@ -206,6 +207,39 @@ namespace Game.Core.Services
             dispatcher_.Send(new ProfileSwitchedEvent());
         }
 
+        public bool DeleteProfile(int index)
+        {
+            if (index < 0 || index >= Data.Profiles.Count)
+            {
+                return false;
+            }
+
+            if (Data.Profiles.Count <= 1)
+            {
+                return false;
+            }
+
+            bool deletingCurrentProfile = index == Data.CurrentProfile;
+            Data.Profiles.RemoveAt(index);
+
+            if (deletingCurrentProfile)
+            {
+                int replacementIndex = Math.Max(0, Math.Min(index, Data.Profiles.Count - 1));
+                CurrentProfile = Data.Profiles[replacementIndex];
+                Data.CurrentProfile = replacementIndex;
+                dispatcher_.Send(new ProfileSwitchedEvent());
+            }
+            else if (Data.CurrentProfile > index)
+            {
+                Data.CurrentProfile--;
+                CurrentProfile = Data.Profiles[Data.CurrentProfile];
+            }
+
+            dispatcher_.Send(new ProfileUpdatedEvent());
+            NotifyDataChanged();
+            return true;
+        }
+
         public void SetPetName(string name)
         {
             if (CurrentProfile?.PetData == null)
@@ -224,6 +258,53 @@ namespace Game.Core.Services
             }
 
             CurrentProfile.PetData.Name = name;
+            dispatcher_.Send(new ProfileUpdatedEvent());
+            NotifyDataChanged();
+        }
+
+        public float GetBrushSessionDurationMinutes()
+        {
+            if (CurrentProfile == null ||
+                CurrentProfile.BrushSessionDurationMinutes <= 0f)
+            {
+                return DefaultProfileState.DefaultBrushSessionDurationMinutes;
+            }
+
+            return CurrentProfile.BrushSessionDurationMinutes;
+        }
+
+        public void SetBrushSessionDurationMinutes(float minutes)
+        {
+            if (Data?.Profiles == null || Data.Profiles.Count == 0)
+            {
+                return;
+            }
+
+            float sanitizedMinutes = Math.Max(0.1f, minutes);
+            bool changed = false;
+
+            for (int index = 0; index < Data.Profiles.Count; index++)
+            {
+                Profile profile = Data.Profiles[index];
+                if (profile == null)
+                {
+                    continue;
+                }
+
+                if (Math.Abs(profile.BrushSessionDurationMinutes - sanitizedMinutes) < 0.001f)
+                {
+                    continue;
+                }
+
+                profile.BrushSessionDurationMinutes = sanitizedMinutes;
+                changed = true;
+            }
+
+            if (!changed)
+            {
+                return;
+            }
+
             dispatcher_.Send(new ProfileUpdatedEvent());
             NotifyDataChanged();
         }

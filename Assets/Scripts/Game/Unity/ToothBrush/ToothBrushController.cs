@@ -53,6 +53,8 @@ namespace Game.Unity.ToothBrush
     /// </summary>
     public class ToothbrushingScene : SceneBase
     {
+        private const float DefaultMoveDuration = 0.3f;
+
         private DataRepository dataRepository_;
         private ScreenBlocker screenBlocker_;
         private EventDispatcher dispatcher_;
@@ -80,7 +82,7 @@ namespace Game.Unity.ToothBrush
         [SerializeField] private BrushTimer[] brushTimers_;
 
         [Header("Animation Settings")]
-        [SerializeField] private float moveDuration = 0.5f;
+        private float moveDuration = DefaultMoveDuration;
         [SerializeField] private float transitionDuration = 0.5f;
         [SerializeField] private float initialWaitDuration = 4f;
         [SerializeField] private float zoneWaitDuration = 2f;
@@ -148,6 +150,7 @@ namespace Game.Unity.ToothBrush
         {
             brushAnim_.Pause();
             started_ = false;
+            moveDuration = ResolveMoveDuration();
 
             if (dataRepository_?.CurrentProfile?.PetData != null)
             {
@@ -172,9 +175,10 @@ namespace Game.Unity.ToothBrush
             if (dataRepository_ != null && dataRepository_.Brush())
             {
                 dataRepository_.SetPendingReward(true);
+                NavigationService.NavigateWithoutHistory(SceneType.RewardsScene);
+                return;
             }
-
-            NavigationService.NavigateWithoutHistory(SceneType.RewardsScene);
+            NavigationService.Back();
         }
 
         private void PauseInt(PauseType pauseType)
@@ -253,7 +257,7 @@ namespace Game.Unity.ToothBrush
                 SetBrushOrientation(BrushOrientation.Back, target.position);
                 yield return StartCoroutine(Wait(initialWaitDuration));
 
-                target.timer?.StartTimer(moveDuration * 3f + 2f * transitionDuration + 1f + 2f * zoneWaitDuration);
+                target.timer?.StartTimer(GetTargetRemainingDurationAfterInitialWait());
 
                 target.dirt?.Run(moveDuration);
                 brushAnim_.Play((int)PauseType.INTERNAL);
@@ -299,6 +303,31 @@ namespace Game.Unity.ToothBrush
 
             OnFinish();
         }
+
+        private float ResolveMoveDuration()
+        {
+            if (targets_ == null || targets_.Count <= 0)
+            {
+                return DefaultMoveDuration;
+            }
+
+            float desiredMinutes = dataRepository_?.GetBrushSessionDurationMinutes() ??
+                DefaultProfileState.DefaultBrushSessionDurationMinutes;
+            float desiredSeconds = desiredMinutes * 60f;
+            float fixedDuration =
+                (targets_.Count * (initialWaitDuration + (2f * zoneWaitDuration) + (6f * transitionDuration))) +
+                transitionDuration +
+                finishDuration;
+            float moveBudget = desiredSeconds - fixedDuration;
+            float calculatedMoveDuration = moveBudget / (targets_.Count * 3f);
+
+            return calculatedMoveDuration >= DefaultMoveDuration
+                ? calculatedMoveDuration
+                : DefaultMoveDuration;
+        }
+
+        private float GetTargetRemainingDurationAfterInitialWait() =>
+            (3f * moveDuration) + (5f * transitionDuration) + (2f * zoneWaitDuration);
 
         private IEnumerator Move(RectTransform target1, RectTransform target2)
         {
