@@ -22,6 +22,9 @@ namespace Game.Unity.Settings
         private int defaultEyesItemId_ = 1;
 
         [SerializeField]
+        private int defaultDressItemId_ = 1;
+
+        [SerializeField]
         private Sprite paintItemSprite_;
 
         [SerializeField]
@@ -58,6 +61,7 @@ namespace Game.Unity.Settings
         private Vector2 placeableObjectDragPointerOffset_ = new Vector2(0f, 120f);
 
         public int DefaultEyesItemId => defaultEyesItemId_;
+        public int DefaultDressItemId => defaultDressItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
         public Sprite SkinItemSprite => skinItemSprite_;
         public Sprite CurrencyRewardSprite => currencyRewardSprite_;

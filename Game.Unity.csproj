@@ -71,6 +71,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionButtonView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/DressItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/IItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ConfirmPopupParams.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Settings/ItemColorPalette.cs" />

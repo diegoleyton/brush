@@ -100,6 +100,8 @@ namespace Game.Unity.Development
                     return Dress;
                 case InteractionPointType.EYES:
                     return Eyes;
+                case InteractionPointType.CURRENCY:
+                    return null;
                 default:
                     return null;
             }

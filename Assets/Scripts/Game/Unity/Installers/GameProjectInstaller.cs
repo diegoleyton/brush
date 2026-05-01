@@ -114,6 +114,10 @@ namespace Game.Unity.Installers
                 .AsSingle();
 
             Container.Bind<IItemView>()
+                .To<DressItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
                 .To<EyesItemView>()
                 .AsSingle();
 

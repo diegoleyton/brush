@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
-using Game.Core.Configuration;
 using Game.Core.Services;
+using Game.Unity.Settings;
 
 using Zenject;
 
@@ -14,13 +14,16 @@ namespace Game.Unity.RoomScene
     {
         private readonly IReadOnlyList<PetDressSurfaceView> dressSurfaceViews_;
         private readonly DataRepository repository_;
+        private readonly RoomSettings roomSettings_;
 
         public PetDressController(
             IReadOnlyList<PetDressSurfaceView> dressSurfaceViews,
-            DataRepository repository)
+            DataRepository repository,
+            RoomSettings roomSettings)
         {
             dressSurfaceViews_ = dressSurfaceViews;
             repository_ = repository;
+            roomSettings_ = roomSettings;
         }
 
         public void Refresh()
@@ -31,7 +34,7 @@ namespace Game.Unity.RoomScene
             }
 
             int dressItemId = repository_?.CurrentProfile?.PetData?.DressItemId
-                ?? DefaultProfileState.DefaultPetDressItemId;
+                ?? (roomSettings_ != null ? roomSettings_.DefaultDressItemId : 1);
 
             for (int index = 0; index < dressSurfaceViews_.Count; index++)
             {
@@ -41,10 +44,7 @@ namespace Game.Unity.RoomScene
                     continue;
                 }
 
-                surfaceView.ResetColor();
-                surfaceView.ApplyDressColor(RoomItemVisuals.GetItemColor(
-                    Core.Data.InteractionPointType.DRESS,
-                    dressItemId));
+                surfaceView.ApplyDress(dressItemId);
             }
         }
 

@@ -5,6 +5,7 @@ namespace Game.Unity.Definitions
     /// </summary>
     public static class AssetNameResolver
     {
+        private const string DRESS_ASSET_PREFIX = "dress_";
         private const string EYES_ASSET_PREFIX = "eyes_";
         private const string FOOD_ASSET_PREFIX = "food_";
         private const string PLACEABLE_ITEM_ASSET_PREFIX = "item_";
@@ -15,6 +16,14 @@ namespace Game.Unity.Definitions
         public static string GetEyeAssetName(int id)
         {
             return EYES_ASSET_PREFIX + id;
+        }
+
+        /// <summary>
+        /// Get the dress asset name for an id.
+        /// </summary>
+        public static string GetDressAssetName(int id)
+        {
+            return DRESS_ASSET_PREFIX + id;
         }
 
         /// <summary>

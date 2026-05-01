@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Dress
+  m_EditorClassIdentifier: 
+  m_GroupName: Dress
+  m_GUID: cde4ac462dc104350aa4b94c803ee303
+  m_SerializeEntries:
+  - m_GUID: 0253b511343c34d5fa28bbc989fe0c95
+    m_Address: dress_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2f49ed14fb06d4a33bf3694d3b4e904c
+    m_Address: dress_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ae984eb514574765b5ae096e7bf1d2a
+    m_Address: dress_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b534657f6e9194fe7a5d63a98870b157
+    m_Address: dress_0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 27ccb70d5eff541d186f82508d714642, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 8b67e86578653415a84a005ab7aafa1d, type: 2}
+    - {fileID: 11400000, guid: a8966b953b90b4f15abcffc8fb309f6a, type: 2}

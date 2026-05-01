@@ -16,7 +16,7 @@ namespace Game.Core.Configuration
         public const int DefaultPetEyesItemId = 1;
         public const int DefaultPetSkinItemId = 1;
         public const int DefaultPetHatItemId = 1;
-        public const int DefaultPetDressItemId = 1;
+        public const int DefaultPetDressItemId = 0;
         public const float DefaultBrushSessionDurationMinutes = 2f;
 
         public const bool InitialPendingReward = true;

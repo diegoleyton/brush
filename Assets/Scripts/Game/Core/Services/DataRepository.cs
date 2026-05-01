@@ -160,6 +160,12 @@ namespace Game.Core.Services
                 return MarketPurchaseStatus.ITEM_NOT_FOUND;
             }
 
+            if (IsMarketItemAlreadyOwned(itemType, itemId))
+            {
+                dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ALREADY_OWNED, itemDefinition));
+                return MarketPurchaseStatus.ALREADY_OWNED;
+            }
+
             Dictionary<int, int> items = CurrentProfile.InventoryData.GetInventoryItems(itemType);
             if (items.TryGetValue(itemId, out int currentQuantity) && currentQuantity == -1)
             {
@@ -174,7 +180,15 @@ namespace Game.Core.Services
             }
 
             SpendCurrency(itemDefinition.CurrencyType, itemDefinition.Price);
-            AddInventoryItem(itemType, itemId, itemDefinition.Quantity);
+            if (itemType == InteractionPointType.DRESS)
+            {
+                UnlockOwnedDress(itemId);
+            }
+            else
+            {
+                AddInventoryItem(itemType, itemId, itemDefinition.Quantity);
+            }
+
             NotifyInventoryChanged();
             dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.OK, itemDefinition));
             NotifyDataChanged();
@@ -376,6 +390,13 @@ namespace Game.Core.Services
             if (CurrentProfile?.InventoryData == null)
             {
                 return false;
+            }
+
+            if (itemType == InteractionPointType.DRESS &&
+                CurrentProfile.PetData != null &&
+                CurrentProfile.PetData.DressItemId == itemId)
+            {
+                return true;
             }
 
             Dictionary<int, int> items = CurrentProfile.InventoryData.GetInventoryItems(itemType);
@@ -601,9 +622,24 @@ namespace Game.Core.Services
                 return;
             }
 
+            int previousDressItemId = CurrentProfile.PetData.DressItemId;
             CurrentProfile.PetData.DressItemId = itemId;
+
+            if (itemId > 0)
+            {
+                CurrentProfile.InventoryData.Dress.Remove(itemId);
+            }
+
+            EnsureDefaultDressOwned();
+
+            if (previousDressItemId > 0)
+            {
+                UnlockOwnedDress(previousDressItemId);
+            }
+
             logger_?.Log($"[RoomData] Applied pet dress item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.DRESS, itemId);
+            NotifyInventoryChanged();
+            NotifyDataChanged();
             NotifyPetDataApplied(InteractionPointType.DRESS, itemId);
         }
 
@@ -660,7 +696,15 @@ namespace Game.Core.Services
 
         public void AddDress(int id, int quantity)
         {
-            AddInventoryItem(CurrentProfile.InventoryData.Dress, id, quantity);
+            if (id == DefaultProfileState.DefaultPetDressItemId)
+            {
+                EnsureDefaultDressOwned();
+            }
+            else if (quantity > 0)
+            {
+                UnlockOwnedDress(id);
+            }
+
             NotifyInventoryChanged();
             NotifyDataChanged();
         }
@@ -732,6 +776,26 @@ namespace Game.Core.Services
                 default:
                     throw new ArgumentOutOfRangeException(nameof(reward.Kind), reward.Kind, null);
             }
+        }
+
+        private void EnsureDefaultDressOwned()
+        {
+            if (CurrentProfile?.InventoryData?.Dress == null)
+            {
+                return;
+            }
+
+            CurrentProfile.InventoryData.Dress[DefaultProfileState.DefaultPetDressItemId] = -1;
+        }
+
+        private void UnlockOwnedDress(int itemId)
+        {
+            if (CurrentProfile?.InventoryData?.Dress == null || itemId <= 0)
+            {
+                return;
+            }
+
+            CurrentProfile.InventoryData.Dress[itemId] = -1;
         }
 
         private void SpendCurrency(CurrencyType currencyType, int amount)
