@@ -1,4 +1,5 @@
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Data;
 using Game.Core.Events;
@@ -25,23 +26,27 @@ namespace Game.Unity.RoomScene
         private readonly EventDispatcher dispatcher_;
         private readonly DataRepository repository_;
         private readonly InventoryDropEffectPositionTracker dropEffectPositionTracker_;
+        private readonly ScreenBlocker screenBlocker_;
 
         private bool isFoodDragActive_;
         private bool foodDropAccepted_;
         private bool foodDragEnded_;
         private int foodItemId_;
         private FoodApplyOutcome foodApplyOutcome_;
+        private System.IDisposable eatBlockScope_;
 
         public PetFoodController(
             PetView petView,
             EventDispatcher dispatcher,
             DataRepository repository,
-            InventoryDropEffectPositionTracker dropEffectPositionTracker)
+            InventoryDropEffectPositionTracker dropEffectPositionTracker,
+            ScreenBlocker screenBlocker)
         {
             petView_ = petView;
             dispatcher_ = dispatcher;
             repository_ = repository;
             dropEffectPositionTracker_ = dropEffectPositionTracker;
+            screenBlocker_ = screenBlocker;
             if (petView_ != null)
             {
                 petView_.EatAnimationCompleted += OnEatAnimationCompleted;
@@ -51,6 +56,8 @@ namespace Game.Unity.RoomScene
 
         public void Dispose()
         {
+            DisposeEatBlockScope();
+
             if (petView_ != null)
             {
                 petView_.EatAnimationCompleted -= OnEatAnimationCompleted;
@@ -145,12 +152,15 @@ namespace Game.Unity.RoomScene
             switch (foodApplyOutcome_)
             {
                 case FoodApplyOutcome.Success:
+                    DisposeEatBlockScope();
+                    eatBlockScope_ = screenBlocker_?.BlockScope("PetEatAnimation");
                     petView_?.Eat(
                         foodItemId_,
                         dropEffectPositionTracker_?.Consume(InteractionPointType.FOOD));
                     ResetFoodState();
                     return;
                 case FoodApplyOutcome.Failed:
+                    DisposeEatBlockScope();
                     petView_?.ExitFoodState();
                     ResetFoodState();
                     return;
@@ -168,7 +178,19 @@ namespace Game.Unity.RoomScene
 
         private void OnEatAnimationCompleted()
         {
+            DisposeEatBlockScope();
             dispatcher_?.Send(new PetFoodAnimationCompletedEvent());
+        }
+
+        private void DisposeEatBlockScope()
+        {
+            if (eatBlockScope_ == null)
+            {
+                return;
+            }
+
+            eatBlockScope_.Dispose();
+            eatBlockScope_ = null;
         }
 
         private bool IsFoodEvent(RoomInventoryItemData data)

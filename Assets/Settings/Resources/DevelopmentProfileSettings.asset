@@ -18,13 +18,15 @@ MonoBehaviour:
   <PetName>k__BackingField: Brushy
   <ProfilePictureId>k__BackingField: 1
   <MinimumCoins>k__BackingField: 250
+  <ForcePlaceableObjectRewardsOnly>k__BackingField: 1
+  <TestProfileCount>k__BackingField: 3
   <PlaceableObjects>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
     <FirstItemCount>k__BackingField: 16
     <AdditionalItems>k__BackingField: []
   <Paint>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
-    <FirstItemCount>k__BackingField: 5
+    <FirstItemCount>k__BackingField: 20
     <AdditionalItems>k__BackingField: []
   <Food>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
@@ -32,7 +34,7 @@ MonoBehaviour:
     <AdditionalItems>k__BackingField: []
   <Skin>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
-    <FirstItemCount>k__BackingField: 6
+    <FirstItemCount>k__BackingField: 20
     <AdditionalItems>k__BackingField: []
   <Hat>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 0

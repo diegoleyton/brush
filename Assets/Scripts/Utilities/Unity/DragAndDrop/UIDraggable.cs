@@ -28,6 +28,9 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         [SerializeField]
         private bool cancelWithEscapeKey_ = true;
 
+        [SerializeField]
+        private Vector2 dragPointerOffset_;
+
         [Header("Behaviour")]
         [SerializeField]
         private bool returnToOriginOnCancel_ = true;
@@ -74,6 +77,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private bool dropAccepted_;
         private bool isDragging_;
         private bool usedDragVisual_;
+        private bool wasCancelledByCancelArea_;
 
         /// <summary>
         /// Gets whether this element is currently being dragged.
@@ -84,6 +88,11 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         /// Gets the currently hovered drop target, if any.
         /// </summary>
         public UIDropTarget HoveredTarget => hoveredTarget_;
+
+        /// <summary>
+        /// Gets whether the active drag was released over a cancel area.
+        /// </summary>
+        protected bool WasCancelledByCancelArea => wasCancelledByCancelArea_;
 
         internal RectTransform DraggedRectTransform =>
             activeDraggedRectTransform_ != null ? activeDraggedRectTransform_ : rectTransform_;
@@ -132,6 +141,23 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         public void SetDragRoot(RectTransform dragRoot)
         {
             dragRoot_ = dragRoot;
+        }
+
+        /// <summary>
+        /// Sets a screen-space offset applied while following the pointer during drag.
+        /// Positive Y moves the dragged visual upward on screen.
+        /// </summary>
+        public void SetDragPointerOffset(Vector2 dragPointerOffset)
+        {
+            dragPointerOffset_ = dragPointerOffset;
+        }
+
+        /// <summary>
+        /// Sets the drag router used to delegate gesture routing for this draggable.
+        /// </summary>
+        public void SetDragRouter(IUIDragRouter dragRouter)
+        {
+            dragRouter_ = dragRouter;
         }
 
         /// <summary>
@@ -268,6 +294,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                 return;
             }
 
+            if (wasCancelledByCancelArea_)
+            {
+                CancelDrag(DragCancelReason.CancelArea);
+                return;
+            }
+
             if (activeDragVisualInstance_ != null)
             {
                 CancelDrag(DragCancelReason.FailedDrop);
@@ -335,6 +367,17 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             return true;
         }
 
+        internal void NotifyCancelledByCancelArea()
+        {
+            if (!isDragging_)
+            {
+                return;
+            }
+
+            wasCancelledByCancelArea_ = true;
+            OnDragCancelledByCancelArea();
+        }
+
         /// <summary>
         /// Called after this draggable has been accepted by a drop target.
         /// </summary>
@@ -353,6 +396,13 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         /// Called when dragging ends, either successfully or unsuccessfully.
         /// </summary>
         public virtual void OnDragEnded(bool dropAccepted)
+        {
+        }
+
+        /// <summary>
+        /// Called when the active drag is released over a cancel area.
+        /// </summary>
+        public virtual void OnDragCancelledByCancelArea()
         {
         }
 
@@ -420,7 +470,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
                     DestroyActiveDragVisual();
                 }
             }
-            else if (returnToOriginOnCancel_ || reason == DragCancelReason.FailedDrop)
+            else if (ShouldRestoreOriginalTransformOnCancel(reason))
             {
                 RestoreOriginalTransform();
             }
@@ -458,10 +508,24 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
             activeDraggedRectTransform_ = null;
             activeDragVisualInstance_ = null;
             usedDragVisual_ = false;
+            wasCancelledByCancelArea_ = false;
 
             if (canvasGroup_ != null)
             {
                 canvasGroup_.blocksRaycasts = originalBlocksRaycasts_;
+            }
+        }
+
+        private bool ShouldRestoreOriginalTransformOnCancel(DragCancelReason reason)
+        {
+            switch (reason)
+            {
+                case DragCancelReason.FailedDrop:
+                    return returnToOriginOnFailedDrop_;
+                case DragCancelReason.CancelArea:
+                    return returnToOriginOnCancel_;
+                default:
+                    return returnToOriginOnCancel_;
             }
         }
 
@@ -489,7 +553,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                     dragRoot,
-                    eventData.position,
+                    eventData.position + dragPointerOffset_,
                     eventData.pressEventCamera,
                     out Vector3 worldPoint))
             {

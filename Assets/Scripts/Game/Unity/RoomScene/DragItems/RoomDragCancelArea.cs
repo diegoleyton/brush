@@ -54,7 +54,8 @@ namespace Game.Unity.RoomScene
 
         public bool CanCancel(UIDraggable draggable)
         {
-            return visible_ && draggable is RoomInventoryDraggable;
+            return visible_ &&
+                (draggable is RoomInventoryDraggable || draggable is RoomPlacedObjectDraggable);
         }
 
         public void OnDragHoverEntered(UIDraggable draggable)

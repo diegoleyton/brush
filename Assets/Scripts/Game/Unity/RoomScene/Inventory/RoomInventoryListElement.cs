@@ -1,16 +1,14 @@
 using Flowbit.Utilities.Unity.ScrollableList;
 using Flowbit.Utilities.Unity.Instantiator;
-using Flowbit.Utilities.Unity.AssetLoader;
 
 using Game.Core.Data;
-using Game.Unity.Definitions;
-using Game.Unity.Settings;
 
 using UnityEngine;
 using UnityEngine.UI;
 
 using System;
 using Zenject;
+using Game.Unity.Definitions;
 
 namespace Game.Unity.RoomScene
 {
@@ -33,12 +31,8 @@ namespace Game.Unity.RoomScene
     {
         private RoomInventoryItemData data_;
         private IObjectInstantiator instantiator_;
-        private IAssetLoader assetLoader_;
-        private RoomSettings roomSettings_;
-        private IAssetLoadHandle<Sprite> activeHandle_;
-        private IAssetLoadHandle<Sprite> pendingHandle_;
-        private int loadVersion_;
-        private Sprite defaultSprite_;
+        private ItemViewRegistry itemViewRegistry_;
+        private ItemViewRenderer itemViewRenderer_;
 
         [SerializeField]
         private Image image_;
@@ -63,66 +57,33 @@ namespace Game.Unity.RoomScene
 
         [Inject]
         public void Construct(
-            IAssetLoader assetLoader,
-            RoomSettings roomSettings,
+            Flowbit.Utilities.Unity.AssetLoader.IAssetLoader assetLoader,
+            Game.Unity.Settings.RoomSettings roomSettings,
+            ItemViewRegistry itemViewRegistry,
             [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
-            assetLoader_ = assetLoader;
-            roomSettings_ = roomSettings;
             instantiator_ = instantiator;
+            itemViewRegistry_ = itemViewRegistry;
+            itemViewRenderer_ = new ItemViewRenderer(
+                image_,
+                extraImage1_,
+                extraImage2_,
+                assetLoader,
+                roomSettings,
+                nameof(RoomInventoryListElement));
         }
 
         private void OnDestroy()
         {
-            ReleaseHandle(ref pendingHandle_);
-            ReleaseHandle(ref activeHandle_);
-        }
-
-        private void Awake()
-        {
-            if (image_ != null)
-            {
-                defaultSprite_ = image_.sprite;
-            }
+            itemViewRenderer_?.Dispose();
         }
 
         public override void Show(RoomInventoryItemData data)
         {
             data_ = data;
             gameObject.SetActive(true);
-            InvalidatePendingVisualLoads();
-            ResetVisualState();
-
-            if (image_ != null)
-            {
-                if (data.InteractionPointType == InteractionPointType.PLACEABLE_OBJECT)
-                {
-                    ApplyPlaceableItem(data.ItemId);
-                }
-                else if (data.InteractionPointType == InteractionPointType.FOOD)
-                {
-                    ApplyFoodItem(data.ItemId);
-                }
-                else if (data.InteractionPointType == InteractionPointType.PAINT)
-                {
-                    ApplyPaintItem(data.Color);
-                }
-                else if (data.InteractionPointType == InteractionPointType.SKIN)
-                {
-                    ApplySkinItem(data.Color);
-                }
-                else if (data.InteractionPointType == InteractionPointType.EYES)
-                {
-                    ApplyEyes(data.ItemId);
-                }
-                else
-                {
-                    image_.enabled = true;
-                    image_.sprite = defaultSprite_;
-                    SetImageAlpha(1f);
-                    image_.color = data.Color;
-                }
-            }
+            itemViewRenderer_.Reset();
+            itemViewRegistry_.SetView(data, itemViewRenderer_);
 
             if (quantityText_ != null)
             {
@@ -167,8 +128,7 @@ namespace Game.Unity.RoomScene
                 draggable_.SetDragVisualFactory(null);
             }
 
-            InvalidatePendingVisualLoads();
-            ResetVisualState();
+            itemViewRenderer_.Reset();
 
             if (quantityText_ != null)
             {
@@ -186,58 +146,7 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
-            if (data_.InteractionPointType == InteractionPointType.PLACEABLE_OBJECT)
-            {
-                dragVisualInstance.SetColor(Color.white);
-
-                if (image_ != null && image_.sprite != null)
-                {
-                    dragVisualInstance.SetSprite(image_.sprite);
-                    return;
-                }
-
-                dragVisualInstance.ApplyPlaceableItem(data_.ItemId);
-                return;
-            }
-
-            if (data_.InteractionPointType == InteractionPointType.FOOD)
-            {
-                if (image_ != null && image_.sprite != null)
-                {
-                    dragVisualInstance.SetSprite(image_.sprite);
-                    return;
-                }
-
-                dragVisualInstance.ApplyFoodItem(data_.ItemId);
-                return;
-            }
-
-            if (data_.InteractionPointType == InteractionPointType.EYES)
-            {
-                if (extraImage1_ != null && extraImage1_.sprite != null)
-                {
-                    dragVisualInstance.SetEyesSprite(extraImage1_.sprite);
-                    return;
-                }
-
-                dragVisualInstance.ApplyEyes(data_.ItemId);
-                return;
-            }
-
-            if (data_.InteractionPointType == InteractionPointType.PAINT)
-            {
-                dragVisualInstance.ApplyPaintItem(data_.Color);
-                return;
-            }
-
-            if (data_.InteractionPointType == InteractionPointType.SKIN)
-            {
-                dragVisualInstance.ApplySkinItem(data_.Color);
-                return;
-            }
-
-            dragVisualInstance.SetSprite(null);
-            dragVisualInstance.SetColor(data_.Color);
+            dragVisualInstance.Show(data_);
         }
 
         private RectTransform CreateDragVisualInstance()
@@ -269,275 +178,6 @@ namespace Game.Unity.RoomScene
             }
 
             return transform.parent;
-        }
-
-        private void ApplyPlaceableItem(int itemId)
-        {
-            if (assetLoader_ == null || image_ == null)
-            {
-                return;
-            }
-
-            int requestVersion = ++loadVersion_;
-            ReleaseHandle(ref pendingHandle_);
-            image_.color = Color.white;
-            image_.sprite = defaultSprite_;
-            image_.enabled = true;
-            SetImageAlpha(0f);
-
-            string assetName = AssetNameResolver.GetPlaceableItemAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite == null)
-                {
-                    ShowMainImageFallback();
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                image_.sprite = sprite;
-                image_.enabled = true;
-                SetImageAlpha(1f);
-                ReleaseHandle(ref activeHandle_);
-                activeHandle_ = pendingHandle_;
-                pendingHandle_ = null;
-            });
-        }
-
-        private void ApplyFoodItem(int itemId)
-        {
-            if (assetLoader_ == null || image_ == null)
-            {
-                return;
-            }
-
-            int requestVersion = ++loadVersion_;
-            ReleaseHandle(ref pendingHandle_);
-            image_.color = Color.white;
-            image_.sprite = defaultSprite_;
-            image_.enabled = true;
-            SetImageAlpha(1f);
-            SetExtraImagesAlpha(0f);
-
-            string assetName = AssetNameResolver.GetFoodAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite == null)
-                {
-                    ShowMainImageFallback();
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                image_.sprite = sprite;
-                image_.enabled = true;
-                SetImageAlpha(1f);
-                ReleaseHandle(ref activeHandle_);
-                activeHandle_ = pendingHandle_;
-                pendingHandle_ = null;
-            });
-        }
-
-        private void ApplyPaintItem(Color color)
-        {
-            if (image_ == null)
-            {
-                return;
-            }
-
-            if (roomSettings_ == null || roomSettings_.PaintItemSprite == null)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(RoomInventoryListElement)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
-            }
-
-            ApplyTintedMainImage(roomSettings_.PaintItemSprite, color);
-        }
-
-        private void ApplySkinItem(Color color)
-        {
-            if (image_ == null)
-            {
-                return;
-            }
-
-            if (roomSettings_ == null || roomSettings_.SkinItemSprite == null)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(RoomInventoryListElement)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.SkinItemSprite)} to render skin items.");
-            }
-
-            ApplyTintedMainImage(roomSettings_.SkinItemSprite, color);
-        }
-
-        private void ApplyTintedMainImage(Sprite sprite, Color color)
-        {
-            SetExtraImagesAlpha(0f);
-            image_.sprite = sprite;
-            image_.enabled = true;
-            image_.color = color;
-            SetImageAlpha(1f);
-        }
-
-        private void ApplyEyes(int itemId)
-        {
-            if (assetLoader_ == null)
-            {
-                return;
-            }
-
-            SetExtraImagesAlpha(0f);
-            if (image_ != null)
-            {
-                image_.sprite = defaultSprite_;
-                image_.enabled = true;
-                image_.color = Color.white;
-                SetImageAlpha(1f);
-            }
-
-            int requestVersion = ++loadVersion_;
-            StartEyesLoad(itemId, requestVersion, allowFallback: true);
-        }
-
-        private void StartEyesLoad(int itemId, int requestVersion, bool allowFallback)
-        {
-            ReleaseHandle(ref pendingHandle_);
-
-            string assetName = AssetNameResolver.GetEyeAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite != null)
-                {
-                    SetEyesSprite(sprite);
-                    ReleaseHandle(ref activeHandle_);
-                    activeHandle_ = pendingHandle_;
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                pendingHandle_ = null;
-
-                if (allowFallback && roomSettings_ != null && roomSettings_.DefaultEyesItemId != itemId)
-                {
-                    StartEyesLoad(roomSettings_.DefaultEyesItemId, requestVersion, allowFallback: false);
-                    return;
-                }
-
-                ShowMainImageFallback();
-            });
-        }
-
-        private void SetEyesSprite(Sprite sprite)
-        {
-            if (extraImage1_ != null)
-            {
-                extraImage1_.sprite = sprite;
-            }
-
-            if (extraImage2_ != null)
-            {
-                extraImage2_.sprite = sprite;
-            }
-
-            SetExtraImagesAlpha(sprite != null ? 1f : 0f);
-
-            if (image_ != null)
-            {
-                SetImageAlpha(0f);
-            }
-        }
-
-        private void ResetVisualState()
-        {
-            if (image_ != null)
-            {
-                image_.sprite = defaultSprite_;
-                image_.enabled = true;
-                image_.color = Color.white;
-                SetImageAlpha(1f);
-            }
-
-            if (extraImage1_ != null)
-            {
-                extraImage1_.sprite = null;
-            }
-
-            if (extraImage2_ != null)
-            {
-                extraImage2_.sprite = null;
-            }
-
-            SetExtraImagesAlpha(0f);
-        }
-
-        private void ShowMainImageFallback()
-        {
-            if (image_ == null)
-            {
-                return;
-            }
-
-            image_.sprite = defaultSprite_;
-            image_.enabled = true;
-            image_.color = Color.white;
-            SetImageAlpha(1f);
-            SetExtraImagesAlpha(0f);
-        }
-
-        private void InvalidatePendingVisualLoads()
-        {
-            loadVersion_++;
-            ReleaseHandle(ref pendingHandle_);
-            ReleaseHandle(ref activeHandle_);
-        }
-
-        private void SetExtraImagesAlpha(float alpha)
-        {
-            SetGraphicAlpha(extraImage1_, alpha);
-            SetGraphicAlpha(extraImage2_, alpha);
-        }
-
-        private void SetImageAlpha(float alpha)
-        {
-            SetGraphicAlpha(image_, alpha);
-        }
-
-        private static void SetGraphicAlpha(Graphic graphic, float alpha)
-        {
-            if (graphic == null)
-            {
-                return;
-            }
-
-            Color color = graphic.color;
-            color.a = alpha;
-            graphic.color = color;
-        }
-
-        private static void ReleaseHandle(ref IAssetLoadHandle<Sprite> handle)
-        {
-            if (handle == null)
-            {
-                return;
-            }
-
-            handle.Release();
-            handle = null;
         }
     }
 }

@@ -25,6 +25,8 @@ namespace Game.Unity.RoomScene
             }
 
             visual.SetParent(itemContainer_, false);
+            itemContainer_.SetAsLastSibling();
+            visual.SetAsLastSibling();
             visual.anchorMin = Vector2.zero;
             visual.anchorMax = Vector2.one;
             visual.pivot = new Vector2(0.5f, 0.5f);

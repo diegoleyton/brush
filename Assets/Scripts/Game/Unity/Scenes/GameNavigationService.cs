@@ -6,6 +6,8 @@ using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.UI;
 using UnityEngine.SceneManagement;
 using System;
+using System.Collections.Generic;
+using System.Collections;
 
 
 namespace Game.Unity.Scenes
@@ -25,6 +27,9 @@ namespace Game.Unity.Scenes
         private readonly ScreenBlocker screenBlocker_;
 
         private IDisposable navigationBlock_;
+        private readonly Queue<PendingNavigationRequest> pendingRequests_ = new();
+        private bool sceneTransitionInProgress_;
+        private bool processingQueuedRequest_;
 
         public GameNavigationService(
             INavigationService navigationService,
@@ -54,7 +59,12 @@ namespace Game.Unity.Scenes
             SceneType sceneType,
             NavigationParams navigationParams = null)
         {
-            NavigateInternal(sceneType, navigationParams, addCurrentSceneToHistory: true);
+            EnqueueOrExecute(
+                new PendingNavigationRequest(
+                    PendingNavigationRequestType.Navigate,
+                    sceneType,
+                    navigationParams,
+                    addCurrentSceneToHistory: true));
         }
 
         /// <summary>
@@ -64,7 +74,12 @@ namespace Game.Unity.Scenes
             SceneType sceneType,
             NavigationParams navigationParams = null)
         {
-            NavigateInternal(sceneType, navigationParams, addCurrentSceneToHistory: false);
+            EnqueueOrExecute(
+                new PendingNavigationRequest(
+                    PendingNavigationRequestType.Navigate,
+                    sceneType,
+                    navigationParams,
+                    addCurrentSceneToHistory: false));
         }
 
         /// <summary>
@@ -72,8 +87,7 @@ namespace Game.Unity.Scenes
         /// </summary>
         public void Back()
         {
-            coroutineService_.StartCoroutine(navigationService_.Back());
-            eventDispatcher_?.Send(new OnPreviousScene());
+            EnqueueOrExecute(new PendingNavigationRequest(PendingNavigationRequestType.Back));
         }
 
         /// <summary>
@@ -81,9 +95,7 @@ namespace Game.Unity.Scenes
         /// </summary>
         public void Close(SceneType sceneType)
         {
-            string id = sceneSettings_.GetTarget(sceneType).Id;
-            coroutineService_.StartCoroutine(navigationService_.Close(id));
-            eventDispatcher_?.Send(new OnPopupClose());
+            EnqueueOrExecute(new PendingNavigationRequest(PendingNavigationRequestType.Close, sceneType));
         }
 
         /// <summary>
@@ -91,16 +103,65 @@ namespace Game.Unity.Scenes
         /// </summary>
         public bool CanGoBack => navigationService_.CanGoBack;
 
+        private void EnqueueOrExecute(PendingNavigationRequest request)
+        {
+            if (sceneTransitionInProgress_)
+            {
+                pendingRequests_.Enqueue(request);
+                return;
+            }
+
+            ExecuteRequest(request);
+        }
+
+        private void ExecuteRequest(PendingNavigationRequest request)
+        {
+            switch (request.RequestType)
+            {
+                case PendingNavigationRequestType.Navigate:
+                    NavigateInternal(
+                        request.SceneType,
+                        request.NavigationParams,
+                        request.AddCurrentSceneToHistory);
+                    break;
+
+                case PendingNavigationRequestType.Back:
+                    StartSceneTransition();
+                    coroutineService_.StartCoroutine(RunSceneNavigation(navigationService_.Back()));
+                    eventDispatcher_?.Send(new OnPreviousScene());
+                    break;
+
+                case PendingNavigationRequestType.Close:
+                    CloseInternal(request.SceneType);
+                    break;
+
+                default:
+                    throw new InvalidOperationException(
+                        $"Unsupported navigation request type '{request.RequestType}'.");
+            }
+        }
+
         private void NavigateInternal(
             SceneType sceneType,
             NavigationParams navigationParams,
             bool addCurrentSceneToHistory)
         {
-            var target = sceneSettings_.GetTarget(sceneType);
-            coroutineService_.StartCoroutine(
+            NavigationTarget target = sceneSettings_.GetTarget(sceneType);
+
+            if (target.TargetType == NavigationTargetType.Scene)
+            {
+                StartSceneTransition();
+            }
+
+            var navigationRoutine =
                 addCurrentSceneToHistory
                     ? navigationService_.Navigate(target, navigationParams)
-                    : navigationService_.NavigateWithoutHistory(target, navigationParams));
+                    : navigationService_.NavigateWithoutHistory(target, navigationParams);
+
+            coroutineService_.StartCoroutine(
+                target.TargetType == NavigationTargetType.Scene
+                    ? RunSceneNavigation(navigationRoutine)
+                    : navigationRoutine);
 
             if (target.TargetType == NavigationTargetType.Scene)
             {
@@ -109,6 +170,31 @@ namespace Game.Unity.Scenes
             else
             {
                 eventDispatcher_?.Send(new OnPopupOpen());
+            }
+        }
+
+        private void CloseInternal(SceneType sceneType)
+        {
+            string id = sceneSettings_.GetTarget(sceneType).Id;
+            coroutineService_.StartCoroutine(navigationService_.Close(id));
+            eventDispatcher_?.Send(new OnPopupClose());
+        }
+
+        private void StartSceneTransition()
+        {
+            sceneTransitionInProgress_ = true;
+        }
+
+        private IEnumerator RunSceneNavigation(IEnumerator routine)
+        {
+            try
+            {
+                yield return routine;
+            }
+            finally
+            {
+                sceneTransitionInProgress_ = false;
+                ProcessNextQueuedRequestIfNeeded();
             }
         }
 
@@ -121,6 +207,68 @@ namespace Game.Unity.Scenes
         {
             navigationBlock_?.Dispose();
             navigationBlock_ = null;
+        }
+
+        private void ProcessNextQueuedRequestIfNeeded()
+        {
+            if (sceneTransitionInProgress_ || pendingRequests_.Count == 0)
+            {
+                return;
+            }
+
+            PendingNavigationRequest nextRequest = pendingRequests_.Dequeue();
+            processingQueuedRequest_ = true;
+            try
+            {
+                ExecuteRequest(nextRequest);
+            }
+            finally
+            {
+                processingQueuedRequest_ = false;
+            }
+        }
+
+        private enum PendingNavigationRequestType
+        {
+            Navigate,
+            Back,
+            Close
+        }
+
+        private readonly struct PendingNavigationRequest
+        {
+            public PendingNavigationRequestType RequestType { get; }
+            public SceneType SceneType { get; }
+            public NavigationParams NavigationParams { get; }
+            public bool AddCurrentSceneToHistory { get; }
+
+            public PendingNavigationRequest(PendingNavigationRequestType requestType)
+            {
+                RequestType = requestType;
+                SceneType = default;
+                NavigationParams = null;
+                AddCurrentSceneToHistory = true;
+            }
+
+            public PendingNavigationRequest(PendingNavigationRequestType requestType, SceneType sceneType)
+            {
+                RequestType = requestType;
+                SceneType = sceneType;
+                NavigationParams = null;
+                AddCurrentSceneToHistory = true;
+            }
+
+            public PendingNavigationRequest(
+                PendingNavigationRequestType requestType,
+                SceneType sceneType,
+                NavigationParams navigationParams,
+                bool addCurrentSceneToHistory)
+            {
+                RequestType = requestType;
+                SceneType = sceneType;
+                NavigationParams = navigationParams;
+                AddCurrentSceneToHistory = addCurrentSceneToHistory;
+            }
         }
     }
 }

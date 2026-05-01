@@ -66,10 +66,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/ToothBrushEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/DefaultItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintSurfaceView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionButtonView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/IItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ConfirmPopupParams.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Settings/ItemColorPalette.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponent.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventorySelectionState.cs" />
@@ -85,15 +89,19 @@
     <Compile Include="Assets/Scripts/Game/Unity/UI/UISettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetFoodController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/AssetNameResolver.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/FoodItemView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomPlacedObjectDraggable.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponentController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/HideOnInventoryDrag.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/EyesItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/SoundId.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/RoomItemVisuals.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinSurfaceView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/ItemViewRegistry.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/GameSoundLibrary.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PopupTransformTransition.cs" />
@@ -101,9 +109,11 @@
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/ToothBrushController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragCancelArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDraggable.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardsSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/AudioReactor.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/SceneType.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ConfirmPopup.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/ItemViewRenderer.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/DirtFadeOutSequence.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDragData.cs" />
@@ -118,7 +128,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListElement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectInstaller.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/InventoryDropEffectPositionTracker.cs" />
-    <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardsScene.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
@@ -126,16 +136,20 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropVisual.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/BrushTimer.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/GameProjectComposition.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/PaintItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/PersistentGameDataLifetime.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/RoomInventoryGameEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Instantiator/DependencyObjectInstantiator.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/PlaceableObjectItemView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionScene.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileBootstrap.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Settings/RoomSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/InstantiatorIds.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomViewController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/SkinItemView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/Scripts/Game/Unity/Game.Unity.asmdef" />

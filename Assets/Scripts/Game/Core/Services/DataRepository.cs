@@ -208,7 +208,23 @@ namespace Game.Core.Services
 
         public void SetPetName(string name)
         {
+            if (CurrentProfile?.PetData == null)
+            {
+                return;
+            }
+
+            if (!CanUsePetName(name))
+            {
+                return;
+            }
+
+            if (CurrentProfile.PetData.Name == name)
+            {
+                return;
+            }
+
             CurrentProfile.PetData.Name = name;
+            dispatcher_.Send(new ProfileUpdatedEvent());
             NotifyDataChanged();
         }
 
@@ -374,6 +390,53 @@ namespace Game.Core.Services
             roomObject.Item = null;
             NotifyInventoryChanged();
             NotifyDataChanged();
+        }
+
+        public void MoveRoomObject(int sourceLocationId, int targetLocationId)
+        {
+            PlacedRoomObjectLocation sourceRoomObject = FindRoomObject(sourceLocationId);
+            if (sourceRoomObject?.Item == null)
+            {
+                return;
+            }
+
+            PlacedRoomObject sourceItem = sourceRoomObject.Item;
+
+            if (sourceLocationId == targetLocationId)
+            {
+                NotifyDataChanged();
+                NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, targetLocationId);
+                return;
+            }
+
+            PlacedRoomObjectLocation targetRoomObject = GetOrCreateRoomObject(targetLocationId);
+            PlacedRoomObject displacedTargetItem = targetRoomObject.Item;
+
+            targetRoomObject.Item = sourceItem;
+            sourceRoomObject.Item = displacedTargetItem;
+
+            logger_?.Log(
+                $"[RoomData] Moved object {sourceItem.ItemId} from room location {sourceLocationId} to {targetLocationId}.");
+            NotifyDataChanged();
+            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, targetLocationId);
+        }
+
+        public void ReturnRoomObjectToInventory(int sourceLocationId)
+        {
+            PlacedRoomObjectLocation sourceRoomObject = FindRoomObject(sourceLocationId);
+            if (sourceRoomObject?.Item == null)
+            {
+                return;
+            }
+
+            PlacedRoomObject sourceItem = sourceRoomObject.Item;
+            ReturnPlacedRoomObjectToInventory(sourceItem);
+            sourceRoomObject.Item = null;
+            logger_?.Log(
+                $"[RoomData] Returned object {sourceItem.ItemId} from room location {sourceLocationId} to inventory.");
+            NotifyInventoryChanged();
+            NotifyDataChanged();
+            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, sourceLocationId);
         }
 
         public void PaintRoomSurface(int surfaceId, int paintItemId)

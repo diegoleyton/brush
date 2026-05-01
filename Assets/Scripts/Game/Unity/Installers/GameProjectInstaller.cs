@@ -94,6 +94,32 @@ namespace Game.Unity.Installers
             Container.BindInterfacesAndSelfTo<InventoryDropEffectPositionTracker>()
                 .AsSingle();
 
+            Container.Bind<DefaultItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
+                .To<PlaceableObjectItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
+                .To<FoodItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
+                .To<PaintItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
+                .To<SkinItemView>()
+                .AsSingle();
+
+            Container.Bind<IItemView>()
+                .To<EyesItemView>()
+                .AsSingle();
+
+            Container.Bind<ItemViewRegistry>()
+                .AsSingle();
+
             if (uiSettings.AnimatedComponentControllerPrefab == null)
             {
                 throw new InvalidOperationException(

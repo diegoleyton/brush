@@ -48,6 +48,12 @@ namespace Game.Unity.Settings
         private List<PlaceableObjectPrefabDefinition> placeableObjectPrefabs_ =
             new List<PlaceableObjectPrefabDefinition>();
 
+        [SerializeField]
+        private Vector2 placeableObjectDragVisualSize_ = new Vector2(180f, 180f);
+
+        [SerializeField]
+        private Vector2 placeableObjectDragPointerOffset_ = new Vector2(0f, 120f);
+
         public int DefaultEyesItemId => defaultEyesItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
         public Sprite SkinItemSprite => skinItemSprite_;
@@ -55,6 +61,8 @@ namespace Game.Unity.Settings
         public RoomDropVisual RoomDropAreaVisibility => roomDropAreaVisibility_;
         public float PaintSurfaceColorTransitionDuration => paintSurfaceColorTransitionDuration_;
         public float PaintSurfaceEffectLifetimeSeconds => paintSurfaceEffectLifetimeSeconds_;
+        public Vector2 PlaceableObjectDragVisualSize => placeableObjectDragVisualSize_;
+        public Vector2 PlaceableObjectDragPointerOffset => placeableObjectDragPointerOffset_;
 
         public RectTransform ResolvePlaceableObjectPrefab(int itemId)
         {

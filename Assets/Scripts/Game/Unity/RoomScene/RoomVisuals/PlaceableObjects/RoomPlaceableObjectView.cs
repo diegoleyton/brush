@@ -19,6 +19,7 @@ namespace Game.Unity.RoomScene
         private IAssetLoadHandle<Sprite> activeHandle_;
         private IAssetLoadHandle<Sprite> pendingHandle_;
         private int loadVersion_;
+        private CanvasGroup canvasGroup_;
 
         private RoomDropArea[] dropAreas_;
         [Inject]
@@ -44,6 +45,7 @@ namespace Game.Unity.RoomScene
             {
                 image_.enabled = true;
                 image_.color = color;
+                image_.raycastTarget = true;
             }
         }
 
@@ -58,6 +60,7 @@ namespace Game.Unity.RoomScene
             ReleaseHandle(ref pendingHandle_);
             image_.sprite = null;
             image_.enabled = false;
+            image_.raycastTarget = true;
 
             string assetName = AssetNameResolver.GetPlaceableItemAssetName(itemId);
             pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
@@ -75,6 +78,7 @@ namespace Game.Unity.RoomScene
 
                 image_.sprite = sprite;
                 image_.enabled = true;
+                image_.raycastTarget = true;
                 ReleaseHandle(ref activeHandle_);
                 activeHandle_ = pendingHandle_;
                 pendingHandle_ = null;
@@ -99,6 +103,14 @@ namespace Game.Unity.RoomScene
             }
         }
 
+        public void SetVisualVisible(bool visible)
+        {
+            EnsureCanvasGroup();
+            canvasGroup_.alpha = visible ? 1f : 0f;
+            canvasGroup_.blocksRaycasts = visible;
+            canvasGroup_.interactable = visible;
+        }
+
         private void ResolveReferences()
         {
             dropAreas_ = GetComponentsInChildren<RoomDropArea>(true);
@@ -113,6 +125,20 @@ namespace Game.Unity.RoomScene
 
             handle.Release();
             handle = null;
+        }
+
+        private void EnsureCanvasGroup()
+        {
+            if (canvasGroup_ != null)
+            {
+                return;
+            }
+
+            canvasGroup_ = GetComponent<CanvasGroup>();
+            if (canvasGroup_ == null)
+            {
+                canvasGroup_ = gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
     }

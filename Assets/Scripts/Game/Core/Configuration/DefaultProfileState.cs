@@ -31,9 +31,9 @@ namespace Game.Core.Configuration
                 Dictionary<int, int> items = inventory.GetInventoryItems(entry.Key);
                 ItemCategoryConfig itemConfig = entry.Value;
 
-                for (int itemId = 1; itemId <= itemConfig.DefaultUnlockedCount; itemId++)
+                for (int index = 0; index < itemConfig.DefaultUnlockedCount && index < itemConfig.ValidItemIds.Count; index++)
                 {
-                    items.Add(itemId, -1);
+                    items.Add(itemConfig.ValidItemIds[index], -1);
                 }
             }
 

@@ -13,6 +13,7 @@ using Game.Unity.Definitions.Events;
 using Game.Unity.Scenes;
 
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Serialization;
 using Zenject;
 
@@ -47,7 +48,12 @@ namespace Game.Unity.RoomScene
         private RoomInventoryView inventoryView_;
 
         [SerializeField]
+        private InputField petNameInput_;
+
+        [SerializeField]
         private InteractionPointType selectedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
+
+        private bool suppressPetNameInputCallback_;
 
         [Inject]
         public void Construct(
@@ -75,6 +81,8 @@ namespace Game.Unity.RoomScene
             }
 
             SubscribeToDispatcher();
+            BindPetNameInput();
+            RefreshPetNameInput();
             BindInventoryCategoryButtons();
             BuildDropAcceptedHandlers();
         }
@@ -90,6 +98,7 @@ namespace Game.Unity.RoomScene
 
         private void OnDestroy()
         {
+            UnbindPetNameInput();
             UnbindInventoryCategoryButtons();
             UnsubscribeFromDispatcher();
         }
@@ -107,6 +116,7 @@ namespace Game.Unity.RoomScene
             ValidateSceneReferences();
             RefreshInventoryList();
             RefreshDropAreas();
+            RefreshPetNameInput();
             initialized_ = true;
             TryOpenRewardsSceneIfPending();
         }
@@ -125,19 +135,20 @@ namespace Game.Unity.RoomScene
             }, null));
         }
 
-        private void ValidateSceneReferences()
+        public void GoToProfileSelectionScene()
         {
-            if (inventoryList_ == null)
+            if (navigationService_ == null)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
+                    $"{nameof(RoomController)} requires a {nameof(IGameNavigationService)} dependency.");
             }
 
-            if (inventoryView_ == null)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(RoomController)} requires a {nameof(RoomInventoryView)} reference.");
-            }
+            navigationService_.Navigate(SceneType.ProfileSelectionScene);
+        }
+
+        private void ValidateSceneReferences()
+        {
+            ValidateSerializedReferences();
         }
 
         private void BindInventoryCategoryButtons()
@@ -218,6 +229,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<PendingRewardEvent>(OnPendingRewardChanged);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
+            dispatcher_.Subscribe<ProfileUpdatedEvent>(OnProfileUpdated);
             dispatcher_.Subscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = true;
         }
@@ -240,6 +252,7 @@ namespace Game.Unity.RoomScene
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<PendingRewardEvent>(OnPendingRewardChanged);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
+            dispatcher_.Unsubscribe<ProfileUpdatedEvent>(OnProfileUpdated);
             dispatcher_.Unsubscribe<SwitchListEvent>(OnSwitchList);
             dispatcherSubscribed_ = false;
         }
@@ -348,7 +361,13 @@ namespace Game.Unity.RoomScene
         private void OnProfileSwitched(ProfileSwitchedEvent _)
         {
             RefreshInventoryList();
+            RefreshPetNameInput();
             TryOpenRewardsSceneIfPending();
+        }
+
+        private void OnProfileUpdated(ProfileUpdatedEvent _)
+        {
+            RefreshPetNameInput();
         }
 
         private void OnPendingRewardChanged(PendingRewardEvent _)
@@ -372,6 +391,63 @@ namespace Game.Unity.RoomScene
             selectedInventoryType_ = interactionPointType;
             selectionState_?.SetCurrentInteractionPointType(interactionPointType);
             RefreshInventoryList();
+        }
+
+        private void BindPetNameInput()
+        {
+            if (petNameInput_ == null)
+            {
+                return;
+            }
+
+            petNameInput_.onEndEdit.RemoveListener(OnPetNameInputEnded);
+            petNameInput_.onEndEdit.AddListener(OnPetNameInputEnded);
+        }
+
+        private void UnbindPetNameInput()
+        {
+            if (petNameInput_ == null)
+            {
+                return;
+            }
+
+            petNameInput_.onEndEdit.RemoveListener(OnPetNameInputEnded);
+        }
+
+        private void RefreshPetNameInput()
+        {
+            if (petNameInput_ == null)
+            {
+                return;
+            }
+
+            string petName = repository_?.CurrentProfile?.PetData?.Name ?? string.Empty;
+            if (petNameInput_.text == petName)
+            {
+                return;
+            }
+
+            suppressPetNameInputCallback_ = true;
+            petNameInput_.text = petName;
+            suppressPetNameInputCallback_ = false;
+        }
+
+        private void OnPetNameInputEnded(string inputValue)
+        {
+            if (suppressPetNameInputCallback_ || repository_?.CurrentProfile?.PetData == null)
+            {
+                return;
+            }
+
+            string normalizedPetName = (inputValue ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(normalizedPetName))
+            {
+                RefreshPetNameInput();
+                return;
+            }
+
+            repository_.SetPetName(normalizedPetName);
+            RefreshPetNameInput();
         }
 
         private void RefreshInventoryList()
@@ -399,15 +475,13 @@ namespace Game.Unity.RoomScene
         {
             Dictionary<int, int> inventoryItems =
                 repository_?.CurrentProfile?.InventoryData?.GetInventoryItems(interactionPointType);
-            int maxItemId = Core.Configuration.ItemCatalog.Get(interactionPointType).ItemCount;
-
             if (inventoryItems == null)
             {
                 return new List<RoomInventoryItemData>();
             }
 
             return inventoryItems
-                .Where(entry => entry.Value != 0 && entry.Key > 0 && entry.Key <= maxItemId)
+                .Where(entry => entry.Value != 0 && Core.Configuration.ItemCatalog.IsValidItemId(interactionPointType, entry.Key))
                 .OrderBy(entry => entry.Key)
                 .Select(entry => new RoomInventoryItemData
                 {
@@ -525,6 +599,12 @@ namespace Game.Unity.RoomScene
             {
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires a {nameof(RoomInventoryListUI)} reference.");
+            }
+
+            if (petNameInput_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires an {nameof(InputField)} reference for the pet name input.");
             }
         }
 

@@ -34,8 +34,9 @@ namespace Game.Core.Configuration
                 InteractionPointType itemType = entry.Key;
                 ItemCategoryConfig category = entry.Value;
 
-                for (int itemId = category.DefaultUnlockedCount + 1; itemId <= category.ItemCount; itemId++)
+                for (int index = category.DefaultUnlockedCount; index < category.ValidItemIds.Count; index++)
                 {
+                    int itemId = category.ValidItemIds[index];
                     catalog[(itemType, itemId)] = new MarketItemDefinition
                     {
                         ItemType = itemType,

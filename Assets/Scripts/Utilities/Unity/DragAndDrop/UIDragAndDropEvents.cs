@@ -8,6 +8,7 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         Manual,
         Disabled,
         FailedDrop,
-        EventSystemCancel
+        EventSystemCancel,
+        CancelArea
     }
 }

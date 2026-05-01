@@ -1,4 +1,5 @@
 using Game.Core.Data;
+using Game.Unity.Settings;
 
 using UnityEngine;
 
@@ -9,6 +10,12 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public static class RoomItemVisuals
     {
+        private const string PaintPaletteResourcePath = "PaintItemColorPalette";
+        private const string SkinPaletteResourcePath = "SkinItemColorPalette";
+
+        private static ItemColorPalette paintPalette_;
+        private static ItemColorPalette skinPalette_;
+
         public static string GetCategoryDisplayName(InteractionPointType interactionPointType)
         {
             switch (interactionPointType)
@@ -34,6 +41,37 @@ namespace Game.Unity.RoomScene
 
         public static Color GetItemColor(InteractionPointType interactionPointType, int itemId)
         {
+            if (interactionPointType == InteractionPointType.PAINT)
+            {
+                return GetPaletteColor(ref paintPalette_, PaintPaletteResourcePath, interactionPointType, itemId);
+            }
+
+            if (interactionPointType == InteractionPointType.SKIN)
+            {
+                return GetPaletteColor(ref skinPalette_, SkinPaletteResourcePath, interactionPointType, itemId);
+            }
+
+            float categoryOffset = (int)interactionPointType * 0.137f;
+            float hue = Mathf.Repeat((itemId * 0.173f) + categoryOffset, 1f);
+            return Color.HSVToRGB(hue, 0.65f, 0.95f);
+        }
+
+        private static Color GetPaletteColor(
+            ref ItemColorPalette cachedPalette,
+            string resourcePath,
+            InteractionPointType interactionPointType,
+            int itemId)
+        {
+            if (cachedPalette == null)
+            {
+                cachedPalette = Resources.Load<ItemColorPalette>(resourcePath);
+            }
+
+            if (cachedPalette != null)
+            {
+                return cachedPalette.GetColor(itemId);
+            }
+
             float categoryOffset = (int)interactionPointType * 0.137f;
             float hue = Mathf.Repeat((itemId * 0.173f) + categoryOffset, 1f);
             return Color.HSVToRGB(hue, 0.65f, 0.95f);

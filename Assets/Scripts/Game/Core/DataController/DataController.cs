@@ -23,6 +23,8 @@ namespace Game.Core.DataController
             dispatcher_ = dispatcher;
 
             dispatcher_?.Subscribe<RoomObjectPlacedEvent>(OnRoomObjectPlaced);
+            dispatcher_?.Subscribe<RoomObjectMovedEvent>(OnRoomObjectMoved);
+            dispatcher_?.Subscribe<RoomObjectReturnedToInventoryEvent>(OnRoomObjectReturnedToInventory);
             dispatcher_?.Subscribe<RoomPaintAppliedEvent>(OnRoomPaintApplied);
             dispatcher_?.Subscribe<RoomFoodAppliedEvent>(OnRoomFoodApplied);
             dispatcher_?.Subscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
@@ -42,6 +44,8 @@ namespace Game.Core.DataController
             }
 
             dispatcher_?.Unsubscribe<RoomObjectPlacedEvent>(OnRoomObjectPlaced);
+            dispatcher_?.Unsubscribe<RoomObjectMovedEvent>(OnRoomObjectMoved);
+            dispatcher_?.Unsubscribe<RoomObjectReturnedToInventoryEvent>(OnRoomObjectReturnedToInventory);
             dispatcher_?.Unsubscribe<RoomPaintAppliedEvent>(OnRoomPaintApplied);
             dispatcher_?.Unsubscribe<RoomFoodAppliedEvent>(OnRoomFoodApplied);
             dispatcher_?.Unsubscribe<RoomSkinAppliedEvent>(OnRoomSkinApplied);
@@ -59,6 +63,16 @@ namespace Game.Core.DataController
         private void OnRoomPaintApplied(RoomPaintAppliedEvent eventData)
         {
             repository_?.PaintRoomSurface(eventData.TargetId, eventData.ItemId);
+        }
+
+        private void OnRoomObjectMoved(RoomObjectMovedEvent eventData)
+        {
+            repository_?.MoveRoomObject(eventData.SourceTargetId, eventData.TargetId);
+        }
+
+        private void OnRoomObjectReturnedToInventory(RoomObjectReturnedToInventoryEvent eventData)
+        {
+            repository_?.ReturnRoomObjectToInventory(eventData.SourceTargetId);
         }
 
         private void OnRoomFoodApplied(RoomFoodAppliedEvent eventData)

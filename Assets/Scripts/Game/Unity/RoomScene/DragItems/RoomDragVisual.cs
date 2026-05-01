@@ -1,11 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-using Flowbit.Utilities.Unity.AssetLoader;
-
-using Game.Unity.Definitions;
-using Game.Unity.Settings;
-
 using Zenject;
 
 namespace Game.Unity.RoomScene
@@ -15,7 +10,8 @@ namespace Game.Unity.RoomScene
     /// </summary>
     public sealed class RoomDragVisual : MonoBehaviour
     {
-        private Sprite defaultSprite_;
+        private ItemViewRenderer itemViewRenderer_;
+        private ItemViewRegistry itemViewRegistry_;
 
         [SerializeField]
         private Image image_;
@@ -26,279 +22,39 @@ namespace Game.Unity.RoomScene
         [SerializeField]
         private Image extraImage2_;
 
-        private IAssetLoader assetLoader_;
-        private RoomSettings roomSettings_;
-        private IAssetLoadHandle<Sprite> activeHandle_;
-        private IAssetLoadHandle<Sprite> pendingHandle_;
-        private int loadVersion_;
-
         [Inject]
-        public void Construct(IAssetLoader assetLoader, RoomSettings roomSettings)
+        public void Construct(
+            Flowbit.Utilities.Unity.AssetLoader.IAssetLoader assetLoader,
+            Game.Unity.Settings.RoomSettings roomSettings,
+            ItemViewRegistry itemViewRegistry)
         {
-            assetLoader_ = assetLoader;
-            roomSettings_ = roomSettings;
-        }
-
-        private void Awake()
-        {
-            if (image_ != null)
-            {
-                defaultSprite_ = image_.sprite;
-            }
+            itemViewRegistry_ = itemViewRegistry;
+            itemViewRenderer_ = new ItemViewRenderer(
+                image_,
+                extraImage1_,
+                extraImage2_,
+                assetLoader,
+                roomSettings,
+                nameof(RoomDragVisual));
         }
 
         private void OnDestroy()
         {
-            ReleaseHandle(ref pendingHandle_);
-            ReleaseHandle(ref activeHandle_);
+            itemViewRenderer_?.Dispose();
         }
 
         /// <summary>
-        /// Applies the given color to the configured graphic.
+        /// Applies the provided item data to the drag visual.
         /// </summary>
-        public void SetColor(Color color)
+        public void Show(RoomInventoryItemData data)
         {
-            if (image_ != null)
-            {
-                SetExtraImagesAlpha(0f);
-                image_.enabled = true;
-                SetImageAlpha(1f);
-                image_.color = color;
-            }
-        }
-
-        public void SetSprite(Sprite sprite)
-        {
-            if (image_ != null)
-            {
-                SetExtraImagesAlpha(0f);
-                image_.color = Color.white;
-                image_.sprite = sprite;
-                image_.enabled = sprite != null;
-                SetImageAlpha(sprite != null ? 1f : 0f);
-            }
-        }
-
-        public void SetEyesSprite(Sprite sprite)
-        {
-            if (extraImage1_ != null)
-            {
-                extraImage1_.sprite = sprite;
-            }
-
-            if (extraImage2_ != null)
-            {
-                extraImage2_.sprite = sprite;
-            }
-
-            SetExtraImagesAlpha(sprite != null ? 1f : 0f);
-
-            if (image_ != null)
-            {
-                image_.enabled = true;
-                SetImageAlpha(0f);
-                image_.sprite = defaultSprite_;
-            }
-        }
-
-        public void ApplyPlaceableItem(int itemId)
-        {
-            if (assetLoader_ == null || image_ == null)
+            if (data == null)
             {
                 return;
             }
-
-            int requestVersion = ++loadVersion_;
-            ReleaseHandle(ref pendingHandle_);
-            SetExtraImagesAlpha(0f);
-            image_.sprite = defaultSprite_;
-            image_.enabled = true;
-            image_.color = Color.white;
-            SetImageAlpha(1f);
-
-            string assetName = AssetNameResolver.GetPlaceableItemAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite == null)
-                {
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                image_.sprite = sprite;
-                image_.enabled = true;
-                ReleaseHandle(ref activeHandle_);
-                activeHandle_ = pendingHandle_;
-                pendingHandle_ = null;
-            });
-        }
-
-        public void ApplyFoodItem(int itemId)
-        {
-            if (assetLoader_ == null || image_ == null)
-            {
-                return;
-            }
-
-            int requestVersion = ++loadVersion_;
-            ReleaseHandle(ref pendingHandle_);
-            SetExtraImagesAlpha(0f);
-            image_.sprite = defaultSprite_;
-            image_.enabled = true;
-            image_.color = Color.white;
-            SetImageAlpha(1f);
-
-            string assetName = AssetNameResolver.GetFoodAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite == null)
-                {
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                image_.sprite = sprite;
-                image_.enabled = true;
-                SetImageAlpha(1f);
-                ReleaseHandle(ref activeHandle_);
-                activeHandle_ = pendingHandle_;
-                pendingHandle_ = null;
-            });
-        }
-
-        public void ApplyEyes(int itemId)
-        {
-            if (assetLoader_ == null)
-            {
-                return;
-            }
-
-            SetExtraImagesAlpha(0f);
-            if (image_ != null)
-            {
-                image_.sprite = defaultSprite_;
-                image_.color = Color.white;
-                image_.enabled = true;
-                SetImageAlpha(1f);
-            }
-
-            int requestVersion = ++loadVersion_;
-            StartEyesLoad(itemId, requestVersion, allowFallback: true);
-        }
-
-        public void ApplyPaintItem(Color color)
-        {
-            if (image_ == null)
-            {
-                return;
-            }
-
-            if (roomSettings_ == null || roomSettings_.PaintItemSprite == null)
-            {
-                throw new System.InvalidOperationException(
-                    $"{nameof(RoomDragVisual)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.PaintItemSprite)} to render paint items.");
-            }
-
-            ApplyTintedMainImage(roomSettings_.PaintItemSprite, color);
-        }
-
-        public void ApplySkinItem(Color color)
-        {
-            if (image_ == null)
-            {
-                return;
-            }
-
-            if (roomSettings_ == null || roomSettings_.SkinItemSprite == null)
-            {
-                throw new System.InvalidOperationException(
-                    $"{nameof(RoomDragVisual)} requires {nameof(RoomSettings)}.{nameof(RoomSettings.SkinItemSprite)} to render skin items.");
-            }
-
-            ApplyTintedMainImage(roomSettings_.SkinItemSprite, color);
-        }
-
-        private void ApplyTintedMainImage(Sprite sprite, Color color)
-        {
-            SetExtraImagesAlpha(0f);
-            image_.sprite = sprite;
-            image_.enabled = true;
-            image_.color = color;
-            SetImageAlpha(1f);
-        }
-
-        private void StartEyesLoad(int itemId, int requestVersion, bool allowFallback)
-        {
-            ReleaseHandle(ref pendingHandle_);
-
-            string assetName = AssetNameResolver.GetEyeAssetName(itemId);
-            pendingHandle_ = assetLoader_.LoadAssetAsync<Sprite>(assetName, sprite =>
-            {
-                if (requestVersion != loadVersion_)
-                {
-                    return;
-                }
-
-                if (sprite != null)
-                {
-                    SetEyesSprite(sprite);
-                    ReleaseHandle(ref activeHandle_);
-                    activeHandle_ = pendingHandle_;
-                    pendingHandle_ = null;
-                    return;
-                }
-
-                pendingHandle_ = null;
-
-                if (allowFallback && roomSettings_ != null && roomSettings_.DefaultEyesItemId != itemId)
-                {
-                    StartEyesLoad(roomSettings_.DefaultEyesItemId, requestVersion, allowFallback: false);
-                }
-            });
-        }
-
-        private void SetExtraImagesAlpha(float alpha)
-        {
-            SetGraphicAlpha(extraImage1_, alpha);
-            SetGraphicAlpha(extraImage2_, alpha);
-        }
-
-        private void SetImageAlpha(float alpha)
-        {
-            SetGraphicAlpha(image_, alpha);
-        }
-
-        private static void SetGraphicAlpha(Graphic graphic, float alpha)
-        {
-            if (graphic == null)
-            {
-                return;
-            }
-
-            Color color = graphic.color;
-            color.a = alpha;
-            graphic.color = color;
-        }
-
-        private static void ReleaseHandle(ref IAssetLoadHandle<Sprite> handle)
-        {
-            if (handle == null)
-            {
-                return;
-            }
-
-            handle.Release();
-            handle = null;
+            
+            itemViewRenderer_.Reset();
+            itemViewRegistry_.SetView(data, itemViewRenderer_);
         }
     }
 }

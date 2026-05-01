@@ -71,6 +71,16 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
 
         public bool IsRoutingEnabled => isActiveAndEnabled;
 
+        public void SetDraggable(UIDraggable draggable)
+        {
+            draggable_ = draggable;
+        }
+
+        public void SetScrollRect(ScrollRect scrollRect)
+        {
+            scrollRect_ = scrollRect;
+        }
+
         private void OnDisable()
         {
             activeRoute_ = GestureRoute.None;
@@ -338,6 +348,12 @@ namespace Flowbit.Utilities.Unity.DragAndDrop
         private void FinalizeDraggableRoute(PointerEventData eventData)
         {
             PointerEventData finalEventData = CreatePointerEventData(eventData);
+            IUIDragCancelArea cancelArea = FindCancelArea(finalEventData);
+            if (cancelArea != null)
+            {
+                draggable_?.NotifyCancelledByCancelArea();
+            }
+
             ExecuteDropIfAvailable(finalEventData);
             draggable_?.EndDragFromRouter(finalEventData);
         }

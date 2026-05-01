@@ -101,6 +101,7 @@ namespace Game.Unity.RoomScene
             ValidateSceneReferences();
             placeableObjectsController_ = new RoomPlaceableObjectsController(
                 repository_,
+                dispatcher_,
                 placeableObjectSurfaceViews_,
                 roomSettings_,
                 instantiator_);
@@ -207,8 +208,8 @@ namespace Game.Unity.RoomScene
 
             if (eventData.ItemType == Core.Data.InteractionPointType.PLACEABLE_OBJECT)
             {
-                logger_?.Log($"[RoomView] Refresh placeable object {eventData.TargetId}.");
-                placeableObjectsController_?.RefreshPlaceableObject(eventData.TargetId);
+                logger_?.Log("[RoomView] Refresh placeable objects layout.");
+                placeableObjectsController_?.Refresh();
                 return;
             }
 

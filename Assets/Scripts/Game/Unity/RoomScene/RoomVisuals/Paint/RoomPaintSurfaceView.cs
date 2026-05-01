@@ -3,6 +3,7 @@ using System.Collections;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.Instantiator;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;
 using Game.Unity.Definitions;
@@ -30,9 +31,11 @@ namespace Game.Unity.RoomScene
         private RoomSettings roomSettings_;
         private EventDispatcher dispatcher_;
         private IObjectInstantiator unityInstantiator_;
+        private ScreenBlocker screenBlocker_;
         private Coroutine colorTransitionCoroutine_;
         private Coroutine paintEffectCleanupCoroutine_;
         private RectTransform activePaintEffect_;
+        private IDisposable paintBlockScope_;
 
         public int SurfaceId => surfaceId_;
 
@@ -40,10 +43,12 @@ namespace Game.Unity.RoomScene
         public void Construct(
             RoomSettings roomSettings,
             EventDispatcher dispatcher,
+            ScreenBlocker screenBlocker,
             [Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator unityInstantiator)
         {
             roomSettings_ = roomSettings;
             dispatcher_ = dispatcher;
+            screenBlocker_ = screenBlocker;
             unityInstantiator_ = unityInstantiator;
         }
 
@@ -69,6 +74,8 @@ namespace Game.Unity.RoomScene
                 StopCoroutine(paintEffectCleanupCoroutine_);
                 paintEffectCleanupCoroutine_ = null;
             }
+
+            DisposePaintBlockScope();
         }
 
         public void ResetColor()
@@ -89,6 +96,7 @@ namespace Game.Unity.RoomScene
 
             if (!animate)
             {
+                DisposePaintBlockScope();
                 image_.color = color;
                 return;
             }
@@ -157,6 +165,9 @@ namespace Game.Unity.RoomScene
                 paintEffectCleanupCoroutine_ = null;
             }
 
+            DisposePaintBlockScope();
+            paintBlockScope_ = screenBlocker_?.BlockScope("RoomPaintEffect");
+
             RectTransform rootCanvasTransform = canvas.rootCanvas.transform as RectTransform;
             activePaintEffect_ = unityInstantiator_.InstantiatePrefab(
                 roomSettings_.PaintSurfaceEffectPrefab,
@@ -170,6 +181,7 @@ namespace Game.Unity.RoomScene
             {
                 Destroy(activePaintEffect_.gameObject);
                 activePaintEffect_ = null;
+                DisposePaintBlockScope();
                 dispatcher_?.Send(new RoomPaintEffectCompletedEvent(surfaceId_));
                 return;
             }
@@ -219,6 +231,7 @@ namespace Game.Unity.RoomScene
             }
 
             paintEffectCleanupCoroutine_ = null;
+            DisposePaintBlockScope();
             dispatcher_?.Send(new RoomPaintEffectCompletedEvent(surfaceId_));
         }
 
@@ -251,6 +264,17 @@ namespace Game.Unity.RoomScene
 
                 graphic.color = color;
             }
+        }
+
+        private void DisposePaintBlockScope()
+        {
+            if (paintBlockScope_ == null)
+            {
+                return;
+            }
+
+            paintBlockScope_.Dispose();
+            paintBlockScope_ = null;
         }
     }
 }

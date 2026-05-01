@@ -54,6 +54,12 @@ namespace Game.Unity.Development
         public int MinimumCoins { get; private set; } = 250;
 
         [field: SerializeField]
+        public bool ForcePlaceableObjectRewardsOnly { get; private set; } = false;
+
+        [field: SerializeField]
+        public int TestProfileCount { get; private set; } = 1;
+
+        [field: SerializeField]
         [field: FormerlySerializedAs("Objects")]
         public DevelopmentInventoryCategorySettings PlaceableObjects { get; private set; } = new DevelopmentInventoryCategorySettings();
 

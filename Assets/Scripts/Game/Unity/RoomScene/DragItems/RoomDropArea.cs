@@ -39,6 +39,7 @@ namespace Game.Unity.RoomScene
         private bool interactionVisible_;
         private bool isPointerOver_;
         private bool subscribed_;
+        private int? activeSourceRoomLocationId_;
 
         public InteractionPointType SupportedInventoryType => supportedInventoryType_;
         public int TargetId => targetId_;
@@ -77,6 +78,7 @@ namespace Game.Unity.RoomScene
         public override void OnDragHoverEntered(UIDraggable draggable)
         {
             isPointerOver_ = true;
+            BringVisibilityToFront();
 
             if (CanShowVisibilityFeedback())
             {
@@ -123,6 +125,7 @@ namespace Game.Unity.RoomScene
 
         private void OnRoomInventoryDragStarted(RoomInventoryDragStartedEvent eventData)
         {
+            activeSourceRoomLocationId_ = eventData?.SourceRoomLocationId;
             interactionVisible_ = eventData?.Data != null &&
                 ShouldShowForInteractionType(eventData.Data.InteractionPointType) &&
                 CanShowForDraggedItem(eventData.Data);
@@ -171,6 +174,11 @@ namespace Game.Unity.RoomScene
 
         private bool CanApplyPlaceableObject(int itemId)
         {
+            if (activeSourceRoomLocationId_.HasValue)
+            {
+                return true;
+            }
+
             return !repository_.RoomHasObject(targetId_, itemId);
         }
 
@@ -183,6 +191,7 @@ namespace Game.Unity.RoomScene
         {
             interactionVisible_ = false;
             isPointerOver_ = false;
+            activeSourceRoomLocationId_ = null;
             UpdateVisibility();
         }
 
@@ -201,12 +210,23 @@ namespace Game.Unity.RoomScene
                 return;
             }
 
+            BringVisibilityToFront();
             visibilityController_?.Highlight(isPointerOver_);
         }
 
         private bool CanShowVisibilityFeedback()
         {
             return interactionVisible_ && dropEnabled_ && HasValidTargetConfiguration();
+        }
+
+        private void BringVisibilityToFront()
+        {
+            if (visibilityController_ == null)
+            {
+                return;
+            }
+
+            (visibilityController_.transform as RectTransform)?.SetAsLastSibling();
         }
 
         private void CreateVisibilityControllerIfNeeded()

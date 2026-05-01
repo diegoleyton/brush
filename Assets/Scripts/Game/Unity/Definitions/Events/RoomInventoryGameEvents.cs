@@ -25,12 +25,14 @@ namespace Game.Unity.Definitions.Events
     /// </summary>
     public sealed class RoomInventoryDragStartedEvent : IEvent
     {
-        public RoomInventoryDragStartedEvent(RoomInventoryItemData data)
+        public RoomInventoryDragStartedEvent(RoomInventoryItemData data, int? sourceRoomLocationId = null)
         {
             Data = data;
+            SourceRoomLocationId = sourceRoomLocationId;
         }
 
         public RoomInventoryItemData Data { get; }
+        public int? SourceRoomLocationId { get; }
     }
 
     /// <summary>

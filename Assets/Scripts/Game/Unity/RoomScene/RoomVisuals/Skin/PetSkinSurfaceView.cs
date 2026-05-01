@@ -3,6 +3,7 @@ using System.Collections;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.Instantiator;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;
 using Game.Unity.Definitions;
@@ -27,18 +28,22 @@ namespace Game.Unity.RoomScene
         private RoomSettings roomSettings_;
         private EventDispatcher dispatcher_;
         private IObjectInstantiator unityInstantiator_;
+        private ScreenBlocker screenBlocker_;
         private Coroutine colorTransitionCoroutine_;
         private Coroutine effectCleanupCoroutine_;
         private RectTransform activeEffect_;
+        private IDisposable skinBlockScope_;
 
         [Inject]
         public void Construct(
             RoomSettings roomSettings,
             EventDispatcher dispatcher,
+            ScreenBlocker screenBlocker,
             [Inject(Id = InstantiatorIds.Unity)] IObjectInstantiator unityInstantiator)
         {
             roomSettings_ = roomSettings;
             dispatcher_ = dispatcher;
+            screenBlocker_ = screenBlocker;
             unityInstantiator_ = unityInstantiator;
         }
 
@@ -64,6 +69,8 @@ namespace Game.Unity.RoomScene
                 StopCoroutine(effectCleanupCoroutine_);
                 effectCleanupCoroutine_ = null;
             }
+
+            DisposeSkinBlockScope();
         }
 
         public void ResetColor()
@@ -83,6 +90,7 @@ namespace Game.Unity.RoomScene
 
             if (!animate)
             {
+                DisposeSkinBlockScope();
                 image_.color = color;
                 return;
             }
@@ -151,6 +159,9 @@ namespace Game.Unity.RoomScene
                 effectCleanupCoroutine_ = null;
             }
 
+            DisposeSkinBlockScope();
+            skinBlockScope_ = screenBlocker_?.BlockScope("PetSkinEffect");
+
             RectTransform rootCanvasTransform = canvas.rootCanvas.transform as RectTransform;
             activeEffect_ = unityInstantiator_.InstantiatePrefab(
                 roomSettings_.PaintSurfaceEffectPrefab,
@@ -164,6 +175,7 @@ namespace Game.Unity.RoomScene
             {
                 Destroy(activeEffect_.gameObject);
                 activeEffect_ = null;
+                DisposeSkinBlockScope();
                 dispatcher_?.Send(new PetSkinEffectCompletedEvent());
                 return;
             }
@@ -213,6 +225,7 @@ namespace Game.Unity.RoomScene
             }
 
             effectCleanupCoroutine_ = null;
+            DisposeSkinBlockScope();
             dispatcher_?.Send(new PetSkinEffectCompletedEvent());
         }
 
@@ -245,6 +258,17 @@ namespace Game.Unity.RoomScene
 
                 graphic.color = color;
             }
+        }
+
+        private void DisposeSkinBlockScope()
+        {
+            if (skinBlockScope_ == null)
+            {
+                return;
+            }
+
+            skinBlockScope_.Dispose();
+            skinBlockScope_ = null;
         }
     }
 }

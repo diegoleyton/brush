@@ -11,7 +11,7 @@ using Zenject;
 namespace Game.Unity.RoomScene
 {
     /// <summary>
-    /// Simple visual component used by rop area visuals.
+    /// Simple visual component used by drop area visuals.
     /// </summary>
     public sealed class RoomDropVisual : MonoBehaviour
     {

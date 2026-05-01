@@ -21,3 +21,5 @@ MonoBehaviour:
   paintSurfaceEffectLifetimeSeconds_: 2
   defaultPlaceableObjectPrefab_: {fileID: 3020903656568588460, guid: 0bb0dfefff9214fee95f65f20ffc3b2a, type: 3}
   placeableObjectPrefabs_: []
+  placeableObjectDragVisualSize_: {x: 260, y: 260}
+  placeableObjectDragPointerOffset_: {x: 0, y: 80}
