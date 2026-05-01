@@ -207,7 +207,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 2c98d3f842f8d4d158fa7f5d9ad38474, type: 3}
   - {fileID: 21300000, guid: 99e91b1a927fc4c0c839462e105be861, type: 3}
   - {fileID: 21300000, guid: 22f79d852ae7444cd8e8967bcceeddcd, type: 3}
-  transitionDuration_: 2
+  transitionDuration_: 0.9
   useUnscaledTime_: 0
   edgeOffset_: 10
 --- !u!114 &5977009573955907521

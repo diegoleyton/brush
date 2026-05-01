@@ -328,8 +328,8 @@ MonoBehaviour:
     maskConatiner_: {fileID: 3454495485271255061}
   - mainConatiner_: {fileID: 1395292785162954339}
     maskConatiner_: {fileID: 5090664916492182773}
-  transitionOutDuration_: 0.9
-  throwDuration_: 0.7
+  transitionOutDuration_: 0.4
+  throwDuration_: 0.5
   throwHeight_: 300
   throwRotationDegrees_: 180
   throwTarget_: {fileID: 3240347335101000341}
