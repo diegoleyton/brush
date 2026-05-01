@@ -100,6 +100,7 @@ namespace Game.Unity.RoomScene
                 throw new Exception("Missing draggable");
             }
 
+            draggable_.enabled = true;
             draggable_.SetData(data);
             draggable_.SetReturnToOriginOnSuccessfulDrop(true);
 

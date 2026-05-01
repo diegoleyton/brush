@@ -93,6 +93,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/FoodItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomPlacedObjectDraggable.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponentController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PasswordPopup.cs" />
@@ -135,6 +136,8 @@
     <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemListUI.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/CurrencyItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropVisual.cs" />
@@ -144,13 +147,16 @@
     <Compile Include="Assets/Scripts/Game/Unity/Installers/PersistentGameDataLifetime.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/RoomInventoryGameEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Instantiator/DependencyObjectInstantiator.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketTabButtonView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/PlaceableObjectItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionScene.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileBootstrap.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Settings/RoomSettings.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketConfirmMessageView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/InstantiatorIds.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomViewController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/SkinItemView.cs" />

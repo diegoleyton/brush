@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ProfileManagementScene.unity
     guid: b0195669178b479f8b71f4f65ab13a8e
+  - enabled: 1
+    path: Assets/Scenes/MarketScene.unity
+    guid: e49f79dfa63884789b119408476e017a
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: cf84fede2960e4413ac59b39a3e4f6cf, type: 2}
   m_UseUCBPForAssetBundles: 0

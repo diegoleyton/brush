@@ -117,6 +117,10 @@ namespace Game.Unity.Installers
                 .To<EyesItemView>()
                 .AsSingle();
 
+            Container.Bind<IItemView>()
+                .To<CurrencyItemView>()
+                .AsSingle();
+
             Container.Bind<ItemViewRegistry>()
                 .AsSingle();
 

@@ -146,6 +146,17 @@ namespace Game.Unity.RoomScene
             navigationService_.Navigate(SceneType.ProfileSelectionScene);
         }
 
+        public void GoToMarketScene()
+        {
+            if (navigationService_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(IGameNavigationService)} dependency.");
+            }
+
+            navigationService_.Navigate(SceneType.MarketScene);
+        }
+
         private void ValidateSceneReferences()
         {
             ValidateSerializedReferences();

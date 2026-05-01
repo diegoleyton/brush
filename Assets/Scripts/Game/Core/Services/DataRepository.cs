@@ -186,12 +186,12 @@ namespace Game.Core.Services
             SetPendingReward(false);
             Reward[] rewards = new Reward[2];
 
-            rewards[0] = GameRules.GetRandomReward(InteractionPointType.FOOD);
+            rewards[0] = GameRules.GetGuaranteedFoodReward();
             rewards[1] = GameRules.GetRandomReward();
 
             foreach (Reward reward in rewards)
             {
-                AddInventoryItem(reward.RewardType, reward.Id, reward.Quantity);
+                ApplyReward(reward);
             }
 
             NotifyDataChanged();
@@ -369,6 +369,17 @@ namespace Game.Core.Services
                 default:
                     throw new ArgumentOutOfRangeException(nameof(interactionPointType), interactionPointType, null);
             }
+        }
+
+        public bool IsMarketItemAlreadyOwned(InteractionPointType itemType, int itemId)
+        {
+            if (CurrentProfile?.InventoryData == null)
+            {
+                return false;
+            }
+
+            Dictionary<int, int> items = CurrentProfile.InventoryData.GetInventoryItems(itemType);
+            return items.TryGetValue(itemId, out int quantity) && quantity == -1;
         }
 
         public void PetEat()
@@ -701,6 +712,26 @@ namespace Game.Core.Services
         private void NotifyInventoryChanged()
         {
             dispatcher_.Send(new InventoryUpdatedEvent());
+        }
+
+        private void ApplyReward(Reward reward)
+        {
+            if (reward == null)
+            {
+                return;
+            }
+
+            switch (reward.Kind)
+            {
+                case RewardKind.Item:
+                    AddInventoryItem(reward.RewardType, reward.Id, reward.Quantity);
+                    return;
+                case RewardKind.Currency:
+                    AddCurrency(reward.CurrencyType, reward.Quantity);
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(reward.Kind), reward.Kind, null);
+            }
         }
 
         private void SpendCurrency(CurrencyType currencyType, int amount)

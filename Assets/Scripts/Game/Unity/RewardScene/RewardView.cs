@@ -113,6 +113,17 @@ namespace Game.Unity.RewardScene
                 throw new ArgumentNullException(nameof(reward));
             }
 
+            if (reward.Kind == RewardKind.Currency)
+            {
+                return new RoomInventoryItemData
+                {
+                    ItemId = 0,
+                    InteractionPointType = InteractionPointType.CURRENCY,
+                    Quantity = reward.Quantity,
+                    Color = Color.white
+                };
+            }
+
             return new RoomInventoryItemData
             {
                 ItemId = reward.Id,

@@ -13,7 +13,8 @@ namespace Game.Unity.Definitions
         PasswordPopup,
         RewardsScene,
         ProfileSelectionScene,
-        ProfileManagementScene
+        ProfileManagementScene,
+        MarketScene
     }
 
     public static class SceneTypeExtension
@@ -26,7 +27,8 @@ namespace Game.Unity.Definitions
             {SceneType.PasswordPopup, "PasswordPopup"},
             {SceneType.RewardsScene, "RewardsScene"},
             {SceneType.ProfileSelectionScene, "ProfileSelectionScene"},
-            {SceneType.ProfileManagementScene, "ProfileManagementScene"}
+            {SceneType.ProfileManagementScene, "ProfileManagementScene"},
+            {SceneType.MarketScene, "MarketScene"}
         };
 
         public static string GeTInstruction(this SceneType sceneType)

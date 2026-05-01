@@ -28,6 +28,9 @@ namespace Game.Unity.Settings
         private Sprite skinItemSprite_;
 
         [SerializeField]
+        private Sprite currencyRewardSprite_;
+
+        [SerializeField]
         private RectTransform paintSurfaceEffectPrefab_;
 
         [SerializeField]
@@ -57,6 +60,7 @@ namespace Game.Unity.Settings
         public int DefaultEyesItemId => defaultEyesItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
         public Sprite SkinItemSprite => skinItemSprite_;
+        public Sprite CurrencyRewardSprite => currencyRewardSprite_;
         public RectTransform PaintSurfaceEffectPrefab => paintSurfaceEffectPrefab_;
         public RoomDropVisual RoomDropAreaVisibility => roomDropAreaVisibility_;
         public float PaintSurfaceColorTransitionDuration => paintSurfaceColorTransitionDuration_;

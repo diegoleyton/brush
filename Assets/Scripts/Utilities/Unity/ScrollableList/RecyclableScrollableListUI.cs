@@ -16,6 +16,15 @@ namespace Flowbit.Utilities.Unity.ScrollableList
     }
 
     /// <summary>
+    /// Supported element arrangements for recyclable lists.
+    /// </summary>
+    public enum ScrollableListLayout
+    {
+        Linear,
+        GridVertical
+    }
+
+    /// <summary>
     /// Recyclable scroll list for fixed-size UI elements.
     /// Inherit with concrete generic arguments to use it as a Unity component.
     /// </summary>
@@ -37,8 +46,15 @@ namespace Flowbit.Utilities.Unity.ScrollableList
         private ScrollableListDirection direction_ = ScrollableListDirection.Vertical;
 
         [SerializeField]
+        private ScrollableListLayout layout_ = ScrollableListLayout.Linear;
+
+        [SerializeField]
         [Min(0f)]
         private float spacing_ = 0f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float crossAxisSpacing_ = 0f;
 
         [SerializeField]
         [Min(0f)]
@@ -51,6 +67,14 @@ namespace Flowbit.Utilities.Unity.ScrollableList
         [SerializeField]
         [Min(0.01f)]
         private float elementSize_ = 100f;
+
+        [SerializeField]
+        [Min(0.01f)]
+        private float crossAxisElementSize_ = 100f;
+
+        [SerializeField]
+        [Min(1)]
+        private int crossAxisItemCount_ = 1;
 
         [SerializeField]
         [Min(0)]
@@ -142,7 +166,9 @@ namespace Flowbit.Utilities.Unity.ScrollableList
 
             Vector2 anchoredPosition = content_.anchoredPosition;
 
-            float target = GetElementStart(index);
+            float target = layout_ == ScrollableListLayout.GridVertical
+                ? GetElementStart(index / GetCrossAxisItemCount())
+                : GetElementStart(index);
             float maxScroll = GetMaxScroll();
 
             if (direction_ == ScrollableListDirection.Vertical)
@@ -248,6 +274,13 @@ namespace Flowbit.Utilities.Unity.ScrollableList
                     $"{GetType().Name} requires an element prefab.");
             }
 
+            if (layout_ == ScrollableListLayout.GridVertical &&
+                direction_ != ScrollableListDirection.Vertical)
+            {
+                throw new InvalidOperationException(
+                    $"{GetType().Name} supports {ScrollableListLayout.GridVertical} only with vertical scrolling.");
+            }
+
             ConfigureContentForDirection();
             initialized_ = true;
         }
@@ -276,7 +309,7 @@ namespace Flowbit.Utilities.Unity.ScrollableList
 
         private void EnsurePoolSize()
         {
-            int requiredPoolSize = Mathf.Max(1, GetVisibleSlotCount() + extraVisibleElements_);
+            int requiredPoolSize = Mathf.Max(1, GetVisibleSlotCount());
 
             while (pooledElements_.Count < requiredPoolSize)
             {
@@ -338,46 +371,13 @@ namespace Flowbit.Utilities.Unity.ScrollableList
 
         private void PositionElement(RectTransform elementRect, int dataIndex)
         {
-            if (forceAnchorsForDirection_)
+            if (layout_ == ScrollableListLayout.GridVertical)
             {
-                if (direction_ == ScrollableListDirection.Vertical)
-                {
-                    elementRect.anchorMin = new Vector2(0f, 1f);
-                    elementRect.anchorMax = new Vector2(1f, 1f);
-                    elementRect.pivot = new Vector2(0.5f, 1f);
-                }
-                else
-                {
-                    elementRect.anchorMin = new Vector2(0f, 1f);
-                    elementRect.anchorMax = new Vector2(0f, 1f);
-                    elementRect.pivot = new Vector2(0f, 1f);
-                }
+                PositionGridElement(elementRect, dataIndex);
+                return;
             }
 
-            Vector2 sizeDelta = elementRect.sizeDelta;
-            if (direction_ == ScrollableListDirection.Vertical)
-            {
-                sizeDelta.y = elementSize_;
-            }
-            else
-            {
-                sizeDelta.x = elementSize_;
-            }
-
-            elementRect.sizeDelta = sizeDelta;
-
-            if (direction_ == ScrollableListDirection.Vertical)
-            {
-                elementRect.anchoredPosition = new Vector2(
-                    0f,
-                    -GetElementStart(dataIndex));
-            }
-            else
-            {
-                elementRect.anchoredPosition = new Vector2(
-                    GetElementStart(dataIndex),
-                    0f);
-            }
+            PositionLinearElement(elementRect, dataIndex);
         }
 
         private void UpdateContentHeight()
@@ -392,6 +392,13 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             if (direction_ == ScrollableListDirection.Vertical)
             {
                 sizeDelta.y = GetContentLength();
+
+                if (layout_ == ScrollableListLayout.GridVertical)
+                {
+                    int crossAxisItemCount = GetCrossAxisItemCount();
+                    sizeDelta.x = (crossAxisItemCount * crossAxisElementSize_) +
+                        ((crossAxisItemCount - 1) * crossAxisSpacing_);
+                }
             }
             else
             {
@@ -427,10 +434,16 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             float viewportLength = GetViewportLength();
             if (viewportLength <= 0f)
             {
-                return 1;
+                return GetCrossAxisItemCount();
             }
 
-            return Mathf.CeilToInt(viewportLength / GetStride());
+            if (layout_ == ScrollableListLayout.GridVertical)
+            {
+                int visibleRows = Mathf.CeilToInt(viewportLength / GetStride());
+                return Mathf.Max(1, (visibleRows + extraVisibleElements_) * GetCrossAxisItemCount());
+            }
+
+            return Mathf.Max(1, Mathf.CeilToInt(viewportLength / GetStride()) + extraVisibleElements_);
         }
 
         private int GetFirstVisibleIndex()
@@ -443,6 +456,12 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             float scroll = GetEffectiveScroll();
             float offset = Mathf.Max(0f, scroll - startPadding_);
             int index = Mathf.FloorToInt(offset / GetStride());
+
+            if (layout_ == ScrollableListLayout.GridVertical)
+            {
+                index *= GetCrossAxisItemCount();
+            }
+
             int maxIndex = Mathf.Max(0, dataList_.Count - 1);
             return Mathf.Clamp(index, 0, maxIndex);
         }
@@ -452,6 +471,15 @@ namespace Flowbit.Utilities.Unity.ScrollableList
             if (dataList_.Count == 0)
             {
                 return startPadding_ + endPadding_;
+            }
+
+            if (layout_ == ScrollableListLayout.GridVertical)
+            {
+                int rowCount = Mathf.CeilToInt(dataList_.Count / (float)GetCrossAxisItemCount());
+                return startPadding_
+                    + endPadding_
+                    + (rowCount * elementSize_)
+                    + ((rowCount - 1) * spacing_);
             }
 
             return startPadding_
@@ -468,6 +496,70 @@ namespace Flowbit.Utilities.Unity.ScrollableList
         private float GetStride()
         {
             return elementSize_ + spacing_;
+        }
+
+        private int GetCrossAxisItemCount()
+        {
+            return Mathf.Max(1, crossAxisItemCount_);
+        }
+
+        private void PositionLinearElement(RectTransform elementRect, int dataIndex)
+        {
+            if (forceAnchorsForDirection_)
+            {
+                if (direction_ == ScrollableListDirection.Vertical)
+                {
+                    elementRect.anchorMin = new Vector2(0f, 1f);
+                    elementRect.anchorMax = new Vector2(1f, 1f);
+                    elementRect.pivot = new Vector2(0.5f, 1f);
+                }
+                else
+                {
+                    elementRect.anchorMin = new Vector2(0f, 1f);
+                    elementRect.anchorMax = new Vector2(0f, 1f);
+                    elementRect.pivot = new Vector2(0f, 1f);
+                }
+            }
+
+            Vector2 sizeDelta = elementRect.sizeDelta;
+            if (direction_ == ScrollableListDirection.Vertical)
+            {
+                sizeDelta.y = elementSize_;
+            }
+            else
+            {
+                sizeDelta.x = elementSize_;
+            }
+
+            elementRect.sizeDelta = sizeDelta;
+
+            if (direction_ == ScrollableListDirection.Vertical)
+            {
+                elementRect.anchoredPosition = new Vector2(0f, -GetElementStart(dataIndex));
+            }
+            else
+            {
+                elementRect.anchoredPosition = new Vector2(GetElementStart(dataIndex), 0f);
+            }
+        }
+
+        private void PositionGridElement(RectTransform elementRect, int dataIndex)
+        {
+            if (forceAnchorsForDirection_)
+            {
+                elementRect.anchorMin = new Vector2(0f, 1f);
+                elementRect.anchorMax = new Vector2(0f, 1f);
+                elementRect.pivot = new Vector2(0f, 1f);
+            }
+
+            int crossAxisItemCount = GetCrossAxisItemCount();
+            int row = dataIndex / crossAxisItemCount;
+            int column = dataIndex % crossAxisItemCount;
+
+            elementRect.sizeDelta = new Vector2(crossAxisElementSize_, elementSize_);
+            elementRect.anchoredPosition = new Vector2(
+                column * (crossAxisElementSize_ + crossAxisSpacing_),
+                -GetElementStart(row));
         }
 
         private float GetViewportLength()

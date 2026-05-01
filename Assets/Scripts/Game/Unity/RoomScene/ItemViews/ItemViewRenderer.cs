@@ -111,6 +111,20 @@ namespace Game.Unity.RoomScene
             SetMainAlpha(1f);
         }
 
+        public void SetMainSprite(Sprite sprite, Color color)
+        {
+            if (mainImage_ == null)
+            {
+                return;
+            }
+
+            mainImage_.sprite = sprite != null ? sprite : defaultSprite_;
+            mainImage_.enabled = true;
+            mainImage_.color = color;
+            SetMainAlpha(1f);
+            SetExtraImagesAlpha(0f);
+        }
+
         public void LoadMainSprite(
             string assetName,
             bool startTransparentUntilLoaded,

@@ -34,6 +34,8 @@ namespace Game.Unity.RoomScene
                     return "Dress";
                 case InteractionPointType.EYES:
                     return "Eyes";
+                case InteractionPointType.CURRENCY:
+                    return "Stars";
                 default:
                     return "Item";
             }

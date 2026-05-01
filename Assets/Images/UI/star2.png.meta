@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6d12781f1499241bb811d75416130efd
+guid: 739faa45dfb4a42959d06b8f024024f4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6969959989206344804
-    second: cartoon_square_0
+      213: 2768992596504944150
+    second: star2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cartoon_square_0
+      name: star2_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 4
-        width: 507
-        height: 506
+        x: 0
+        y: 0
+        width: 512
+        height: 512
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 119, y: 157, z: 139, w: 129}
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c9b9ba8715ab54f90800000000000000
-      internalID: -6969959989206344804
+      spriteID: 61e1d5488107d6620800000000000000
+      internalID: 2768992596504944150
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 61fc98f1a5a324f59903aa5b9dc37cd0
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -147,8 +147,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      cartoon_square_0: -6969959989206344804
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
