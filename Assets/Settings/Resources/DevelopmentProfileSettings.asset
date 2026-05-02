@@ -42,7 +42,7 @@ MonoBehaviour:
     <AdditionalItems>k__BackingField: []
   <Dress>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1
-    <FirstItemCount>k__BackingField: 4
+    <FirstItemCount>k__BackingField: 20
     <AdditionalItems>k__BackingField: []
   <Eyes>k__BackingField:
     <ResetPetTimesOnStartup>k__BackingField: 1

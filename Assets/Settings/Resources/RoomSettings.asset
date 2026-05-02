@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RoomSettings
   m_EditorClassIdentifier: 
   defaultEyesItemId_: 1
-  defaultDressItemId_: 1
+  defaultDressItemId_: 0
   paintItemSprite_: {fileID: -709768274109351568, guid: f1b4eb60bcf3d4027aac695262d8e550, type: 3}
   skinItemSprite_: {fileID: -3846509191455527814, guid: cf89125599fe64419839ff3f282085f1, type: 3}
   currencyRewardSprite_: {fileID: 2768992596504944150, guid: 739faa45dfb4a42959d06b8f024024f4, type: 3}
@@ -25,3 +25,69 @@ MonoBehaviour:
   placeableObjectPrefabs_: []
   placeableObjectDragVisualSize_: {x: 260, y: 260}
   placeableObjectDragPointerOffset_: {x: 0, y: 80}
+  defaultDressLayout_:
+    Left: -18.93999
+    Top: -51.7
+    Right: -20.99999
+    Bottom: -69.10001
+  dressLayoutOverrides_:
+  - ItemId: 3
+    Layout:
+      Left: -27.2
+      Top: -51.4
+      Right: -22.600021
+      Bottom: -69.1
+  - ItemId: 9
+    Layout:
+      Left: -49.299995
+      Top: -141.9
+      Right: -52.500008
+      Bottom: -69.100006
+  - ItemId: 10
+    Layout:
+      Left: 2.3800144
+      Top: -35
+      Right: -38.700005
+      Bottom: -45.199905
+  - ItemId: 4
+    Layout:
+      Left: -36.600025
+      Top: -20.299988
+      Right: -39.8
+      Bottom: -63.9999
+  - ItemId: 11
+    Layout:
+      Left: -11.100025
+      Top: -41.799988
+      Right: -34.2
+      Bottom: -42.40001
+  - ItemId: 12
+    Layout:
+      Left: -152.89993
+      Top: -123.599976
+      Right: -136.30002
+      Bottom: -68.19998
+  - ItemId: 13
+    Layout:
+      Left: -15.099998
+      Top: -121
+      Right: -74.9
+      Bottom: -72.35005
+  - ItemId: 14
+    Layout:
+      Left: -45.1
+      Top: -95.8
+      Right: -43.10003
+      Bottom: -94.09999
+  - ItemId: 15
+    Layout:
+      Left: -4.4000015
+      Top: -132.2
+      Right: -113.92
+      Bottom: -69.10013
+  - ItemId: 19
+    Layout:
+      Left: -60.900005
+      Top: -91.400024
+      Right: -57.8
+      Bottom: -87.79999

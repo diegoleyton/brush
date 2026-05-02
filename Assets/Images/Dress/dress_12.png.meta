@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 4f8342bb8c630416aba4533733f48404
+guid: 66aea7955668b41bcb637a7d23f1eb88
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 455129475359792129
-    second: dress_4_0
+      213: 5424589614625062768
+    second: dress_12_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dress_4_0
+      name: dress_12_0
       rect:
         serializedVersion: 2
-        x: 1
+        x: 0
         y: 0
-        width: 835
-        height: 789
+        width: 899
+        height: 861
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 10c51a1b8d1f05600800000000000000
-      internalID: 455129475359792129
+      spriteID: 07ffff78383084b40800000000000000
+      internalID: 5424589614625062768
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      dress_4_0: 455129475359792129
+      dress_12_0: 5424589614625062768
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

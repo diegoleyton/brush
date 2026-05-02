@@ -86,6 +86,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListUI.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/IGameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Editor/DressLayoutCaptureEditor.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UISettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetFoodController.cs" />

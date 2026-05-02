@@ -25,7 +25,9 @@ namespace Game.Unity.RoomScene
         private int loadVersion_;
 
         [Inject]
-        public void Construct(IAssetLoader assetLoader, RoomSettings roomSettings)
+        public void Construct(
+            IAssetLoader assetLoader,
+            RoomSettings roomSettings)
         {
             assetLoader_ = assetLoader;
             roomSettings_ = roomSettings;
@@ -43,6 +45,8 @@ namespace Game.Unity.RoomScene
             {
                 return;
             }
+
+            ApplyDressLayout(itemId);
 
             if (itemId <= 0)
             {
@@ -95,6 +99,19 @@ namespace Game.Unity.RoomScene
                     StartLoad(roomSettings_.DefaultDressItemId, requestVersion, allowFallback: false);
                 }
             });
+        }
+
+        private void ApplyDressLayout(int itemId)
+        {
+            if (image_ == null || roomSettings_ == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = image_.rectTransform;
+            DressLayoutDefinition layout = roomSettings_.ResolveDressLayout(itemId);
+            rectTransform.offsetMin = new Vector2(layout.Left, layout.Bottom);
+            rectTransform.offsetMax = new Vector2(-layout.Right, -layout.Top);
         }
 
         private static void ReleaseHandle(ref IAssetLoadHandle<Sprite> handle)

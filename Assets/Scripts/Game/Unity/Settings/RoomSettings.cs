@@ -12,6 +12,22 @@ namespace Game.Unity.Settings
         public RectTransform Prefab;
     }
 
+    [Serializable]
+    public struct DressLayoutDefinition
+    {
+        public float Left;
+        public float Top;
+        public float Right;
+        public float Bottom;
+    }
+
+    [Serializable]
+    public sealed class DressLayoutOverrideDefinition
+    {
+        public int ItemId;
+        public DressLayoutDefinition Layout;
+    }
+
     /// <summary>
     /// Global room view settings.
     /// </summary>
@@ -22,7 +38,7 @@ namespace Game.Unity.Settings
         private int defaultEyesItemId_ = 1;
 
         [SerializeField]
-        private int defaultDressItemId_ = 1;
+        private int defaultDressItemId_ = 0;
 
         [SerializeField]
         private Sprite paintItemSprite_;
@@ -60,6 +76,13 @@ namespace Game.Unity.Settings
         [SerializeField]
         private Vector2 placeableObjectDragPointerOffset_ = new Vector2(0f, 120f);
 
+        [SerializeField]
+        private DressLayoutDefinition defaultDressLayout_;
+
+        [SerializeField]
+        private List<DressLayoutOverrideDefinition> dressLayoutOverrides_ =
+            new List<DressLayoutOverrideDefinition>();
+
         public int DefaultEyesItemId => defaultEyesItemId_;
         public int DefaultDressItemId => defaultDressItemId_;
         public Sprite PaintItemSprite => paintItemSprite_;
@@ -71,6 +94,7 @@ namespace Game.Unity.Settings
         public float PaintSurfaceEffectLifetimeSeconds => paintSurfaceEffectLifetimeSeconds_;
         public Vector2 PlaceableObjectDragVisualSize => placeableObjectDragVisualSize_;
         public Vector2 PlaceableObjectDragPointerOffset => placeableObjectDragPointerOffset_;
+        public DressLayoutDefinition DefaultDressLayout => defaultDressLayout_;
 
         public RectTransform ResolvePlaceableObjectPrefab(int itemId)
         {
@@ -84,6 +108,39 @@ namespace Game.Unity.Settings
             }
 
             return defaultPlaceableObjectPrefab_;
+        }
+
+        public DressLayoutDefinition ResolveDressLayout(int itemId)
+        {
+            for (int index = 0; index < dressLayoutOverrides_.Count; index++)
+            {
+                DressLayoutOverrideDefinition definition = dressLayoutOverrides_[index];
+                if (definition != null && definition.ItemId == itemId)
+                {
+                    return definition.Layout;
+                }
+            }
+
+            return defaultDressLayout_;
+        }
+
+        public void SetDressLayoutOverride(int itemId, DressLayoutDefinition layout)
+        {
+            for (int index = 0; index < dressLayoutOverrides_.Count; index++)
+            {
+                DressLayoutOverrideDefinition definition = dressLayoutOverrides_[index];
+                if (definition != null && definition.ItemId == itemId)
+                {
+                    definition.Layout = layout;
+                    return;
+                }
+            }
+
+            dressLayoutOverrides_.Add(new DressLayoutOverrideDefinition
+            {
+                ItemId = itemId,
+                Layout = layout
+            });
         }
     }
 }
