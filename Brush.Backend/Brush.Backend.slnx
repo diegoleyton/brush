@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Brush.Api/Brush.Api.csproj" />
+    <Project Path="src/Brush.Domain/Brush.Domain.csproj" />
+    <Project Path="src/Brush.Infrastructure/Brush.Infrastructure.csproj" />
+  </Folder>
+</Solution>

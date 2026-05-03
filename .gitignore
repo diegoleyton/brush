@@ -2,6 +2,7 @@
 [Tt]emp/
 [Bb]uild/
 [Bb]uilds/
+[Bb]in/
 [Ll]ogs/
 [Oo]bj/
 UserSettings/
@@ -10,3 +11,6 @@ MemoryCaptures/
 .vscode/
 
 .DS_Store
+
+Brush.Backend/**/bin/
+Brush.Backend/**/obj/
