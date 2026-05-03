@@ -3010,7 +3010,7 @@ MonoBehaviour:
   layout_: 1
   spacing_: 100
   crossAxisSpacing_: 160
-  startPadding_: 30
+  startPadding_: 50
   endPadding_: 95
   elementSize_: 160
   crossAxisElementSize_: 160

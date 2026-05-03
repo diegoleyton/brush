@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowbit.Utilities.Core", "Flowbit.Utilities.Core.csproj", "{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowbit.Utilities.Unity.Addressables.Editor", "Flowbit.Utilities.Unity.Addressables.Editor.csproj", "{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
