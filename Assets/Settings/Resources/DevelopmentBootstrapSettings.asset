@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23834294e8c74c13a5704ec30cd0d395, type: 3}
-  m_Name: DevelopmentProfileSettings
+  m_Name: DevelopmentBootstrapSettings
   m_EditorClassIdentifier: 
   <Enabled>k__BackingField: 1
   <OnlyInEditorOrDevelopmentBuild>k__BackingField: 1

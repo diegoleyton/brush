@@ -159,7 +159,7 @@ namespace Game.Unity.Installers
         public ScreenBlocker CreateScreenBlocker()
         {
             ScreenBlockerImage blockerImage = CreatePersistentPrefab(sceneSettings_.ScreenBlockerImage);
-            return new ScreenBlocker(blockerImage.Image);
+            return new ScreenBlocker(blockerImage);
         }
 
         /// <summary>

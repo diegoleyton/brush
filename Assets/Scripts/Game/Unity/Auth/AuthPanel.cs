@@ -1,5 +1,8 @@
 using System;
+using Flowbit.Utilities.Localization;
 using Game.Core.Services;
+using Flowbit.Utilities.Unity.UI;
+using Game.Unity.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -40,17 +43,22 @@ namespace Game.Unity.Auth
         private string defaultFamilyName_ = "Mi familia";
 
         private IAuthService authService_;
+        private ScreenBlocker screenBlocker_;
+        private FeedbackMessage feedbackMessage_;
         private bool isBusy_;
 
         [Inject]
-        public void Construct(IAuthService authService)
+        public void Construct(IAuthService authService, ScreenBlocker screenBlocker)
         {
             authService_ = authService;
+            screenBlocker_ = screenBlocker;
         }
 
         private void Awake()
         {
             ValidateSerializedReferences();
+            feedbackMessage_ = GetComponent<FeedbackMessage>() ?? gameObject.AddComponent<FeedbackMessage>();
+            feedbackMessage_.Configure(feedbackText_);
             WireButtons();
             RefreshView();
         }
@@ -76,6 +84,12 @@ namespace Game.Unity.Auth
             SetFeedback(string.Empty);
             RefreshButtonState();
 
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "CreateAccount",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.auth.create_account",
+                    "Creating account..."));
             try
             {
                 AuthResult result = await authService_.CreateAccountAsync(
@@ -87,10 +101,13 @@ namespace Game.Unity.Auth
             }
             catch (Exception exception)
             {
-                SetFeedback($"Create account failed: {exception.Message}");
+                SetFeedback(RemoteOperationMessageFormatter.Format(
+                    exception,
+                    LocalizationServiceLocator.GetText("auth.create_account.error", "Could not create account.")));
             }
             finally
             {
+                blockScope?.Dispose();
                 isBusy_ = false;
                 RefreshView();
             }
@@ -107,6 +124,12 @@ namespace Game.Unity.Auth
             SetFeedback(string.Empty);
             RefreshButtonState();
 
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "Login",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.auth.login",
+                    "Signing in..."));
             try
             {
                 AuthResult result = await authService_.LoginAsync(
@@ -117,10 +140,13 @@ namespace Game.Unity.Auth
             }
             catch (Exception exception)
             {
-                SetFeedback($"Login failed: {exception.Message}");
+                SetFeedback(RemoteOperationMessageFormatter.Format(
+                    exception,
+                    LocalizationServiceLocator.GetText("auth.login.error", "Could not sign in.")));
             }
             finally
             {
+                blockScope?.Dispose();
                 isBusy_ = false;
                 RefreshView();
             }
@@ -130,17 +156,17 @@ namespace Game.Unity.Auth
         {
             if (result == null)
             {
-                SetFeedback("No auth result was returned.");
+                SetFeedback(LocalizationServiceLocator.GetText("auth.result.none", "No auth result was returned."));
                 return;
             }
 
             if (!result.IsSuccess)
             {
-                SetFeedback(result.ErrorMessage ?? "Authentication failed.");
+                SetFeedback(result.ErrorMessage ?? LocalizationServiceLocator.GetText("auth.error.generic", "Authentication failed."));
                 return;
             }
 
-            SetFeedback("Account created.");
+            ShowSuccess(LocalizationServiceLocator.GetText("auth.create_account.success", "Account created."));
             AuthSucceeded?.Invoke(result);
         }
 
@@ -148,17 +174,17 @@ namespace Game.Unity.Auth
         {
             if (result == null)
             {
-                SetFeedback("No auth result was returned.");
+                SetFeedback(LocalizationServiceLocator.GetText("auth.result.none", "No auth result was returned."));
                 return;
             }
 
             if (!result.IsSuccess)
             {
-                SetFeedback(result.ErrorMessage ?? "Authentication failed.");
+                SetFeedback(result.ErrorMessage ?? LocalizationServiceLocator.GetText("auth.error.generic", "Authentication failed."));
                 return;
             }
 
-            SetFeedback("Login successful.");
+            ShowSuccess(LocalizationServiceLocator.GetText("auth.login.success", "Login successful."));
             AuthSucceeded?.Invoke(result);
         }
 
@@ -167,8 +193,10 @@ namespace Game.Unity.Auth
             if (sessionStatusText_ != null)
             {
                 sessionStatusText_.text = authService_ != null && authService_.HasSession
-                    ? $"Authenticated as {authService_.CurrentSession?.Email}"
-                    : "No active session";
+                    ? string.Format(
+                        LocalizationServiceLocator.GetText("auth.status.authenticated_as", "Authenticated as {0}"),
+                        authService_.CurrentSession?.Email)
+                    : LocalizationServiceLocator.GetText("auth.status.no_session", "No active session");
             }
 
             RefreshButtonState();
@@ -184,10 +212,12 @@ namespace Game.Unity.Auth
 
         private void SetFeedback(string message)
         {
-            if (feedbackText_ != null)
-            {
-                feedbackText_.text = message ?? string.Empty;
-            }
+            feedbackMessage_?.ShowError(message);
+        }
+
+        private void ShowSuccess(string message)
+        {
+            feedbackMessage_?.ShowSuccess(message, durationSeconds: 2f);
         }
 
         private void WireButtons()

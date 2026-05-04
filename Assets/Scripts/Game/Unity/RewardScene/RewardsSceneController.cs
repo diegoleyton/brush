@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Localization;
 using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.UI;
 
@@ -128,8 +129,15 @@ namespace Game.Unity.RewardScene
                 yield break;
             }
 
+            IDisposable claimBlockerScope = screenBlocker_?.BlockScope(
+                "RewardsSceneClaim",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.rewards.claim",
+                    "Claiming reward..."));
             Task<Reward[]> claimTask = rewardClaimService_.ClaimAsync();
             yield return new WaitUntil(() => claimTask.IsCompleted);
+            claimBlockerScope?.Dispose();
 
             if (claimTask.IsFaulted)
             {

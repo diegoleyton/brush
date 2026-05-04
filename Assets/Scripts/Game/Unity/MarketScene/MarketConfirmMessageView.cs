@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Flowbit.Utilities.Localization;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,12 +12,6 @@ namespace Game.Unity.MarketScene
     /// </summary>
     public sealed class MarketConfirmMessageView : MonoBehaviour
     {
-        private const string SuccessMessage = "Purchase completed.";
-        private const string NotEnoughCurrencyMessage = "Not enough coins.";
-        private const string AlreadyOwnedMessage = "Item already owned.";
-        private const string ItemNotFoundMessage = "Item not found.";
-        private const string NoCurrentProfileMessage = "No profile selected.";
-
         [SerializeField]
         private Text messageText_;
 
@@ -57,27 +52,27 @@ namespace Game.Unity.MarketScene
 
         public void ShowSuccessMessage()
         {
-            SetMessage(SuccessMessage, successColor_);
+            SetMessage(LocalizationServiceLocator.GetText("market.purchase.success", "Purchase completed."), successColor_);
         }
 
         public void ShowNotEnoughCurrencyMessage()
         {
-            SetMessage(NotEnoughCurrencyMessage, failureColor_);
+            SetMessage(LocalizationServiceLocator.GetText("market.purchase.not_enough_currency", "Not enough coins."), failureColor_);
         }
 
         public void ShowAlreadyOwnedMessage()
         {
-            SetMessage(AlreadyOwnedMessage, failureColor_);
+            SetMessage(LocalizationServiceLocator.GetText("market.purchase.already_owned", "Item already owned."), failureColor_);
         }
 
         public void ShowItemNotFoundMessage()
         {
-            SetMessage(ItemNotFoundMessage, failureColor_);
+            SetMessage(LocalizationServiceLocator.GetText("market.purchase.item_not_found", "Item not found."), failureColor_);
         }
 
         public void ShowNoCurrentProfileMessage()
         {
-            SetMessage(NoCurrentProfileMessage, failureColor_);
+            SetMessage(LocalizationServiceLocator.GetText("market.purchase.no_profile", "No profile selected."), failureColor_);
         }
 
         public void Clear()

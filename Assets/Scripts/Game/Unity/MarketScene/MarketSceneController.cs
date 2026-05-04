@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;
 using Game.Core.Data;
@@ -46,6 +48,7 @@ namespace Game.Unity.MarketScene
         private IRoomGameplayService roomGameplayService_;
         private IMarketPurchaseService marketPurchaseService_;
         private EventDispatcher dispatcher_;
+        private ScreenBlocker screenBlocker_;
         private bool dispatcherSubscribed_;
 
         [Inject]
@@ -54,13 +57,15 @@ namespace Game.Unity.MarketScene
             IGameNavigationService navigationService,
             DataRepository repository,
             IRoomGameplayService roomGameplayService,
-            IMarketPurchaseService marketPurchaseService)
+            IMarketPurchaseService marketPurchaseService,
+            ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
             repository_ = repository;
             roomGameplayService_ = roomGameplayService;
             marketPurchaseService_ = marketPurchaseService;
+            screenBlocker_ = screenBlocker;
         }
 
         private void Awake()
@@ -285,9 +290,22 @@ namespace Game.Unity.MarketScene
 
         private async Task PurchaseConfirmedAsync(MarketItemDefinition definition)
         {
-            MarketPurchaseStatus status = await marketPurchaseService_.PurchaseAsync(definition);
-            OnMarketPurchaseCompleted(status);
-            Refresh();
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "MarketPurchase",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.market.purchase",
+                    "Buying item..."));
+            try
+            {
+                MarketPurchaseStatus status = await marketPurchaseService_.PurchaseAsync(definition);
+                OnMarketPurchaseCompleted(status);
+                Refresh();
+            }
+            finally
+            {
+                blockScope?.Dispose();
+            }
         }
 
         private void ClearFeedback()

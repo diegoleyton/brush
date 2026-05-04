@@ -1,9 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.Unity.UI;
 using Game.Core.Services;
 using Game.Unity.Auth;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
+using Game.Unity.UI;
 using UnityEngine;
 using Zenject;
 
@@ -22,6 +25,7 @@ namespace Game.Unity.AuthScene
         private IProfilesService profilesService_;
         private IChildGameStateSyncService childGameStateSyncService_;
         private ClientGameStateStore gameStateStore_;
+        private ScreenBlocker screenBlocker_;
         private bool isRedirecting_;
 
         [Inject]
@@ -31,13 +35,15 @@ namespace Game.Unity.AuthScene
             IAuthService authService,
             IProfilesService profilesService,
             IChildGameStateSyncService childGameStateSyncService,
-            ClientGameStateStore gameStateStore)
+            ClientGameStateStore gameStateStore,
+            ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             authService_ = authService;
             profilesService_ = profilesService;
             childGameStateSyncService_ = childGameStateSyncService;
             gameStateStore_ = gameStateStore;
+            screenBlocker_ = screenBlocker;
         }
 
         private void Reset()
@@ -102,6 +108,12 @@ namespace Game.Unity.AuthScene
             }
 
             isRedirecting_ = true;
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "AuthRedirect",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.auth.redirect",
+                    "Loading profile..."));
             try
             {
                 await profilesService_.RefreshAsync();
@@ -128,9 +140,20 @@ namespace Game.Unity.AuthScene
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
+                AuthPanel authPanel = authPanel_;
+                if (authPanel != null)
+                {
+                    FeedbackMessage feedbackMessage = authPanel.GetComponent<FeedbackMessage>();
+                    feedbackMessage?.ShowError(
+                        RemoteOperationMessageFormatter.Format(
+                            exception,
+                            LocalizationServiceLocator.GetText("auth.redirect.error", "Could not load account.")),
+                        durationSeconds: 3f);
+                }
             }
             finally
             {
+                blockScope?.Dispose();
                 isRedirecting_ = false;
             }
         }

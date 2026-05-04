@@ -6,7 +6,7 @@ using Game.Core.Data;
 namespace Game.Unity.Development
 {
     [System.Serializable]
-    public sealed class DevelopmentInventoryEntry
+    public sealed class DevelopmentBootstrapInventoryEntry
     {
         [field: SerializeField]
         public int ItemId { get; private set; } = 1;
@@ -16,7 +16,7 @@ namespace Game.Unity.Development
     }
 
     [System.Serializable]
-    public sealed class DevelopmentInventoryCategorySettings
+    public sealed class DevelopmentBootstrapInventoryCategorySettings
     {
         [field: SerializeField]
         public bool ResetPetTimesOnStartup { get; private set; } = false;
@@ -25,15 +25,15 @@ namespace Game.Unity.Development
         public int FirstItemCount { get; private set; } = 0;
 
         [field: SerializeField]
-        public DevelopmentInventoryEntry[] AdditionalItems { get; private set; } =
-            System.Array.Empty<DevelopmentInventoryEntry>();
+        public DevelopmentBootstrapInventoryEntry[] AdditionalItems { get; private set; } =
+            System.Array.Empty<DevelopmentBootstrapInventoryEntry>();
     }
 
     /// <summary>
-    /// Development-only settings used to bootstrap a test profile.
+    /// Development-only settings used to seed local bootstrap state for quick iteration.
     /// </summary>
-    [CreateAssetMenu(fileName = "DevelopmentProfileSettings", menuName = "Game/Development/Development Profile Settings")]
-    public sealed class DevelopmentProfileSettings : ScriptableObject
+    [CreateAssetMenu(fileName = "DevelopmentBootstrapSettings", menuName = "Game/Development/Development Bootstrap Settings")]
+    public sealed class DevelopmentBootstrapSettings : ScriptableObject
     {
         [field: SerializeField]
         public bool Enabled { get; private set; } = true;
@@ -61,28 +61,28 @@ namespace Game.Unity.Development
 
         [field: SerializeField]
         [field: FormerlySerializedAs("Objects")]
-        public DevelopmentInventoryCategorySettings PlaceableObjects { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings PlaceableObjects { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Paint { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Paint { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Food { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Food { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Skin { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Skin { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Hat { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Hat { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
-        public DevelopmentInventoryCategorySettings Dress { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Dress { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
         [field: SerializeField]
         [field: FormerlySerializedAs("Face")]
-        public DevelopmentInventoryCategorySettings Eyes { get; private set; } = new DevelopmentInventoryCategorySettings();
+        public DevelopmentBootstrapInventoryCategorySettings Eyes { get; private set; } = new DevelopmentBootstrapInventoryCategorySettings();
 
-        public DevelopmentInventoryCategorySettings GetCategorySettings(InteractionPointType interactionPointType)
+        public DevelopmentBootstrapInventoryCategorySettings GetCategorySettings(InteractionPointType interactionPointType)
         {
             switch (interactionPointType)
             {

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Data;
 using Game.Core.Events;
 using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
+using Game.Unity.UI;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,6 +52,8 @@ namespace Game.Unity.ProfileManagementScene
         private IProfilesService profilesService_;
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
+        private ScreenBlocker screenBlocker_;
+        private FeedbackMessage feedbackMessage_;
         private bool dispatcherSubscribed_;
 
         [Inject]
@@ -57,19 +62,23 @@ namespace Game.Unity.ProfileManagementScene
             IGameNavigationService navigationService,
             ClientGameStateStore gameStateStore,
             IProfilesService profilesService,
-            DataRepository repository)
+            DataRepository repository,
+            ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
             gameStateStore_ = gameStateStore;
             profilesService_ = profilesService;
             repository_ = repository;
+            screenBlocker_ = screenBlocker;
         }
 
         private void Awake()
         {
             sceneType_ = SceneType.ProfileManagementScene;
             ValidateSerializedReferences();
+            feedbackMessage_ = GetComponent<FeedbackMessage>() ?? gameObject.AddComponent<FeedbackMessage>();
+            feedbackMessage_.Configure(feedbackText_);
         }
 
         private void OnEnable()
@@ -121,17 +130,25 @@ namespace Game.Unity.ProfileManagementScene
 
             if (!profilesService_.CanUseName(profileName))
             {
-                SetFeedback("Profile name is invalid or already in use.");
+                SetFeedback(LocalizationServiceLocator.GetText(
+                    "profiles.name.invalid_or_used",
+                    "Profile name is invalid or already in use."));
                 return;
             }
 
             if (!profilesService_.CanUsePetName(petName))
             {
-                SetFeedback("Pet name cannot be empty.");
+                SetFeedback(LocalizationServiceLocator.GetText("profiles.pet_name.invalid", "Pet name cannot be empty."));
                 return;
             }
 
             Profile createdProfile;
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "CreateProfile",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.profiles.create",
+                    "Creating profile..."));
             try
             {
                 createdProfile = await profilesService_.CreateAsync(profileName, petName, pictureId: 1);
@@ -139,13 +156,19 @@ namespace Game.Unity.ProfileManagementScene
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
-                SetFeedback("Could not create profile.");
+                SetFeedback(RemoteOperationMessageFormatter.Format(
+                    exception,
+                    LocalizationServiceLocator.GetText("profiles.create.error", "Could not create profile.")));
                 return;
+            }
+            finally
+            {
+                blockScope?.Dispose();
             }
 
             if (createdProfile == null)
             {
-                SetFeedback("Could not create profile.");
+                SetFeedback(LocalizationServiceLocator.GetText("profiles.create.error", "Could not create profile."));
                 return;
             }
 
@@ -159,7 +182,7 @@ namespace Game.Unity.ProfileManagementScene
                 petNameInput_.text = string.Empty;
             }
 
-            SetFeedback("Profile created.");
+            ShowSuccess(LocalizationServiceLocator.GetText("profiles.create.success", "Profile created."));
 
             if (creatingFirstProfile)
             {
@@ -191,6 +214,12 @@ namespace Game.Unity.ProfileManagementScene
             }
 
             bool deleted;
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "DeleteProfile",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.profiles.delete",
+                    "Deleting profile..."));
             try
             {
                 deleted = await profilesService_.DeleteAsync(profileIndex);
@@ -198,17 +227,23 @@ namespace Game.Unity.ProfileManagementScene
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
-                SetFeedback("Could not delete profile.");
+                SetFeedback(RemoteOperationMessageFormatter.Format(
+                    exception,
+                    LocalizationServiceLocator.GetText("profiles.delete.error", "Could not delete profile.")));
                 return;
+            }
+            finally
+            {
+                blockScope?.Dispose();
             }
 
             if (!deleted)
             {
-                SetFeedback("At least one profile must remain.");
+                SetFeedback(LocalizationServiceLocator.GetText("profiles.delete.minimum_one", "At least one profile must remain."));
                 return;
             }
 
-            SetFeedback("Profile deleted.");
+            ShowSuccess(LocalizationServiceLocator.GetText("profiles.delete.success", "Profile deleted."));
         }
 
         private void OnProfileSwitched(ProfileSwitchedEvent _)
@@ -341,10 +376,12 @@ namespace Game.Unity.ProfileManagementScene
 
         private void SetFeedback(string message)
         {
-            if (feedbackText_ != null)
-            {
-                feedbackText_.text = message;
-            }
+            feedbackMessage_?.ShowError(message);
+        }
+
+        private void ShowSuccess(string message)
+        {
+            feedbackMessage_?.ShowSuccess(message, durationSeconds: 2f);
         }
 
         private void ClearFeedback()
@@ -361,12 +398,25 @@ namespace Game.Unity.ProfileManagementScene
 
             try
             {
-                await profilesService_.RefreshAsync();
+                IDisposable blockScope = screenBlocker_?.BlockScope(
+                    "RefreshProfiles",
+                    showLoadingWithTime: true,
+                    loadingMessage: "Loading profiles...");
+                try
+                {
+                    await profilesService_.RefreshAsync();
+                }
+                finally
+                {
+                    blockScope?.Dispose();
+                }
             }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
-                SetFeedback("Could not refresh profiles.");
+                SetFeedback(RemoteOperationMessageFormatter.Format(
+                    exception,
+                    LocalizationServiceLocator.GetText("profiles.refresh.error", "Could not refresh profiles.")));
             }
         }
 

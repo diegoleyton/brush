@@ -19,12 +19,12 @@ namespace Game.Unity.Development
     {
         private readonly DataRepository repository_;
         private readonly IRoomGameplayService roomGameplayService_;
-        private readonly DevelopmentProfileSettings settings_;
+        private readonly DevelopmentBootstrapSettings settings_;
 
         public DevelopmentProfileBootstrap(
             DataRepository repository,
             IRoomGameplayService roomGameplayService,
-            DevelopmentProfileSettings settings)
+            DevelopmentBootstrapSettings settings)
         {
             repository_ = repository;
             roomGameplayService_ = roomGameplayService;
@@ -216,7 +216,7 @@ namespace Game.Unity.Development
         {
             foreach (InteractionPointType interactionPointType in Enum.GetValues(typeof(InteractionPointType)))
             {
-                DevelopmentInventoryCategorySettings categorySettings = settings_.GetCategorySettings(interactionPointType);
+                DevelopmentBootstrapInventoryCategorySettings categorySettings = settings_.GetCategorySettings(interactionPointType);
                 if (categorySettings != null && categorySettings.ResetPetTimesOnStartup)
                 {
                     return true;
@@ -229,7 +229,7 @@ namespace Game.Unity.Development
         private void EnsureInventoryCategory(
             InteractionPointType interactionPointType,
             Dictionary<int, int> inventoryItems,
-            DevelopmentInventoryCategorySettings categorySettings,
+            DevelopmentBootstrapInventoryCategorySettings categorySettings,
             Action<int, int> addItem)
         {
             if (inventoryItems == null || categorySettings == null || addItem == null)
@@ -246,7 +246,7 @@ namespace Game.Unity.Development
                 EnsureInventoryItem(inventoryItems, itemId, 1, addItem);
             }
 
-            DevelopmentInventoryEntry[] additionalItems = categorySettings.AdditionalItems;
+            DevelopmentBootstrapInventoryEntry[] additionalItems = categorySettings.AdditionalItems;
             if (additionalItems == null)
             {
                 return;
@@ -254,7 +254,7 @@ namespace Game.Unity.Development
 
             for (int index = 0; index < additionalItems.Length; index++)
             {
-                DevelopmentInventoryEntry entry = additionalItems[index];
+                DevelopmentBootstrapInventoryEntry entry = additionalItems[index];
                 if (entry == null ||
                     !ItemCatalog.IsValidItemId(interactionPointType, entry.ItemId) ||
                     entry.Quantity <= 0)

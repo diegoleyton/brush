@@ -7,6 +7,7 @@ using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.RemoteCommunication;
 using Flowbit.Utilities.Storage;
+using Flowbit.Utilities.Localization;
 using Flowbit.Utilities.Unity.AssetLoader;
 using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.Logger;
@@ -37,7 +38,7 @@ namespace Game.Unity.Installers
     {
         private const string SceneSettingsResourcePath = "SceneSettings";
         private const string GameSoundLibraryResourcePath = "GameSoundLibrary";
-        private const string DevelopmentProfileSettingsResourcePath = "DevelopmentProfileSettings";
+        private const string DevelopmentBootstrapSettingsResourcePath = "DevelopmentBootstrapSettings";
         private const string RoomSettingsResourcePath = "RoomSettings";
         private const string UISettingsResourcePath = "UISettings";
 
@@ -45,7 +46,7 @@ namespace Game.Unity.Installers
         {
             SceneSettings sceneSettings = LoadSceneSettings();
             GameSoundLibrary gameSoundLibrary = LoadGameSoundLibrary();
-            DevelopmentProfileSettings developmentProfileSettings = LoadDevelopmentProfileSettings();
+            DevelopmentBootstrapSettings developmentBootstrapSettings = LoadDevelopmentBootstrapSettings();
             RoomSettings roomSettings = LoadRoomSettings();
             UISettings uiSettings = LoadUISettings();
             GameProjectComposition composition = new GameProjectComposition(sceneSettings, gameSoundLibrary);
@@ -55,7 +56,7 @@ namespace Game.Unity.Installers
             Container.BindInstance(composition).AsSingle();
             Container.BindInstance(sceneSettings).AsSingle();
             Container.BindInstance(gameSoundLibrary).AsSingle();
-            Container.BindInstance(developmentProfileSettings).AsSingle();
+            Container.BindInstance(developmentBootstrapSettings).AsSingle();
             Container.BindInstance(roomSettings).AsSingle();
             Container.BindInstance(uiSettings).AsSingle();
 
@@ -92,6 +93,15 @@ namespace Game.Unity.Installers
 
             Container.Bind<IGameLogger>()
                 .To<UnityGameLogger>()
+                .AsSingle();
+
+            Container.Bind<ILocalizationService>()
+                .FromMethod(_ =>
+                {
+                    LocalizationService service = new LocalizationService();
+                    LocalizationServiceLocator.Current = service;
+                    return service;
+                })
                 .AsSingle();
 
             Container.Bind<IRemotePayloadCodec>()
@@ -339,9 +349,9 @@ namespace Game.Unity.Installers
             return gameSoundLibrary;
         }
 
-        private static DevelopmentProfileSettings LoadDevelopmentProfileSettings()
+        private static DevelopmentBootstrapSettings LoadDevelopmentBootstrapSettings()
         {
-            return UnityEngine.Resources.Load<DevelopmentProfileSettings>(DevelopmentProfileSettingsResourcePath);
+            return UnityEngine.Resources.Load<DevelopmentBootstrapSettings>(DevelopmentBootstrapSettingsResourcePath);
         }
 
         private static RoomSettings LoadRoomSettings()

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Game.Unity.Scenes;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Flowbit.Utilities.Unity.UI
 {
@@ -10,29 +10,40 @@ namespace Flowbit.Utilities.Unity.UI
     /// </summary>
     public class ScreenBlocker
     {
-        private readonly Image blockerImage_;
-        private readonly Dictionary<int, string> activeLocks_ = new();
+        private sealed class BlockState
+        {
+            public string Reason;
+            public bool ShowLoadingWithTime;
+            public string LoadingMessage;
+            public float StartedAtRealtime;
+        }
+
+        private readonly ScreenBlockerImage blockerImage_;
+        private readonly Dictionary<int, BlockState> activeLocks_ = new();
         private int idCounter_;
 
         public bool IsBlocked => activeLocks_.Count > 0;
 
-        public ScreenBlocker(Image blockerImage)
+        public ScreenBlocker(ScreenBlockerImage blockerImage)
         {
             blockerImage_ = blockerImage;
 
-            if (blockerImage_ != null)
+            if (blockerImage_?.Image != null)
             {
-                blockerImage_.raycastTarget = true; // importante
-                blockerImage_.gameObject.SetActive(false);
+                blockerImage_.Image.raycastTarget = true;
+                blockerImage_.Image.gameObject.SetActive(false);
             }
         }
 
         /// <summary>
         /// Blocks the screen and returns a disposable scope that will unblock automatically.
         /// </summary>
-        public IDisposable BlockScope(string reason = "")
+        public IDisposable BlockScope(
+            string reason = "",
+            bool showLoadingWithTime = false,
+            string loadingMessage = null)
         {
-            int id = Block(reason);
+            int id = Block(reason, showLoadingWithTime, loadingMessage);
             return new Scope(this, id);
         }
 
@@ -45,10 +56,16 @@ namespace Flowbit.Utilities.Unity.UI
             UpdateBlocker();
         }
 
-        private int Block(string reason = "")
+        private int Block(string reason = "", bool showLoadingWithTime = false, string loadingMessage = null)
         {
             int id = ++idCounter_;
-            activeLocks_[id] = reason;
+            activeLocks_[id] = new BlockState
+            {
+                Reason = reason,
+                ShowLoadingWithTime = showLoadingWithTime,
+                LoadingMessage = loadingMessage,
+                StartedAtRealtime = Time.realtimeSinceStartup
+            };
 
             UpdateBlocker();
             return id;
@@ -67,9 +84,48 @@ namespace Flowbit.Utilities.Unity.UI
 
         private void UpdateBlocker()
         {
-            if (blockerImage_ != null)
+            if (blockerImage_?.Image != null)
             {
-                blockerImage_.gameObject.SetActive(activeLocks_.Count > 0);
+                blockerImage_.Image.gameObject.SetActive(activeLocks_.Count > 0);
+            }
+
+            if (blockerImage_ == null)
+            {
+                return;
+            }
+
+            if (activeLocks_.Count == 0)
+            {
+                blockerImage_.HideLoading();
+                return;
+            }
+
+            int latestLockId = -1;
+            BlockState latestLoadingState = null;
+            foreach (KeyValuePair<int, BlockState> entry in activeLocks_)
+            {
+                if (!entry.Value.ShowLoadingWithTime)
+                {
+                    continue;
+                }
+
+                if (entry.Key > latestLockId)
+                {
+                    latestLockId = entry.Key;
+                    latestLoadingState = entry.Value;
+                }
+            }
+
+            if (latestLoadingState != null)
+            {
+                blockerImage_.ShowLoading(
+                    latestLoadingState.LoadingMessage,
+                    latestLoadingState.ShowLoadingWithTime,
+                    latestLoadingState.StartedAtRealtime);
+            }
+            else
+            {
+                blockerImage_.HideLoading();
             }
         }
 
