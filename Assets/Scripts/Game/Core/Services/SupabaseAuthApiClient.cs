@@ -1,0 +1,121 @@
+using System;
+using System.Threading.Tasks;
+using Flowbit.Utilities.Core.Logger;
+using Flowbit.Utilities.RemoteCommunication;
+using Game.Unity.Settings;
+using UnityEngine;
+
+namespace Game.Core.Services
+{
+    /// <summary>
+    /// Thin Unity client for Supabase email/password auth endpoints.
+    /// </summary>
+    public sealed class SupabaseAuthApiClient : IRemoteIdentityProviderClient
+    {
+        private readonly MarmiloBackendSettings settings_;
+        private readonly IRemoteRequestDispatcher remoteRequestDispatcher_;
+        private readonly IRemotePayloadCodec payloadCodec_;
+        private readonly IGameLogger logger_;
+
+        private static readonly IRemotePayloadCodec FallbackPayloadCodec =
+            new Flowbit.Utilities.Unity.RemoteCommunication.JsonUtilityRemotePayloadCodec();
+
+        public SupabaseAuthApiClient(
+            MarmiloBackendSettings settings,
+            IRemoteRequestDispatcher remoteRequestDispatcher,
+            IRemotePayloadCodec payloadCodec,
+            IGameLogger logger)
+        {
+            settings_ = settings ?? throw new ArgumentNullException(nameof(settings));
+            remoteRequestDispatcher_ = remoteRequestDispatcher ?? throw new ArgumentNullException(nameof(remoteRequestDispatcher));
+            payloadCodec_ = payloadCodec ?? throw new ArgumentNullException(nameof(payloadCodec));
+            logger_ = logger;
+        }
+
+        public Task<SupabaseAuthResponse> SignUpAsync(string email, string password) =>
+            SendAuthRequestAsync(
+                $"{settings_.SupabaseUrl}/auth/v1/signup",
+                "{\"email\":\"" + EscapeJson(email) + "\",\"password\":\"" + EscapeJson(password) + "\"}");
+
+        public Task<SupabaseAuthResponse> LoginAsync(string email, string password) =>
+            SendAuthRequestAsync(
+                $"{settings_.SupabaseUrl}/auth/v1/token?grant_type=password",
+                "{\"email\":\"" + EscapeJson(email) + "\",\"password\":\"" + EscapeJson(password) + "\"}");
+
+        private async Task<SupabaseAuthResponse> SendAuthRequestAsync(string url, string jsonBody)
+        {
+            string configurationError = ValidateConfiguration();
+            if (!string.IsNullOrWhiteSpace(configurationError))
+            {
+                return new SupabaseAuthResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = configurationError
+                };
+            }
+
+            RemoteRequest request = new RemoteRequest(
+                url,
+                RemoteRequestMethod.Post,
+                body: jsonBody,
+                headers: new System.Collections.Generic.Dictionary<string, string>
+                {
+                    ["apikey"] = settings_.SupabaseAnonKey
+                },
+                isIdempotent: false);
+
+            RemoteResponse response = await remoteRequestDispatcher_.SendAsync(request);
+            if (response.IsSuccess)
+            {
+                return payloadCodec_.Deserialize<SupabaseAuthResponse>(response.Body);
+            }
+
+            string errorMessage = TryParseErrorMessage(response.Body);
+            logger_?.Log($"[Auth] Supabase request failed: {response.StatusCode} {errorMessage}");
+
+            return new SupabaseAuthResponse
+            {
+                IsSuccess = false,
+                ErrorMessage = errorMessage
+            };
+        }
+
+        private static string TryParseErrorMessage(string payload)
+        {
+            if (string.IsNullOrWhiteSpace(payload))
+            {
+                return "Request failed.";
+            }
+
+            try
+            {
+                MarmiloApiErrorResponse errorResponse = FallbackPayloadCodec.Deserialize<MarmiloApiErrorResponse>(payload);
+                return errorResponse?.ResolveMessage() ?? payload;
+            }
+            catch
+            {
+                return payload;
+            }
+        }
+
+        private static string EscapeJson(string value) =>
+            (value ?? string.Empty)
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"");
+
+        private string ValidateConfiguration()
+        {
+            if (string.IsNullOrWhiteSpace(settings_.SupabaseUrl))
+            {
+                return "Supabase URL is missing in MarmiloBackendSettings.json.";
+            }
+
+            if (string.IsNullOrWhiteSpace(settings_.SupabaseAnonKey))
+            {
+                return "Supabase anon key is missing in MarmiloBackendSettings.json.";
+            }
+
+            return null;
+        }
+    }
+}

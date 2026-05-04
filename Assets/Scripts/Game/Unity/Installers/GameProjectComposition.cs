@@ -14,6 +14,7 @@ using Game.Core.Services;
 using Game.Unity.Audio;
 using Game.Unity.Scenes;
 using Game.Core.Data;
+using Game.Unity.Settings;
 
 using UnityEngine;
 
@@ -79,6 +80,15 @@ namespace Game.Unity.Installers
         public DataRepository CreateDataRepository(Data data, EventDispatcher dispatcher, IGameLogger logger)
         {
             return new DataRepository(data, dispatcher, logger);
+        }
+
+        /// <summary>
+        /// Loads remote backend settings from Resources.
+        /// </summary>
+        public MarmiloBackendSettings CreateMarmiloBackendSettings()
+        {
+            TextAsset textAsset = Resources.Load<TextAsset>(MarmiloBackendSettings.ResourceFileName);
+            return MarmiloBackendSettings.FromJson(textAsset != null ? textAsset.text : string.Empty);
         }
 
         /// <summary>

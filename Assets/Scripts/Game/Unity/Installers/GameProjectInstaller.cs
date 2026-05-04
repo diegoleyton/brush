@@ -5,10 +5,12 @@ using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
+using Flowbit.Utilities.RemoteCommunication;
 using Flowbit.Utilities.Storage;
 using Flowbit.Utilities.Unity.AssetLoader;
 using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.Logger;
+using Flowbit.Utilities.Unity.RemoteCommunication;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
@@ -79,6 +81,10 @@ namespace Game.Unity.Installers
                 .FromMethod(_ => composition.CreateDataStorage())
                 .AsSingle();
 
+            Container.Bind<MarmiloBackendSettings>()
+                .FromMethod(_ => composition.CreateMarmiloBackendSettings())
+                .AsSingle();
+
             Container.Bind<EventDispatcher>()
                 .FromMethod(_ => composition.CreateEventDispatcher())
                 .AsSingle();
@@ -86,6 +92,31 @@ namespace Game.Unity.Installers
             Container.Bind<IGameLogger>()
                 .To<UnityGameLogger>()
                 .AsSingle();
+
+            Container.Bind<IRemotePayloadCodec>()
+                .To<JsonUtilityRemotePayloadCodec>()
+                .AsSingle();
+
+            Container.Bind<IRemoteRetryPolicy>()
+                .To<DefaultRemoteRetryPolicy>()
+                .AsSingle();
+
+            Container.Bind<IRemoteRequestDispatcher>()
+                .To<RemoteRequestDispatcher>()
+                .AsSingle();
+
+            Container.Bind<IRemoteIdentityProviderClient>()
+                .To<SupabaseAuthApiClient>()
+                .AsSingle();
+
+            Container.Bind<IParentAccountApiClient>()
+                .To<MarmiloBackendApiClient>()
+                .AsSingle();
+
+            Container.Bind<IMarmiloAuthService>()
+                .To<MarmiloAuthService>()
+                .AsSingle()
+                .NonLazy();
 
             Container.Bind<IAssetLoader>()
                 .To<AddressablesAssetLoader>()
