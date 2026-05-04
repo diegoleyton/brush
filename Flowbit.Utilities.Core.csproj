@@ -65,10 +65,16 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteRequestMethod.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemoteRequestDispatcher.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Events/IEvent.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Events/EventDispatcher.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Services/ServiceContainer.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteResponse.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteRequest.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/DataLoadResult.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemotePayloadCodec.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemoteRetryPolicy.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/PlayerPrefsDataStorage.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/IDataStorage.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Logger/IGameLogger.cs" />

@@ -1292,6 +1292,7 @@
     <ProjectReference Include="Zenject-ReflectionBaking-Editor.csproj" />
     <ProjectReference Include="Zenject-Editor.csproj" />
     <ProjectReference Include="Zenject-PoolMonitor-Editor.csproj" />
+    <ProjectReference Include="Flowbit.Utilities.Unity.Addressables.Editor.csproj" />
     <ProjectReference Include="Zenject.csproj" />
     <ProjectReference Include="Flowbit.Utilities.Unity.csproj" />
   </ItemGroup>

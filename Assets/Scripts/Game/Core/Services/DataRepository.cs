@@ -19,82 +19,38 @@ namespace Game.Core.Services
     {
         private readonly EventDispatcher dispatcher_;
         private readonly IGameLogger logger_;
+        private readonly ClientGameStateStore gameStateStore_;
+        private readonly IProfileService profileService_;
 
-        public GameState Data { get; private set; }
+        public GameState Data => gameStateStore_.Data;
 
-        public Profile CurrentProfile { get; private set; }
+        public Profile CurrentProfile => gameStateStore_.CurrentProfile;
 
-        public List<Profile> AllProfiles => Data.Profiles;
+        public List<Profile> AllProfiles => gameStateStore_.AllProfiles;
 
         private static long Now => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        public DataRepository(GameState data, EventDispatcher dispatcher, IGameLogger logger)
+        public DataRepository(
+            ClientGameStateStore gameStateStore,
+            IProfileService profileService,
+            EventDispatcher dispatcher,
+            IGameLogger logger)
         {
-            if (data == null)
-            {
-                data = new GameState();
-            }
-
+            gameStateStore_ = gameStateStore ?? throw new ArgumentNullException(nameof(gameStateStore));
+            profileService_ = profileService ?? throw new ArgumentNullException(nameof(profileService));
             dispatcher_ = dispatcher;
             logger_ = logger;
-            Data = data;
-
-            if (Data.CurrentProfile != -1)
-            {
-                CurrentProfile = Data.Profiles[Data.CurrentProfile];
-            }
         }
 
-        public bool CanUseName(string name) =>
-            (CurrentProfile != null && name == CurrentProfile.Name) ||
-            (name != "" && !Data.Profiles.Exists(item => item.Name == name));
+        public bool CanUseName(string name) => profileService_.CanUseName(name);
 
-        public bool CanUsePetName(string name) => name != "";
+        public bool CanUsePetName(string name) => profileService_.CanUsePetName(name);
 
-        public Profile CreateProfile(string name, string petName, int pictureId)
-        {
-            if (!CanUseName(name))
-            {
-                dispatcher_.Send(new DataSavedEvent(DataSaveStatus.NAME_EXIST));
-                return null;
-            }
+        public Profile CreateProfile(string name, string petName, int pictureId) =>
+            profileService_.CreateProfile(name, petName, pictureId);
 
-            Profile profile = new Profile
-            {
-                Name = name,
-                ProfilePictureId = pictureId,
-                BrushSessionDurationMinutes = DefaultProfileState.DefaultBrushSessionDurationMinutes,
-                PetData = CreatePet(petName),
-                RoomData = CreateRoom(),
-                InventoryData = CreateInventory(),
-                PendingReward = DefaultProfileState.InitialPendingReward
-            };
-
-            Data.Profiles.Add(profile);
-            SwitchProfile(Data.Profiles.Count - 1);
-            return profile;
-        }
-
-        public void ModifyCurrentProfile(string name, string petName, int pictureId)
-        {
-            if (!CanUseName(name))
-            {
-                dispatcher_.Send(new DataSavedEvent(DataSaveStatus.NAME_EXIST));
-                return;
-            }
-
-            if (CurrentProfile == null)
-            {
-                dispatcher_.Send(new DataSavedEvent(DataSaveStatus.NO_CURRENT_PROFILE));
-                return;
-            }
-
-            CurrentProfile.Name = name;
-            CurrentProfile.PetData.Name = petName;
-            CurrentProfile.ProfilePictureId = pictureId;
-            dispatcher_.Send(new ProfileUpdatedEvent());
-            NotifyDataChanged();
-        }
+        public void ModifyCurrentProfile(string name, string petName, int pictureId) =>
+            profileService_.ModifyCurrentProfile(name, petName, pictureId);
 
         public void SetPendingReward(bool pendingReward)
         {
@@ -213,68 +169,11 @@ namespace Game.Core.Services
             return rewards;
         }
 
-        public void SwitchProfile(int index)
-        {
-            CurrentProfile = Data.Profiles[index];
-            Data.CurrentProfile = index;
-            NotifyDataChanged();
-            dispatcher_.Send(new ProfileSwitchedEvent());
-        }
+        public void SwitchProfile(int index) => profileService_.SwitchProfile(index);
 
-        public bool DeleteProfile(int index)
-        {
-            if (index < 0 || index >= Data.Profiles.Count)
-            {
-                return false;
-            }
+        public bool DeleteProfile(int index) => profileService_.DeleteProfile(index);
 
-            if (Data.Profiles.Count <= 1)
-            {
-                return false;
-            }
-
-            bool deletingCurrentProfile = index == Data.CurrentProfile;
-            Data.Profiles.RemoveAt(index);
-
-            if (deletingCurrentProfile)
-            {
-                int replacementIndex = Math.Max(0, Math.Min(index, Data.Profiles.Count - 1));
-                CurrentProfile = Data.Profiles[replacementIndex];
-                Data.CurrentProfile = replacementIndex;
-                dispatcher_.Send(new ProfileSwitchedEvent());
-            }
-            else if (Data.CurrentProfile > index)
-            {
-                Data.CurrentProfile--;
-                CurrentProfile = Data.Profiles[Data.CurrentProfile];
-            }
-
-            dispatcher_.Send(new ProfileUpdatedEvent());
-            NotifyDataChanged();
-            return true;
-        }
-
-        public void SetPetName(string name)
-        {
-            if (CurrentProfile?.PetData == null)
-            {
-                return;
-            }
-
-            if (!CanUsePetName(name))
-            {
-                return;
-            }
-
-            if (CurrentProfile.PetData.Name == name)
-            {
-                return;
-            }
-
-            CurrentProfile.PetData.Name = name;
-            dispatcher_.Send(new ProfileUpdatedEvent());
-            NotifyDataChanged();
-        }
+        public void SetPetName(string name) => profileService_.SetPetName(name);
 
         public float GetBrushSessionDurationMinutes()
         {

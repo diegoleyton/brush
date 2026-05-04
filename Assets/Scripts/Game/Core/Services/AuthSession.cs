@@ -6,7 +6,7 @@ namespace Game.Core.Services
     /// Persisted authenticated parent session.
     /// </summary>
     [Serializable]
-    public sealed class MarmiloAuthSession
+    public sealed class AuthSession
     {
         public string AccessToken;
         public string RefreshToken;

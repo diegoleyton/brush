@@ -1980,7 +1980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b40525d44d3349efbf6b61573a1f15f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 1
+  sceneType_: 2
   mouthTop: {fileID: 741138964608283523}
   mouthBottom: {fileID: 6066767858765091457}
   mouthBackground: {fileID: 5108338315594673413}
@@ -2003,7 +2003,6 @@ MonoBehaviour:
   - {fileID: 1809629811692002701}
   - {fileID: 898770756416451628}
   - {fileID: 3812624967964048489}
-  moveDuration: 0.5
   transitionDuration: 0.2
   initialWaitDuration: 3
   zoneWaitDuration: 1

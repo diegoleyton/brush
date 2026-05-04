@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 
@@ -44,6 +45,8 @@ namespace Game.Unity.ProfileManagementScene
 
         private readonly List<ProfileManagementProfileRowView> spawnedRows_ = new();
 
+        private ClientGameStateStore gameStateStore_;
+        private IProfilesService profilesService_;
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
         private bool dispatcherSubscribed_;
@@ -52,10 +55,14 @@ namespace Game.Unity.ProfileManagementScene
         public void Construct(
             EventDispatcher dispatcher,
             IGameNavigationService navigationService,
+            ClientGameStateStore gameStateStore,
+            IProfilesService profilesService,
             DataRepository repository)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
+            gameStateStore_ = gameStateStore;
+            profilesService_ = profilesService;
             repository_ = repository;
         }
 
@@ -70,6 +77,7 @@ namespace Game.Unity.ProfileManagementScene
             if (initialized_)
             {
                 RefreshProfileRows();
+                _ = RefreshProfilesAsync();
             }
         }
 
@@ -85,6 +93,7 @@ namespace Game.Unity.ProfileManagementScene
             ClearFeedback();
             RefreshProfileRows();
             RefreshBrushTime();
+            _ = RefreshProfilesAsync();
         }
 
         public void GoBack()
@@ -98,29 +107,42 @@ namespace Game.Unity.ProfileManagementScene
             NavigationService.Navigate(SceneType.RoomScene);
         }
 
-        public void CreateProfile()
+        public async void CreateProfile()
         {
-            if (repository_ == null)
+            if (profilesService_ == null)
             {
                 return;
             }
 
+            bool creatingFirstProfile = gameStateStore_ == null || gameStateStore_.AllProfiles.Count == 0;
+
             string profileName = profileNameInput_ != null ? profileNameInput_.text.Trim() : string.Empty;
             string petName = petNameInput_ != null ? petNameInput_.text.Trim() : string.Empty;
 
-            if (!repository_.CanUseName(profileName))
+            if (!profilesService_.CanUseName(profileName))
             {
                 SetFeedback("Profile name is invalid or already in use.");
                 return;
             }
 
-            if (!repository_.CanUsePetName(petName))
+            if (!profilesService_.CanUsePetName(petName))
             {
                 SetFeedback("Pet name cannot be empty.");
                 return;
             }
 
-            Profile createdProfile = repository_.CreateProfile(profileName, petName, pictureId: 1);
+            Profile createdProfile;
+            try
+            {
+                createdProfile = await profilesService_.CreateAsync(profileName, petName, pictureId: 1);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                SetFeedback("Could not create profile.");
+                return;
+            }
+
             if (createdProfile == null)
             {
                 SetFeedback("Could not create profile.");
@@ -138,13 +160,18 @@ namespace Game.Unity.ProfileManagementScene
             }
 
             SetFeedback("Profile created.");
+
+            if (creatingFirstProfile)
+            {
+                NavigationService.NavigateAsRoot(SceneType.RoomScene);
+            }
         }
 
         private void RequestDeleteProfile(int profileIndex)
         {
-            if (repository_ == null ||
+            if (gameStateStore_ == null ||
                 profileIndex < 0 ||
-                profileIndex >= repository_.AllProfiles.Count)
+                profileIndex >= gameStateStore_.AllProfiles.Count)
             {
                 return;
             }
@@ -156,14 +183,26 @@ namespace Game.Unity.ProfileManagementScene
                     onCancel: null));
         }
 
-        private void DeleteProfileConfirmed(int profileIndex)
+        private async void DeleteProfileConfirmed(int profileIndex)
         {
-            if (repository_ == null)
+            if (profilesService_ == null)
             {
                 return;
             }
 
-            if (!repository_.DeleteProfile(profileIndex))
+            bool deleted;
+            try
+            {
+                deleted = await profilesService_.DeleteAsync(profileIndex);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                SetFeedback("Could not delete profile.");
+                return;
+            }
+
+            if (!deleted)
             {
                 SetFeedback("At least one profile must remain.");
                 return;
@@ -210,21 +249,19 @@ namespace Game.Unity.ProfileManagementScene
 
         private void RefreshProfileRows()
         {
-            if (profileListContainer_ == null || repository_ == null)
+            if (profileListContainer_ == null || gameStateStore_ == null)
             {
                 return;
             }
 
             ClearRows();
 
-            int currentProfileIndex = repository_.CurrentProfile != null
-                ? repository_.AllProfiles.IndexOf(repository_.CurrentProfile)
-                : -1;
-            bool canDeleteAnyProfile = repository_.AllProfiles.Count > 1;
+            int currentProfileIndex = gameStateStore_.CurrentProfileIndex;
+            bool canDeleteAnyProfile = gameStateStore_.AllProfiles.Count > 1;
 
-            for (int index = 0; index < repository_.AllProfiles.Count; index++)
+            for (int index = 0; index < gameStateStore_.AllProfiles.Count; index++)
             {
-                Profile profile = repository_.AllProfiles[index];
+                Profile profile = gameStateStore_.AllProfiles[index];
                 if (profile == null)
                 {
                     continue;
@@ -313,6 +350,24 @@ namespace Game.Unity.ProfileManagementScene
         private void ClearFeedback()
         {
             SetFeedback(string.Empty);
+        }
+
+        private async Task RefreshProfilesAsync()
+        {
+            if (profilesService_ == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await profilesService_.RefreshAsync();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                SetFeedback("Could not refresh profiles.");
+            }
         }
 
         private void ValidateSerializedReferences()

@@ -28,6 +28,12 @@ namespace Flowbit.Utilities.Navigation
         IEnumerator NavigateWithoutHistory(NavigationTarget target, NavigationParams navigationParams = null);
 
         /// <summary>
+        /// Navigates to the given scene target and clears any existing back history,
+        /// making the destination the new navigation root.
+        /// </summary>
+        IEnumerator NavigateAsRoot(NavigationTarget target, NavigationParams navigationParams = null);
+
+        /// <summary>
         /// Navigates back to the previous scene in the history.
         /// </summary>
         IEnumerator Back();

@@ -107,6 +107,25 @@ namespace Flowbit.Utilities.Navigation
             return NavigateInternal(target, navigationParams, addCurrentSceneToHistory: false);
         }
 
+        /// <summary>
+        /// Navigates to the given scene target and clears the back stack so the destination becomes the new root.
+        /// </summary>
+        public IEnumerator NavigateAsRoot(NavigationTarget target, NavigationParams navigationParams = null)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (target.TargetType != NavigationTargetType.Scene)
+            {
+                throw new InvalidOperationException("NavigateAsRoot only supports scene targets.");
+            }
+
+            sceneHistory_.Clear();
+            return NavigateInternal(target, navigationParams, addCurrentSceneToHistory: false);
+        }
+
         private IEnumerator NavigateInternal(
             NavigationTarget target,
             NavigationParams navigationParams,

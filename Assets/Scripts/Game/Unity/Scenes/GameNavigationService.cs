@@ -29,7 +29,6 @@ namespace Game.Unity.Scenes
         private IDisposable navigationBlock_;
         private readonly Queue<PendingNavigationRequest> pendingRequests_ = new();
         private bool sceneTransitionInProgress_;
-        private bool processingQueuedRequest_;
 
         public GameNavigationService(
             INavigationService navigationService,
@@ -82,6 +81,18 @@ namespace Game.Unity.Scenes
                     addCurrentSceneToHistory: false));
         }
 
+        public void NavigateAsRoot(
+            SceneType sceneType,
+            NavigationParams navigationParams = null)
+        {
+            EnqueueOrExecute(
+                new PendingNavigationRequest(
+                    PendingNavigationRequestType.NavigateAsRoot,
+                    sceneType,
+                    navigationParams,
+                    addCurrentSceneToHistory: false));
+        }
+
         /// <summary>
         /// Navigates to the previous node
         /// </summary>
@@ -125,6 +136,10 @@ namespace Game.Unity.Scenes
                         request.AddCurrentSceneToHistory);
                     break;
 
+                case PendingNavigationRequestType.NavigateAsRoot:
+                    NavigateAsRootInternal(request.SceneType, request.NavigationParams);
+                    break;
+
                 case PendingNavigationRequestType.Back:
                     StartSceneTransition();
                     coroutineService_.StartCoroutine(RunSceneNavigation(navigationService_.Back()));
@@ -162,6 +177,30 @@ namespace Game.Unity.Scenes
                 target.TargetType == NavigationTargetType.Scene
                     ? RunSceneNavigation(navigationRoutine)
                     : navigationRoutine);
+
+            if (target.TargetType == NavigationTargetType.Scene)
+            {
+                eventDispatcher_?.Send(new OnNextScene(sceneType));
+            }
+            else
+            {
+                eventDispatcher_?.Send(new OnPopupOpen());
+            }
+        }
+
+        private void NavigateAsRootInternal(SceneType sceneType, NavigationParams navigationParams)
+        {
+            NavigationTarget target = sceneSettings_.GetTarget(sceneType);
+
+            if (target.TargetType == NavigationTargetType.Scene)
+            {
+                StartSceneTransition();
+            }
+
+            coroutineService_.StartCoroutine(
+                target.TargetType == NavigationTargetType.Scene
+                    ? RunSceneNavigation(navigationService_.NavigateAsRoot(target, navigationParams))
+                    : navigationService_.NavigateAsRoot(target, navigationParams));
 
             if (target.TargetType == NavigationTargetType.Scene)
             {
@@ -217,20 +256,19 @@ namespace Game.Unity.Scenes
             }
 
             PendingNavigationRequest nextRequest = pendingRequests_.Dequeue();
-            processingQueuedRequest_ = true;
             try
             {
                 ExecuteRequest(nextRequest);
             }
             finally
             {
-                processingQueuedRequest_ = false;
             }
         }
 
         private enum PendingNavigationRequestType
         {
             Navigate,
+            NavigateAsRoot,
             Back,
             Close
         }

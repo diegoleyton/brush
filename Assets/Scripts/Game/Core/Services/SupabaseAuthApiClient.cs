@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.RemoteCommunication;
-using Game.Unity.Settings;
+using Game.Core.Configuration;
 using UnityEngine;
 
 namespace Game.Core.Services
@@ -12,16 +12,13 @@ namespace Game.Core.Services
     /// </summary>
     public sealed class SupabaseAuthApiClient : IRemoteIdentityProviderClient
     {
-        private readonly MarmiloBackendSettings settings_;
+        private readonly BackendSettings settings_;
         private readonly IRemoteRequestDispatcher remoteRequestDispatcher_;
         private readonly IRemotePayloadCodec payloadCodec_;
         private readonly IGameLogger logger_;
 
-        private static readonly IRemotePayloadCodec FallbackPayloadCodec =
-            new Flowbit.Utilities.Unity.RemoteCommunication.JsonUtilityRemotePayloadCodec();
-
         public SupabaseAuthApiClient(
-            MarmiloBackendSettings settings,
+            BackendSettings settings,
             IRemoteRequestDispatcher remoteRequestDispatcher,
             IRemotePayloadCodec payloadCodec,
             IGameLogger logger)
@@ -80,7 +77,7 @@ namespace Game.Core.Services
             };
         }
 
-        private static string TryParseErrorMessage(string payload)
+        private string TryParseErrorMessage(string payload)
         {
             if (string.IsNullOrWhiteSpace(payload))
             {
@@ -89,7 +86,7 @@ namespace Game.Core.Services
 
             try
             {
-                MarmiloApiErrorResponse errorResponse = FallbackPayloadCodec.Deserialize<MarmiloApiErrorResponse>(payload);
+                ApiErrorResponse errorResponse = payloadCodec_.Deserialize<ApiErrorResponse>(payload);
                 return errorResponse?.ResolveMessage() ?? payload;
             }
             catch
@@ -107,12 +104,12 @@ namespace Game.Core.Services
         {
             if (string.IsNullOrWhiteSpace(settings_.SupabaseUrl))
             {
-                return "Supabase URL is missing in MarmiloBackendSettings.json.";
+                return "Supabase URL is missing in BackendSettings.json.";
             }
 
             if (string.IsNullOrWhiteSpace(settings_.SupabaseAnonKey))
             {
-                return "Supabase anon key is missing in MarmiloBackendSettings.json.";
+                return "Supabase anon key is missing in BackendSettings.json.";
             }
 
             return null;

@@ -6,16 +6,16 @@ namespace Game.Core.Services
     /// Minimal backend register response.
     /// </summary>
     [Serializable]
-    public sealed class MarmiloBackendRegisterResponse
+    public sealed class BackendRegisterResponse
     {
         public bool IsSuccess = true;
         public string ErrorMessage;
-        public MarmiloParentSummary parentUser;
-        public MarmiloFamilySummary family;
+        public ParentSummary parentUser;
+        public FamilySummary family;
     }
 
     [Serializable]
-    public sealed class MarmiloParentSummary
+    public sealed class ParentSummary
     {
         public string id;
         public string authUserId;
@@ -23,7 +23,7 @@ namespace Game.Core.Services
     }
 
     [Serializable]
-    public sealed class MarmiloFamilySummary
+    public sealed class FamilySummary
     {
         public string id;
         public string name;

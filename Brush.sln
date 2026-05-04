@@ -23,9 +23,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zenject-TestFramework", "Ze
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zenject-PoolMonitor-Editor", "Zenject-PoolMonitor-Editor.csproj", "{0BB4EE85-3D87-4BB5-5CC8-9A96E23BBF87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{3ABA823B-8C2A-4926-463E-BB0DA48C0615}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowbit.Utilities.Core", "Flowbit.Utilities.Core.csproj", "{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{3ABA823B-8C2A-4926-463E-BB0DA48C0615}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flowbit.Utilities.Unity.Addressables.Editor", "Flowbit.Utilities.Unity.Addressables.Editor.csproj", "{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}"
 EndProject
@@ -79,14 +79,14 @@ Global
 		{0BB4EE85-3D87-4BB5-5CC8-9A96E23BBF87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BB4EE85-3D87-4BB5-5CC8-9A96E23BBF87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BB4EE85-3D87-4BB5-5CC8-9A96E23BBF87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F5F7F86-3AB3-BABA-4AF2-AA5F705D8945}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ABA823B-8C2A-4926-463E-BB0DA48C0615}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5328EDF9-F78E-7F81-AA47-87F48E1B45D7}.Release|Any CPU.ActiveCfg = Release|Any CPU

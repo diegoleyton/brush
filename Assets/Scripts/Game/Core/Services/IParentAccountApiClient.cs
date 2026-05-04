@@ -7,6 +7,6 @@ namespace Game.Core.Services
     /// </summary>
     public interface IParentAccountApiClient
     {
-        Task<MarmiloBackendRegisterResponse> RegisterParentAsync(string accessToken, string familyName);
+        Task<BackendRegisterResponse> RegisterParentAsync(string accessToken, string familyName);
     }
 }

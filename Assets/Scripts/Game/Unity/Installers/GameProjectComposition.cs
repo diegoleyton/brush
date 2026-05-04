@@ -10,6 +10,7 @@ using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
+using Game.Core.Configuration;
 using Game.Core.Services;
 using Game.Unity.Audio;
 using Game.Unity.Scenes;
@@ -25,6 +26,14 @@ namespace Game.Unity.Installers
     /// </summary>
     public sealed class GameProjectComposition
     {
+        [Serializable]
+        private sealed class BackendSettingsPayload
+        {
+            public string ApiBaseUrl = "http://localhost:5027";
+            public string SupabaseUrl = string.Empty;
+            public string SupabaseAnonKey = string.Empty;
+        }
+
         private readonly SceneSettings sceneSettings_;
         private readonly GameSoundLibrary gameSoundLibrary_;
 
@@ -75,20 +84,47 @@ namespace Game.Unity.Installers
         }
 
         /// <summary>
+        /// Creates the client-side game state store used by the Unity presentation layer.
+        /// </summary>
+        public ClientGameStateStore CreateClientGameStateStore(Data data)
+        {
+            return new ClientGameStateStore(data);
+        }
+
+        /// <summary>
         /// Creates the runtime data repository.
         /// </summary>
-        public DataRepository CreateDataRepository(Data data, EventDispatcher dispatcher, IGameLogger logger)
+        public DataRepository CreateDataRepository(
+            ClientGameStateStore gameStateStore,
+            IProfileService profileService,
+            EventDispatcher dispatcher,
+            IGameLogger logger)
         {
-            return new DataRepository(data, dispatcher, logger);
+            return new DataRepository(gameStateStore, profileService, dispatcher, logger);
+        }
+
+        /// <summary>
+        /// Creates the temporary local profile application service.
+        /// </summary>
+        public IProfileService CreateProfileService(ClientGameStateStore gameStateStore, EventDispatcher dispatcher)
+        {
+            return new LocalProfileService(gameStateStore, dispatcher);
         }
 
         /// <summary>
         /// Loads remote backend settings from Resources.
         /// </summary>
-        public MarmiloBackendSettings CreateMarmiloBackendSettings()
+        public BackendSettings CreateBackendSettings()
         {
-            TextAsset textAsset = Resources.Load<TextAsset>(MarmiloBackendSettings.ResourceFileName);
-            return MarmiloBackendSettings.FromJson(textAsset != null ? textAsset.text : string.Empty);
+            TextAsset textAsset = Resources.Load<TextAsset>(BackendSettings.ResourceFileName);
+            BackendSettingsPayload payload = string.IsNullOrWhiteSpace(textAsset != null ? textAsset.text : string.Empty)
+                ? new BackendSettingsPayload()
+                : JsonUtility.FromJson<BackendSettingsPayload>(textAsset.text) ?? new BackendSettingsPayload();
+
+            return new BackendSettings(
+                payload.ApiBaseUrl,
+                payload.SupabaseUrl,
+                payload.SupabaseAnonKey);
         }
 
         /// <summary>

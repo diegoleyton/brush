@@ -23,6 +23,7 @@ namespace Game.Core.Data
     [Serializable]
     public class Profile
     {
+        public string RemoteProfileId;
         public string Name;
         public int ProfilePictureId;
         public int Coins = DefaultProfileState.InitialCoins;

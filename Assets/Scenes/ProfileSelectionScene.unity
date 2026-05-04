@@ -163,7 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12e7128081ea4c619eb5cb9f065de275, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 5
+  sceneType_: 6
+  backButtonRoot_: {fileID: 1229268271}
   buttonListContainer_: {fileID: 2231}
   profileButtonTemplate_: {fileID: 2246}
   selectionDelaySeconds_: 0.08

@@ -7,6 +7,7 @@ namespace Game.Unity.Definitions
     /// </summary>
     public enum SceneType
     {
+        AuthScene,
         RoomScene,
         BrushScene,
         ConfirmPopup,
@@ -21,6 +22,7 @@ namespace Game.Unity.Definitions
     {
         private static Dictionary<SceneType, string> typeToId_ = new()
         {
+            {SceneType.AuthScene, "AuthScene"},
             {SceneType.RoomScene, "RoomScene"},
             {SceneType.BrushScene, "BrushScene"},
             {SceneType.ConfirmPopup, "ConfirmPopup"},

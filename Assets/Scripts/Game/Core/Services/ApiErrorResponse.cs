@@ -6,7 +6,7 @@ namespace Game.Core.Services
     /// Generic API error payload used by Supabase and Marmilo backend calls.
     /// </summary>
     [Serializable]
-    public sealed class MarmiloApiErrorResponse
+    public sealed class ApiErrorResponse
     {
         public string message;
         public string msg;

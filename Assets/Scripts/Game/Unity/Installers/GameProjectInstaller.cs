@@ -14,6 +14,7 @@ using Flowbit.Utilities.Unity.RemoteCommunication;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
+using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;
 using Game.Unity.Audio;
@@ -81,8 +82,8 @@ namespace Game.Unity.Installers
                 .FromMethod(_ => composition.CreateDataStorage())
                 .AsSingle();
 
-            Container.Bind<MarmiloBackendSettings>()
-                .FromMethod(_ => composition.CreateMarmiloBackendSettings())
+            Container.Bind<BackendSettings>()
+                .FromMethod(_ => composition.CreateBackendSettings())
                 .AsSingle();
 
             Container.Bind<EventDispatcher>()
@@ -110,13 +111,25 @@ namespace Game.Unity.Installers
                 .AsSingle();
 
             Container.Bind<IParentAccountApiClient>()
-                .To<MarmiloBackendApiClient>()
+                .To<BackendApiClient>()
                 .AsSingle();
 
-            Container.Bind<IMarmiloAuthService>()
-                .To<MarmiloAuthService>()
+            Container.Bind<IChildrenApiClient>()
+                .To<ChildrenApiClient>()
+                .AsSingle();
+
+            Container.Bind<IAuthService>()
+                .To<AuthService>()
                 .AsSingle()
                 .NonLazy();
+
+            Container.BindInterfacesTo<AuthLifetime>()
+                .AsSingle()
+                .NonLazy();
+
+            Container.Bind<IProfilesService>()
+                .To<RemoteProfilesService>()
+                .AsSingle();
 
             Container.Bind<IAssetLoader>()
                 .To<AddressablesAssetLoader>()
@@ -196,10 +209,22 @@ namespace Game.Unity.Installers
                 .FromMethod(ctx => composition.CreateGameData(ctx.Container.Resolve<IDataStorage>()))
                 .AsSingle();
 
+            Container.Bind<ClientGameStateStore>()
+                .FromMethod(ctx => composition.CreateClientGameStateStore(ctx.Container.Resolve<Data>()))
+                .AsSingle();
+
+            Container.Bind<IProfileService>()
+                .FromMethod(ctx =>
+                    composition.CreateProfileService(
+                        ctx.Container.Resolve<ClientGameStateStore>(),
+                        ctx.Container.Resolve<EventDispatcher>()))
+                .AsSingle();
+
             Container.Bind<DataRepository>()
                 .FromMethod(ctx =>
                     composition.CreateDataRepository(
-                        ctx.Container.Resolve<Data>(),
+                        ctx.Container.Resolve<ClientGameStateStore>(),
+                        ctx.Container.Resolve<IProfileService>(),
                         ctx.Container.Resolve<EventDispatcher>(),
                         ctx.Container.Resolve<IGameLogger>()))
                 .AsSingle();

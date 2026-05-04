@@ -7984,7 +7984,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bfdf896dccb47bd8383d5969eff58ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 0
+  sceneType_: 1
   roomController_: {fileID: 1387700004}
   roomViewController_: {fileID: 1387700005}
 --- !u!114 &1387700004

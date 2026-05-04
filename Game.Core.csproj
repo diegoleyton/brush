@@ -66,25 +66,44 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Game/Core/Events/RoomEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IParentAccountApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/ProfileEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/InventoryExtensions.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/SupabaseAuthResponse.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/RemoteProfilesService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/SupabaseAuthApiClient.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IChildrenApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/PersistenceEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/BackendRegisterResponse.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/AuthResult.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Reward.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ClientGameStateStore.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/AuthService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/BackendApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/DataController/DataController.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/ItemCatalog.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Rules/GameRules.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/DataRepository.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IProfileService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IAuthService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/AuthSession.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IProfilesService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/BankEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Data.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/MarketCatalog.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Economy.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ChildrenApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Definitions.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/DefaultProfileState.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/RoomPlaceableObjectEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/PersistentGameDataService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IRemoteIdentityProviderClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/RoomSurfaceIds.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ApiErrorResponse.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/AppEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/LocalProfileService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Configuration/BackendSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/Scripts/Game/Core/Game.Core.asmdef" />

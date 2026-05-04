@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 617b462a7c79c4ebe896d6705acd75aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 7
+  sceneType_: 8
   itemList_: {fileID: 1907540858}
   tabButtons_:
   - {fileID: 477675052}

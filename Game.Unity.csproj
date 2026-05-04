@@ -85,6 +85,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PopupBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryListUI.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/IGameNavigationService.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Auth/AuthPanel.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Editor/DressLayoutCaptureEditor.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/EyesItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Audio/SoundId.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/RoomItemVisuals.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Installers/AuthLifetime.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/ItemViewRegistry.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PopupTransformTransition.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PasswordPopupParams.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/AuthScene/AuthSceneController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/ToothBrushController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragCancelArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomInventoryDraggable.cs" />
@@ -157,6 +160,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionScene.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileBootstrap.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Auth/LogoutButton.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Settings/RoomSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketConfirmMessageView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/InstantiatorIds.cs" />

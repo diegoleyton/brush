@@ -165,6 +165,45 @@ public sealed class ChildrenController : ControllerBase
         }
     }
 
+    [HttpDelete("{childId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid childId,
+        CancellationToken cancellationToken)
+    {
+        var familyId = await ResolveCurrentFamilyIdAsync(cancellationToken);
+        if (familyId == null)
+        {
+            return Unauthorized(new
+            {
+                message = $"Missing or invalid {DevelopmentAuthDefaults.ParentAuthUserIdHeaderName} header, or no family exists for the parent."
+            });
+        }
+
+        var childProfile = await FindChildProfileAsync(familyId.Value, childId, cancellationToken);
+        if (childProfile == null)
+        {
+            return NotFound(new
+            {
+                message = "Child profile was not found."
+            });
+        }
+
+        int familyChildCount = await dbContext_.ChildProfiles
+            .CountAsync(profile => profile.FamilyId == familyId.Value, cancellationToken);
+
+        if (familyChildCount <= 1)
+        {
+            return BadRequest(new
+            {
+                message = "At least one child profile must remain."
+            });
+        }
+
+        dbContext_.ChildProfiles.Remove(childProfile);
+        await dbContext_.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
+
     [HttpGet("{childId:guid}/game-state")]
     public async Task<ActionResult<ChildGameStateResponse>> GetGameState(
         Guid childId,

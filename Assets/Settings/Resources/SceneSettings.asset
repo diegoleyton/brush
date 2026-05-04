@@ -13,31 +13,31 @@ MonoBehaviour:
   m_Name: SceneSettings
   m_EditorClassIdentifier: 
   sceneEntries_:
-  - SceneType: 0
+  - SceneType: 1
     SceneName: RoomScene
     TargetType: 0
     Prefab: {fileID: 0}
-  - SceneType: 1
+  - SceneType: 2
     SceneName: BrushScene
     TargetType: 0
     Prefab: {fileID: 0}
-  - SceneType: 2
+  - SceneType: 3
     SceneName: ConfirmPopup
     TargetType: 1
     Prefab: {fileID: 5699784235750688586, guid: e3f1616d29e5642fd8b2dda926fa0061, type: 3}
-  - SceneType: 3
+  - SceneType: 4
     SceneName: PasswordPopup
     TargetType: 1
     Prefab: {fileID: 5699784235750688586, guid: 9d20766c20fa4935b1948f09d6bb5fd8, type: 3}
-  - SceneType: 4
+  - SceneType: 5
     SceneName: RewardsScene
     TargetType: 0
     Prefab: {fileID: 0}
-  - SceneType: 5
+  - SceneType: 6
     SceneName: ProfileSelectionScene
     TargetType: 0
     Prefab: {fileID: 0}
-  - SceneType: 6
+  - SceneType: 7
     SceneName: ProfileManagementScene
     TargetType: 0
     Prefab: {fileID: 0}

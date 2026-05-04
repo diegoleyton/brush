@@ -3,18 +3,18 @@ namespace Game.Core.Services
     /// <summary>
     /// Result of login or account creation flows.
     /// </summary>
-    public sealed class MarmiloAuthResult
+    public sealed class AuthResult
     {
-        public static MarmiloAuthResult Success(MarmiloAuthSession session, bool familyRegistered) =>
-            new MarmiloAuthResult
+        public static AuthResult Success(AuthSession session, bool familyRegistered) =>
+            new AuthResult
             {
                 IsSuccess = true,
                 Session = session,
                 FamilyRegistered = familyRegistered
             };
 
-        public static MarmiloAuthResult Failure(string errorMessage) =>
-            new MarmiloAuthResult
+        public static AuthResult Failure(string errorMessage) =>
+            new AuthResult
             {
                 IsSuccess = false,
                 ErrorMessage = errorMessage ?? "Unknown authentication error."
@@ -26,6 +26,6 @@ namespace Game.Core.Services
 
         public string ErrorMessage { get; private set; } = string.Empty;
 
-        public MarmiloAuthSession Session { get; private set; }
+        public AuthSession Session { get; private set; }
     }
 }

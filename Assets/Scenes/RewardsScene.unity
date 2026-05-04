@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fc8106dce4c4eb6aa2b36501b57357b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 4
+  sceneType_: 5
   rewardView_: {fileID: 215354660}
 --- !u!1 &2000
 GameObject:

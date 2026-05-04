@@ -1,0 +1,255 @@
+using System;
+using Game.Core.Services;
+using UnityEngine;
+using UnityEngine.UI;
+using Zenject;
+
+namespace Game.Unity.Auth
+{
+    /// <summary>
+    /// Reusable auth panel for creating accounts, logging in, and navigating to profile flows.
+    /// All UI references are provided through serialized fields so the panel can be reused in scenes or prefabs.
+    /// </summary>
+    public sealed class AuthPanel : MonoBehaviour
+    {
+        public event Action<AuthResult> AuthSucceeded;
+
+        [Header("Inputs")]
+        [SerializeField]
+        private InputField emailInput_;
+
+        [SerializeField]
+        private InputField passwordInput_;
+
+        [Header("Status")]
+        [SerializeField]
+        private Text sessionStatusText_;
+
+        [SerializeField]
+        private Text feedbackText_;
+
+        [Header("Buttons")]
+        [SerializeField]
+        private Button createAccountButton_;
+
+        [SerializeField]
+        private Button loginButton_;
+
+        [Header("Defaults")]
+        [SerializeField]
+        private string defaultFamilyName_ = "Mi familia";
+
+        private IAuthService authService_;
+        private bool isBusy_;
+
+        [Inject]
+        public void Construct(IAuthService authService)
+        {
+            authService_ = authService;
+        }
+
+        private void Awake()
+        {
+            ValidateSerializedReferences();
+            WireButtons();
+            RefreshView();
+        }
+
+        private void OnEnable()
+        {
+            RefreshView();
+        }
+
+        private void OnDestroy()
+        {
+            UnwireButtons();
+        }
+
+        public async void CreateAccount()
+        {
+            if (authService_ == null || isBusy_)
+            {
+                return;
+            }
+
+            isBusy_ = true;
+            SetFeedback(string.Empty);
+            RefreshButtonState();
+
+            try
+            {
+                AuthResult result = await authService_.CreateAccountAsync(
+                    ReadText(emailInput_),
+                    ReadText(passwordInput_),
+                    ResolveFamilyName());
+
+                HandleCreateAccountResult(result);
+            }
+            catch (Exception exception)
+            {
+                SetFeedback($"Create account failed: {exception.Message}");
+            }
+            finally
+            {
+                isBusy_ = false;
+                RefreshView();
+            }
+        }
+
+        public async void Login()
+        {
+            if (authService_ == null || isBusy_)
+            {
+                return;
+            }
+
+            isBusy_ = true;
+            SetFeedback(string.Empty);
+            RefreshButtonState();
+
+            try
+            {
+                AuthResult result = await authService_.LoginAsync(
+                    ReadText(emailInput_),
+                    ReadText(passwordInput_));
+
+                HandleLoginResult(result);
+            }
+            catch (Exception exception)
+            {
+                SetFeedback($"Login failed: {exception.Message}");
+            }
+            finally
+            {
+                isBusy_ = false;
+                RefreshView();
+            }
+        }
+
+        private void HandleCreateAccountResult(AuthResult result)
+        {
+            if (result == null)
+            {
+                SetFeedback("No auth result was returned.");
+                return;
+            }
+
+            if (!result.IsSuccess)
+            {
+                SetFeedback(result.ErrorMessage ?? "Authentication failed.");
+                return;
+            }
+
+            SetFeedback("Account created.");
+            AuthSucceeded?.Invoke(result);
+        }
+
+        private void HandleLoginResult(AuthResult result)
+        {
+            if (result == null)
+            {
+                SetFeedback("No auth result was returned.");
+                return;
+            }
+
+            if (!result.IsSuccess)
+            {
+                SetFeedback(result.ErrorMessage ?? "Authentication failed.");
+                return;
+            }
+
+            SetFeedback("Login successful.");
+            AuthSucceeded?.Invoke(result);
+        }
+
+        private void RefreshView()
+        {
+            if (sessionStatusText_ != null)
+            {
+                sessionStatusText_.text = authService_ != null && authService_.HasSession
+                    ? $"Authenticated as {authService_.CurrentSession?.Email}"
+                    : "No active session";
+            }
+
+            RefreshButtonState();
+        }
+
+        private void RefreshButtonState()
+        {
+            bool enableAuthActions = !isBusy_;
+            bool hasSession = authService_ != null && authService_.HasSession;
+
+            SetButtonState(createAccountButton_, enableAuthActions);
+            SetButtonState(loginButton_, enableAuthActions);
+        }
+
+        private void SetFeedback(string message)
+        {
+            if (feedbackText_ != null)
+            {
+                feedbackText_.text = message ?? string.Empty;
+            }
+        }
+
+        private void WireButtons()
+        {
+            BindButton(createAccountButton_, CreateAccount);
+            BindButton(loginButton_, Login);
+        }
+
+        private void UnwireButtons()
+        {
+            UnbindButton(createAccountButton_, CreateAccount);
+            UnbindButton(loginButton_, Login);
+        }
+
+        private static void BindButton(Button button, UnityEngine.Events.UnityAction action)
+        {
+            if (button != null)
+            {
+                button.onClick.AddListener(action);
+            }
+        }
+
+        private static void UnbindButton(Button button, UnityEngine.Events.UnityAction action)
+        {
+            if (button != null)
+            {
+                button.onClick.RemoveListener(action);
+            }
+        }
+
+        private static void SetButtonState(Button button, bool enabled)
+        {
+            if (button != null)
+            {
+                button.interactable = enabled;
+            }
+        }
+
+        private static string ReadText(InputField inputField) =>
+            inputField != null ? inputField.text.Trim() : string.Empty;
+
+        private void ValidateSerializedReferences()
+        {
+            if (emailInput_ == null ||
+                passwordInput_ == null ||
+                sessionStatusText_ == null ||
+                feedbackText_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(AuthPanel)} is missing one or more required serialized references.");
+            }
+        }
+
+        private string ResolveFamilyName()
+        {
+            if (!string.IsNullOrWhiteSpace(defaultFamilyName_))
+            {
+                return defaultFamilyName_.Trim();
+            }
+
+            return "Mi familia";
+        }
+    }
+}

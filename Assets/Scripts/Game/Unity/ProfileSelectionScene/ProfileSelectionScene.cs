@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 
@@ -24,6 +25,9 @@ namespace Game.Unity.ProfileSelectionScene
     public sealed class ProfileSelectionScene : SceneBase
     {
         [SerializeField]
+        private GameObject backButtonRoot_;
+
+        [SerializeField]
         private RectTransform buttonListContainer_;
 
         [SerializeField]
@@ -34,7 +38,8 @@ namespace Game.Unity.ProfileSelectionScene
 
         private readonly List<ProfileSelectionButtonView> spawnedButtons_ = new();
 
-        private DataRepository repository_;
+        private ClientGameStateStore gameStateStore_;
+        private IProfilesService profilesService_;
         private EventDispatcher dispatcher_;
         private ScreenBlocker screenBlocker_;
         private bool dispatcherSubscribed_;
@@ -47,12 +52,14 @@ namespace Game.Unity.ProfileSelectionScene
         public void Construct(
             EventDispatcher dispatcher,
             IGameNavigationService navigationService,
-            DataRepository repository,
+            ClientGameStateStore gameStateStore,
+            IProfilesService profilesService,
             ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
-            repository_ = repository;
+            gameStateStore_ = gameStateStore;
+            profilesService_ = profilesService;
             screenBlocker_ = screenBlocker;
         }
 
@@ -69,7 +76,9 @@ namespace Game.Unity.ProfileSelectionScene
 
             if (initialized_)
             {
+                RefreshBackButtonVisibility();
                 RefreshProfileButtons();
+                _ = RefreshProfilesAsync();
             }
         }
 
@@ -88,7 +97,9 @@ namespace Game.Unity.ProfileSelectionScene
         protected override void Initialize()
         {
             SubscribeToDispatcher();
+            RefreshBackButtonVisibility();
             RefreshProfileButtons();
+            _ = RefreshProfilesAsync();
         }
 
         public void GoBack()
@@ -131,6 +142,7 @@ namespace Game.Unity.ProfileSelectionScene
                 return;
             }
 
+            RefreshBackButtonVisibility();
             RefreshProfileButtons();
         }
 
@@ -160,20 +172,18 @@ namespace Game.Unity.ProfileSelectionScene
 
         private void RefreshProfileButtons()
         {
-            if (buttonListContainer_ == null || repository_ == null)
+            if (buttonListContainer_ == null || gameStateStore_ == null)
             {
                 return;
             }
 
             ClearProfileButtons();
 
-            int currentProfileIndex = repository_.CurrentProfile != null
-                ? repository_.AllProfiles.IndexOf(repository_.CurrentProfile)
-                : -1;
+            int currentProfileIndex = gameStateStore_.CurrentProfileIndex;
 
-            for (int index = 0; index < repository_.AllProfiles.Count; index++)
+            for (int index = 0; index < gameStateStore_.AllProfiles.Count; index++)
             {
-                Profile profile = repository_.AllProfiles[index];
+                Profile profile = gameStateStore_.AllProfiles[index];
                 if (profile == null)
                 {
                     continue;
@@ -194,16 +204,15 @@ namespace Game.Unity.ProfileSelectionScene
 
         private void SelectProfile(int profileIndex)
         {
-            if (repository_ == null ||
+            if (gameStateStore_ == null ||
+                profilesService_ == null ||
                 profileIndex < 0 ||
-                profileIndex >= repository_.AllProfiles.Count)
+                profileIndex >= gameStateStore_.AllProfiles.Count)
             {
                 return;
             }
 
-            int currentProfileIndex = repository_.CurrentProfile != null
-                ? repository_.AllProfiles.IndexOf(repository_.CurrentProfile)
-                : -1;
+            int currentProfileIndex = gameStateStore_.CurrentProfileIndex;
             if (currentProfileIndex == profileIndex)
             {
                 GoBack();
@@ -211,7 +220,35 @@ namespace Game.Unity.ProfileSelectionScene
             }
 
             pendingProfileIndex_ = profileIndex;
-            repository_.SwitchProfile(profileIndex);
+            profilesService_.SelectProfile(profileIndex);
+        }
+
+        private async Task RefreshProfilesAsync()
+        {
+            if (profilesService_ == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await profilesService_.RefreshAsync();
+                RefreshBackButtonVisibility();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        private void RefreshBackButtonVisibility()
+        {
+            if (backButtonRoot_ == null || NavigationService == null)
+            {
+                return;
+            }
+
+            backButtonRoot_.SetActive(NavigationService.CanGoBack);
         }
 
         private void ClearProfileButtons()

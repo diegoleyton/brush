@@ -2,26 +2,23 @@ using System;
 using System.Threading.Tasks;
 using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.RemoteCommunication;
-using Game.Unity.Settings;
+using Game.Core.Configuration;
 using UnityEngine;
 
 namespace Game.Core.Services
 {
     /// <summary>
-    /// Thin Unity client for Marmilo backend auth bootstrap endpoints.
+    /// Thin Unity client for backend auth bootstrap endpoints.
     /// </summary>
-    public sealed class MarmiloBackendApiClient : IParentAccountApiClient
+    public sealed class BackendApiClient : IParentAccountApiClient
     {
-        private readonly MarmiloBackendSettings settings_;
+        private readonly BackendSettings settings_;
         private readonly IRemoteRequestDispatcher remoteRequestDispatcher_;
         private readonly IRemotePayloadCodec payloadCodec_;
         private readonly IGameLogger logger_;
 
-        private static readonly IRemotePayloadCodec FallbackPayloadCodec =
-            new Flowbit.Utilities.Unity.RemoteCommunication.JsonUtilityRemotePayloadCodec();
-
-        public MarmiloBackendApiClient(
-            MarmiloBackendSettings settings,
+        public BackendApiClient(
+            BackendSettings settings,
             IRemoteRequestDispatcher remoteRequestDispatcher,
             IRemotePayloadCodec payloadCodec,
             IGameLogger logger)
@@ -32,12 +29,12 @@ namespace Game.Core.Services
             logger_ = logger;
         }
 
-        public async Task<MarmiloBackendRegisterResponse> RegisterParentAsync(string accessToken, string familyName)
+        public async Task<BackendRegisterResponse> RegisterParentAsync(string accessToken, string familyName)
         {
             string configurationError = ValidateConfiguration();
             if (!string.IsNullOrWhiteSpace(configurationError))
             {
-                return new MarmiloBackendRegisterResponse
+                return new BackendRegisterResponse
                 {
                     IsSuccess = false,
                     ErrorMessage = configurationError
@@ -60,20 +57,20 @@ namespace Game.Core.Services
             RemoteResponse response = await remoteRequestDispatcher_.SendAsync(request);
             if (response.IsSuccess)
             {
-                return payloadCodec_.Deserialize<MarmiloBackendRegisterResponse>(response.Body);
+                return payloadCodec_.Deserialize<BackendRegisterResponse>(response.Body);
             }
 
             string errorMessage = TryParseErrorMessage(response.Body);
-            logger_?.Log($"[Auth] Marmilo register failed: {response.StatusCode} {errorMessage}");
+            logger_?.Log($"[Auth] Register failed: {response.StatusCode} {errorMessage}");
 
-            return new MarmiloBackendRegisterResponse
+            return new BackendRegisterResponse
             {
                 IsSuccess = false,
                 ErrorMessage = errorMessage
             };
         }
 
-        private static string TryParseErrorMessage(string payload)
+        private string TryParseErrorMessage(string payload)
         {
             if (string.IsNullOrWhiteSpace(payload))
             {
@@ -82,7 +79,7 @@ namespace Game.Core.Services
 
             try
             {
-                MarmiloApiErrorResponse errorResponse = FallbackPayloadCodec.Deserialize<MarmiloApiErrorResponse>(payload);
+                ApiErrorResponse errorResponse = payloadCodec_.Deserialize<ApiErrorResponse>(payload);
                 return errorResponse?.ResolveMessage() ?? payload;
             }
             catch
@@ -100,7 +97,7 @@ namespace Game.Core.Services
         {
             if (string.IsNullOrWhiteSpace(settings_.ApiBaseUrl))
             {
-                return "Marmilo API base URL is missing in MarmiloBackendSettings.json.";
+                return "API base URL is missing in BackendSettings.json.";
             }
 
             return null;

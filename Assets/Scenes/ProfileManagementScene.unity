@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f12e6bb83d34d9fa95f79bd1c0dffb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 6
+  sceneType_: 7
   profileListContainer_: {fileID: 2231}
   profileRowTemplate_: {fileID: 2246}
   profileNameInput_: {fileID: 8103}
