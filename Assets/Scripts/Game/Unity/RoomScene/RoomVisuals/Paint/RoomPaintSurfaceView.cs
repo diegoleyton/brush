@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.ScreenBlocker;
 using Flowbit.Utilities.Unity.Instantiator;
-using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;
 using Game.Unity.Definitions;

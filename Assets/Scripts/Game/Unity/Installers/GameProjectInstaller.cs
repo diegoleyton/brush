@@ -6,13 +6,13 @@ using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.RemoteCommunication;
+using Flowbit.Utilities.ScreenBlocker;
 using Flowbit.Utilities.Storage;
 using Flowbit.Utilities.Localization;
 using Flowbit.Utilities.Unity.AssetLoader;
 using Flowbit.Utilities.Unity.Instantiator;
 using Flowbit.Utilities.Unity.Logger;
 using Flowbit.Utilities.Unity.RemoteCommunication;
-using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
 using Game.Core.Configuration;

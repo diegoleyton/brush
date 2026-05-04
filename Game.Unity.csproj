@@ -69,6 +69,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/DefaultItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Paint/RoomPaintSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionButtonView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/RemoteOperationMessageFormatter.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/DressItemView.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponent.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventorySelectionState.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/FeedbackMessage.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectsController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/NavigationGameEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinController.cs" />
@@ -131,7 +133,6 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryToggleButtonRotation.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
-    <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/ScreenBlockerImage.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/LoopMovement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetTouchController.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/InventoryDropEffectPositionTracker.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RewardScene/RewardView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectSurfaceView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentBootstrapSettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemListUI.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/CurrencyItemView.cs" />

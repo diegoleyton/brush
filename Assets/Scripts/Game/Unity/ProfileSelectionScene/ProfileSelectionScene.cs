@@ -4,6 +4,7 @@ using System.Collections;
 using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.ScreenBlocker;
 
 using Game.Core.Data;
 using Game.Core.Events;
@@ -11,7 +12,6 @@ using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
 
-using Flowbit.Utilities.Unity.UI;
 using UnityEngine;
 using UnityEngine.UI;
 

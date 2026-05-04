@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Game.Unity.Scenes;
 using UnityEngine;
 
-namespace Flowbit.Utilities.Unity.UI
+namespace Flowbit.Utilities.ScreenBlocker
 {
     /// <summary>
     /// Blocks user input using a full-screen image, supporting multiple concurrent locks.
@@ -18,13 +17,13 @@ namespace Flowbit.Utilities.Unity.UI
             public float StartedAtRealtime;
         }
 
-        private readonly ScreenBlockerImage blockerImage_;
+        private readonly ScreenBlockerView blockerImage_;
         private readonly Dictionary<int, BlockState> activeLocks_ = new();
         private int idCounter_;
 
         public bool IsBlocked => activeLocks_.Count > 0;
 
-        public ScreenBlocker(ScreenBlockerImage blockerImage)
+        public ScreenBlocker(ScreenBlockerView blockerImage)
         {
             blockerImage_ = blockerImage;
 
@@ -43,7 +42,17 @@ namespace Flowbit.Utilities.Unity.UI
             bool showLoadingWithTime = false,
             string loadingMessage = null)
         {
-            int id = Block(reason, showLoadingWithTime, loadingMessage);
+            return BlockScope(new ScreenBlockerRequest
+            {
+                Reason = reason,
+                ShowLoadingWithTime = showLoadingWithTime,
+                LoadingMessage = loadingMessage
+            });
+        }
+
+        public IDisposable BlockScope(ScreenBlockerRequest request)
+        {
+            int id = Block(request ?? new ScreenBlockerRequest());
             return new Scope(this, id);
         }
 
@@ -56,14 +65,14 @@ namespace Flowbit.Utilities.Unity.UI
             UpdateBlocker();
         }
 
-        private int Block(string reason = "", bool showLoadingWithTime = false, string loadingMessage = null)
+        private int Block(ScreenBlockerRequest request)
         {
             int id = ++idCounter_;
             activeLocks_[id] = new BlockState
             {
-                Reason = reason,
-                ShowLoadingWithTime = showLoadingWithTime,
-                LoadingMessage = loadingMessage,
+                Reason = request?.Reason,
+                ShowLoadingWithTime = request?.ShowLoadingWithTime ?? false,
+                LoadingMessage = request?.LoadingMessage,
                 StartedAtRealtime = Time.realtimeSinceStartup
             };
 

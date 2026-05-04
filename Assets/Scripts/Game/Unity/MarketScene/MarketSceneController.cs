@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.ScreenBlocker;
 using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Configuration;

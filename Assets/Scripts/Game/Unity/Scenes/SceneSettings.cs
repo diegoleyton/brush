@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Flowbit.Utilities.Navigation;
+using Flowbit.Utilities.ScreenBlocker;
 using Game.Unity.Definitions;
 using UnityEngine;
 
@@ -37,7 +38,7 @@ namespace Game.Unity.Scenes
         public GameSceneTransitionBase PopupTransitionClose { get; private set; }
 
         [field: SerializeField]
-        public ScreenBlockerImage ScreenBlockerImage { get; private set; }
+        public ScreenBlockerView ScreenBlockerView { get; private set; }
 
         public IReadOnlyDictionary<string, GameObject> GetPrefabs()
         {

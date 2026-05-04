@@ -1,5 +1,5 @@
 using Flowbit.Utilities.Core.Events;
-using Flowbit.Utilities.Unity.UI;
+using Flowbit.Utilities.ScreenBlocker;
 
 using Game.Core.Data;
 using Game.Core.Events;

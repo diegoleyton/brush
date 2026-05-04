@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Flowbit.Utilities.Core.Events;
-using Flowbit.Utilities.Unity.UI;
+using Flowbit.Utilities.ScreenBlocker;
 using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;

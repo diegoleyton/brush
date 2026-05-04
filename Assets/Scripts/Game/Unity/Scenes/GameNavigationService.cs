@@ -3,7 +3,7 @@ using Game.Unity.Definitions;
 using Game.Unity.Definitions.Events;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Core.Events;
-using Flowbit.Utilities.Unity.UI;
+using Flowbit.Utilities.ScreenBlocker;
 using UnityEngine.SceneManagement;
 using System;
 using System.Collections.Generic;

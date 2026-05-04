@@ -70,14 +70,20 @@
     <Compile Include="Assets/Scripts/Utilities/Core/Events/IEvent.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Events/EventDispatcher.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Services/ServiceContainer.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/ILocalizationService.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/LocalizationEntry.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteResponse.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteRequest.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/DataLoadResult.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemotePayloadCodec.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemoteRetryPolicy.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/LocalizationService.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/PlayerPrefsDataStorage.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Storage/IDataStorage.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Logger/IGameLogger.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/LocalizationServiceLocator.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/LocalizedTextReference.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Core/Localization/LocalizationServiceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/Scripts/Utilities/Core/Flowbit.Utilities.Core.asmdef" />

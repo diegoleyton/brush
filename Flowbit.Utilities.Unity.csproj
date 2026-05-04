@@ -88,6 +88,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/AssetLoader/IAssetLoader.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationParams.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundLibrary.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/Localization/LocalizedText.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundLibraryEntry.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundAsset.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/RemoteCommunication/DefaultRemoteRetryPolicy.cs" />

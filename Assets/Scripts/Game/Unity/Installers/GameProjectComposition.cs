@@ -6,8 +6,8 @@ using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.Coroutines;
 using Flowbit.Utilities.Navigation;
 using Flowbit.Utilities.Storage;
+using Flowbit.Utilities.ScreenBlocker;
 using Flowbit.Utilities.Unity.Instantiator;
-using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.DataController;
 using Game.Core.Configuration;
@@ -158,7 +158,7 @@ namespace Game.Unity.Installers
         /// </summary>
         public ScreenBlocker CreateScreenBlocker()
         {
-            ScreenBlockerImage blockerImage = CreatePersistentPrefab(sceneSettings_.ScreenBlockerImage);
+            ScreenBlockerView blockerImage = CreatePersistentPrefab(sceneSettings_.ScreenBlockerView);
             return new ScreenBlocker(blockerImage);
         }
 
