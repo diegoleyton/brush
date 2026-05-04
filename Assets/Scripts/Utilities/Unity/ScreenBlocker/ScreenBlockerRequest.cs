@@ -5,10 +5,10 @@ namespace Flowbit.Utilities.ScreenBlocker
     /// </summary>
     public sealed class ScreenBlockerRequest
     {
-        public string Reason { get; init; } = string.Empty;
+        public string Reason { get; set; } = string.Empty;
 
-        public bool ShowLoadingWithTime { get; init; }
+        public bool ShowLoadingWithTime { get; set; }
 
-        public string LoadingMessage { get; init; }
+        public string LoadingMessage { get; set; }
     }
 }

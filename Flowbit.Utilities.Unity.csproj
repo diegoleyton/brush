@@ -69,7 +69,6 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/Logger/UnityGameLogger.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/UI/HoldToActionButton.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/Editor/SoundAssetPreviewPlayerEditor.cs" />
-    <Compile Include="Assets/Scripts/Utilities/Unity/UI/ScreenBlocker.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationTarget.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/General/AutoDestroy.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/General/PlayerPrefsUtility.cs" />
@@ -90,6 +89,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundLibrary.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Localization/LocalizedText.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundLibraryEntry.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/ScreenBlocker/ScreenBlockerView.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/SoundAsset.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/RemoteCommunication/DefaultRemoteRetryPolicy.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/DragAndDrop/UIDragAndDropEvents.cs" />
@@ -105,6 +105,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/Coroutines/ICoroutineService.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/AssetLoader/AddressablesAssetLoadHandle.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/RemoteCommunication/RemoteRequestDispatcher.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/ScreenBlocker/ScreenBlockerRequest.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Coroutines/CoroutineService.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Instantiator/UnityInstantiator.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/AudioPlayer.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/LoopingAudioSourcePool.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/ScrollableList/IScrollableListUI.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/AssetLoader/IAssetLoadHandle.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/ScreenBlocker/ScreenBlocker.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/AudioSourcePool.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Instantiator/IObjectInstantiator.cs" />
   </ItemGroup>

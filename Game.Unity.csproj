@@ -133,7 +133,6 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Eyes/PetEyesSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryToggleButtonRotation.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomSceneController.cs" />
-    <Compile Include="Assets/Scripts/Game/Unity/Scenes/ScreenBlockerImage.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/LoopMovement.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetTouchController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/PaperOpenTransitionOverlay.cs" />

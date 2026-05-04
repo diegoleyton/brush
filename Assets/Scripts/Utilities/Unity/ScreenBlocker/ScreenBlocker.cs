@@ -17,20 +17,20 @@ namespace Flowbit.Utilities.ScreenBlocker
             public float StartedAtRealtime;
         }
 
-        private readonly ScreenBlockerView blockerImage_;
+        private readonly ScreenBlockerView blockerView_;
         private readonly Dictionary<int, BlockState> activeLocks_ = new();
         private int idCounter_;
 
         public bool IsBlocked => activeLocks_.Count > 0;
 
-        public ScreenBlocker(ScreenBlockerView blockerImage)
+        public ScreenBlocker(ScreenBlockerView blockerView)
         {
-            blockerImage_ = blockerImage;
+            blockerView_ = blockerView;
 
-            if (blockerImage_?.Image != null)
+            if (blockerView_ != null)
             {
-                blockerImage_.Image.raycastTarget = true;
-                blockerImage_.Image.gameObject.SetActive(false);
+                blockerView_.BlockScreen(false);
+                blockerView_.HideLoading();
             }
         }
 
@@ -93,19 +93,16 @@ namespace Flowbit.Utilities.ScreenBlocker
 
         private void UpdateBlocker()
         {
-            if (blockerImage_?.Image != null)
-            {
-                blockerImage_.Image.gameObject.SetActive(activeLocks_.Count > 0);
-            }
-
-            if (blockerImage_ == null)
+            if (blockerView_ == null)
             {
                 return;
             }
 
+            blockerView_.BlockScreen(activeLocks_.Count > 0);
+
             if (activeLocks_.Count == 0)
             {
-                blockerImage_.HideLoading();
+                blockerView_.HideLoading();
                 return;
             }
 
@@ -127,14 +124,14 @@ namespace Flowbit.Utilities.ScreenBlocker
 
             if (latestLoadingState != null)
             {
-                blockerImage_.ShowLoading(
+                blockerView_.ShowLoading(
                     latestLoadingState.LoadingMessage,
                     latestLoadingState.ShowLoadingWithTime,
                     latestLoadingState.StartedAtRealtime);
             }
             else
             {
-                blockerImage_.HideLoading();
+                blockerView_.HideLoading();
             }
         }
 

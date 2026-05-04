@@ -1,15 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 namespace Flowbit.Utilities.ScreenBlocker
 {
     /// <summary>
-    /// Holds the image used by the global screen blocker service.
+    /// Presentation-only view for the global screen blocker.
     /// </summary>
     public class ScreenBlockerView : MonoBehaviour
     {
-        [field: SerializeField]
-        public Image Image { get; private set; }
+        [SerializeField]
+        private GameObject loadingVisualRoot_;
 
         [SerializeField]
         private Text loadingText_;
@@ -20,7 +21,8 @@ namespace Flowbit.Utilities.ScreenBlocker
 
         private void Awake()
         {
-            EnsureLoadingText();
+            ValidateDependencies();
+            BlockScreen(false);
             HideLoading();
         }
 
@@ -34,9 +36,19 @@ namespace Flowbit.Utilities.ScreenBlocker
             loadingText_.text = BuildLoadingText();
         }
 
+        public void BlockScreen(bool blocked)
+        {
+            gameObject.SetActive(blocked);
+        }
+
         public void ShowLoading(string message, bool showLoadingWithTime, float loadingStartedAtRealtime)
         {
-            EnsureLoadingText();
+            ValidateDependencies();
+            if (loadingVisualRoot_ != null)
+            {
+                loadingVisualRoot_.SetActive(true);
+            }
+
             if (loadingText_ == null)
             {
                 return;
@@ -54,6 +66,11 @@ namespace Flowbit.Utilities.ScreenBlocker
             loadingMessage_ = string.Empty;
             showLoadingWithTime_ = false;
             loadingStartedAtRealtime_ = 0f;
+
+            if (loadingVisualRoot_ != null)
+            {
+                loadingVisualRoot_.SetActive(false);
+            }
 
             if (loadingText_ != null)
             {
@@ -74,35 +91,12 @@ namespace Flowbit.Utilities.ScreenBlocker
             return $"{message}\n{elapsedSeconds:0.0}s";
         }
 
-        private void EnsureLoadingText()
+        private void ValidateDependencies()
         {
-            if (loadingText_ != null)
+            if (loadingText_ == null || loadingVisualRoot_ == null)
             {
-                return;
+                throw new InvalidOperationException("Missing dependencies inScreenBlockerView.");
             }
-
-            if (Image == null)
-            {
-                return;
-            }
-
-            GameObject loadingTextObject = new GameObject("LoadingText", typeof(RectTransform), typeof(Text));
-            loadingTextObject.transform.SetParent(Image.transform, false);
-
-            RectTransform rectTransform = loadingTextObject.GetComponent<RectTransform>();
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.offsetMin = new Vector2(32f, 32f);
-            rectTransform.offsetMax = new Vector2(-32f, -32f);
-
-            loadingText_ = loadingTextObject.GetComponent<Text>();
-            loadingText_.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            loadingText_.fontSize = 42;
-            loadingText_.alignment = TextAnchor.MiddleCenter;
-            loadingText_.color = Color.white;
-            loadingText_.horizontalOverflow = HorizontalWrapMode.Wrap;
-            loadingText_.verticalOverflow = VerticalWrapMode.Overflow;
-            loadingText_.raycastTarget = false;
         }
     }
 }
