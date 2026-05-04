@@ -8,6 +8,8 @@ namespace Game.Core.Services
     [Serializable]
     public sealed class AuthSession
     {
+        private const long ExpirationSkewSeconds = 30;
+
         public string AccessToken;
         public string RefreshToken;
         public string TokenType;
@@ -16,5 +18,21 @@ namespace Game.Core.Services
         public string Email;
 
         public bool HasAccessToken => !string.IsNullOrWhiteSpace(AccessToken);
+
+        public bool IsExpired
+        {
+            get
+            {
+                if (ExpiresAtUnixSeconds <= 0)
+                {
+                    return false;
+                }
+
+                long nowUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                return nowUnixSeconds >= (ExpiresAtUnixSeconds - ExpirationSkewSeconds);
+            }
+        }
+
+        public bool HasUsableAccessToken => HasAccessToken && !IsExpired;
     }
 }

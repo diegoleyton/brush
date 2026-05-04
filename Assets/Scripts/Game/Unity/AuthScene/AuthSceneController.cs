@@ -20,6 +20,7 @@ namespace Game.Unity.AuthScene
 
         private IAuthService authService_;
         private IProfilesService profilesService_;
+        private IChildGameStateSyncService childGameStateSyncService_;
         private ClientGameStateStore gameStateStore_;
         private bool isRedirecting_;
 
@@ -29,11 +30,13 @@ namespace Game.Unity.AuthScene
             IGameNavigationService navigationService,
             IAuthService authService,
             IProfilesService profilesService,
+            IChildGameStateSyncService childGameStateSyncService,
             ClientGameStateStore gameStateStore)
         {
             base.Construct(dispatcher, navigationService);
             authService_ = authService;
             profilesService_ = profilesService;
+            childGameStateSyncService_ = childGameStateSyncService;
             gameStateStore_ = gameStateStore;
         }
 
@@ -107,6 +110,11 @@ namespace Game.Unity.AuthScene
                 {
                     NavigationService.NavigateAsRoot(SceneType.ProfileManagementScene);
                     return;
+                }
+
+                if (childGameStateSyncService_ != null)
+                {
+                    await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
                 }
 
                 if (gameStateStore_.AllProfiles.Count > 1)

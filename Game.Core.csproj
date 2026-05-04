@@ -89,13 +89,16 @@
     <Compile Include="Assets/Scripts/Game/Core/Services/AuthSession.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IProfilesService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/BankEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSyncService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Data.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/MarketCatalog.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Economy.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ChildrenApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Definitions.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSnapshot.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/DefaultProfileState.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IChildGameStateSyncService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/RoomPlaceableObjectEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/PersistentGameDataService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IRemoteIdentityProviderClient.cs" />

@@ -31,16 +31,22 @@ namespace Game.Core.Services
 
         public AuthSession CurrentSession { get; private set; }
 
-        public bool HasSession => CurrentSession != null && CurrentSession.HasAccessToken;
+        public bool HasSession => CurrentSession != null && CurrentSession.HasUsableAccessToken;
 
         public async Task InitializeAsync()
         {
             DataLoadResult<AuthSession> loadResult =
                 await dataStorage_.LoadAsync<AuthSession>(SessionStorageKey);
 
-            CurrentSession = loadResult.Found && loadResult.Data != null && loadResult.Data.HasAccessToken
+            CurrentSession = loadResult.Found && loadResult.Data != null && loadResult.Data.HasUsableAccessToken
                 ? loadResult.Data
                 : null;
+
+            if (CurrentSession == null && loadResult.Found && loadResult.Data != null && loadResult.Data.HasAccessToken)
+            {
+                await dataStorage_.SaveAsync(SessionStorageKey, new AuthSession());
+                logger_?.Log("[Auth] Cleared expired auth session.");
+            }
 
             logger_?.Log(HasSession
                 ? "[Auth] Restored auth session."

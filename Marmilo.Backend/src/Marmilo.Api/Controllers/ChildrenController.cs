@@ -98,7 +98,7 @@ public sealed class ChildrenController : ControllerBase
         try
         {
             ChildProfile childProfile = new(familyId.Value, request.Name, request.PetName, request.PictureId);
-            ChildGameState childGameState = new(childProfile.Id);
+            ChildGameState childGameState = new(childProfile.Id, request.PetName);
             dbContext_.ChildProfiles.Add(childProfile);
             dbContext_.ChildGameStates.Add(childGameState);
             await dbContext_.SaveChangesAsync(cancellationToken);
@@ -234,6 +234,11 @@ public sealed class ChildrenController : ControllerBase
             {
                 message = "Child game state was not found."
             });
+        }
+
+        if (gameState.EnsureDefaults(childProfile.PetName))
+        {
+            await dbContext_.SaveChangesAsync(cancellationToken);
         }
 
         return Ok(ToGameStateResponse(gameState));

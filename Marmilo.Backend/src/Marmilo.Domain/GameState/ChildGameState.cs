@@ -10,9 +10,13 @@ public sealed class ChildGameState
     {
     }
 
-    public ChildGameState(Guid childProfileId)
+    public ChildGameState(Guid childProfileId, string petName = "")
     {
         ChildProfileId = childProfileId;
+        PendingReward = true;
+        PetStateJson = ChildGameStateDefaults.CreatePetStateJson(petName);
+        RoomStateJson = ChildGameStateDefaults.CreateRoomStateJson();
+        InventoryStateJson = ChildGameStateDefaults.CreateInventoryStateJson();
     }
 
     public Guid ChildProfileId { get; private set; }
@@ -70,6 +74,40 @@ public sealed class ChildGameState
 
         CoinsBalance = coinsBalance;
         UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public bool EnsureDefaults(string petName)
+    {
+        string normalizedPetStateJson = ChildGameStateDefaults.NormalizePetStateJson(PetStateJson, petName);
+        string normalizedRoomStateJson = ChildGameStateDefaults.NormalizeRoomStateJson(RoomStateJson);
+        string normalizedInventoryStateJson = ChildGameStateDefaults.NormalizeInventoryStateJson(InventoryStateJson);
+
+        bool changed = false;
+
+        if (!string.Equals(PetStateJson, normalizedPetStateJson, StringComparison.Ordinal))
+        {
+            PetStateJson = normalizedPetStateJson;
+            changed = true;
+        }
+
+        if (!string.Equals(RoomStateJson, normalizedRoomStateJson, StringComparison.Ordinal))
+        {
+            RoomStateJson = normalizedRoomStateJson;
+            changed = true;
+        }
+
+        if (!string.Equals(InventoryStateJson, normalizedInventoryStateJson, StringComparison.Ordinal))
+        {
+            InventoryStateJson = normalizedInventoryStateJson;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        return changed;
     }
 
     private static string ValidateJson(string json, string paramName)

@@ -105,6 +105,82 @@ namespace Game.Core.Services
             return response.IsSuccess && response.StatusCode == 204;
         }
 
+        public async Task<bool> UpdateProfileAsync(string remoteProfileId, string name, string petName, int pictureId, bool isActive)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return false;
+            }
+
+            string body = payloadCodec_.Serialize(new UpdateChildProfileRequest
+            {
+                Name = name ?? string.Empty,
+                PetName = petName ?? string.Empty,
+                PictureId = pictureId,
+                IsActive = isActive
+            });
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}",
+                    RemoteRequestMethod.Patch,
+                    body: body,
+                    isIdempotent: false));
+
+            return response.IsSuccess;
+        }
+
+        public async Task<ChildGameStateSnapshot> GetGameStateAsync(string remoteProfileId)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return null;
+            }
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/game-state",
+                    RemoteRequestMethod.Get,
+                    isIdempotent: true));
+
+            if (!response.IsSuccess)
+            {
+                return null;
+            }
+
+            ChildGameStateSnapshot snapshot = payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body);
+            logger_?.Log($"[GameStateApi] Loaded child game state for {remoteProfileId}: {DescribeSnapshot(snapshot)}");
+            return snapshot;
+        }
+
+        public async Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId) || snapshot == null)
+            {
+                return false;
+            }
+
+            string body = payloadCodec_.Serialize(new UpdateChildGameStateRequest
+            {
+                BrushSessionDurationMinutes = snapshot.BrushSessionDurationMinutes,
+                PendingReward = snapshot.PendingReward,
+                Muted = snapshot.Muted,
+                PetState = snapshot.PetState ?? new Pet(),
+                RoomState = snapshot.RoomState ?? new Room(),
+                InventoryState = snapshot.InventoryState ?? new Inventory()
+            });
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/game-state",
+                    RemoteRequestMethod.Put,
+                    body: body,
+                    isIdempotent: false));
+
+            logger_?.Log($"[GameStateApi] Pushed child game state for {remoteProfileId}: {DescribeSnapshot(snapshot)}");
+            return response.IsSuccess;
+        }
+
         private async Task<RemoteResponse> SendAuthorizedAsync(RemoteRequest request)
         {
             string token = authService_.CurrentSession?.AccessToken;
@@ -191,6 +267,40 @@ namespace Game.Core.Services
             .Replace("\\", "\\\\")
             .Replace("\"", "\\\"");
 
+        private static string DescribeSnapshot(ChildGameStateSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                return "snapshot=null";
+            }
+
+            return
+                $"pendingReward={snapshot.PendingReward}, " +
+                $"muted={snapshot.Muted}, " +
+                $"brushMinutes={snapshot.BrushSessionDurationMinutes}, " +
+                $"petName={(snapshot.PetState?.Name ?? "<null>")}, " +
+                $"roomObjects={snapshot.RoomState?.PlaceableObjects?.Count ?? 0}, " +
+                $"paintedSurfaces={snapshot.RoomState?.PaintedSurfaces?.Count ?? 0}, " +
+                $"inventory={DescribeInventory(snapshot.InventoryState)}";
+        }
+
+        private static string DescribeInventory(Inventory inventory)
+        {
+            if (inventory == null)
+            {
+                return "<null>";
+            }
+
+            return
+                $"placeable:{inventory.PlaceableObjects?.Count ?? 0}, " +
+                $"paint:{inventory.Paint?.Count ?? 0}, " +
+                $"food:{inventory.Food?.Count ?? 0}, " +
+                $"skin:{inventory.Skin?.Count ?? 0}, " +
+                $"hat:{inventory.Hat?.Count ?? 0}, " +
+                $"dress:{inventory.Dress?.Count ?? 0}, " +
+                $"eyes:{inventory.Eyes?.Count ?? 0}";
+        }
+
         [Serializable]
         private sealed class ChildProfileListEnvelope
         {
@@ -206,6 +316,26 @@ namespace Game.Core.Services
             public string petName;
             public int pictureId;
             public bool isActive;
+        }
+
+        [Serializable]
+        private sealed class UpdateChildGameStateRequest
+        {
+            public int BrushSessionDurationMinutes;
+            public bool PendingReward;
+            public bool Muted;
+            public Pet PetState;
+            public Room RoomState;
+            public Inventory InventoryState;
+        }
+
+        [Serializable]
+        private sealed class UpdateChildProfileRequest
+        {
+            public string Name;
+            public string PetName;
+            public int PictureId;
+            public bool IsActive;
         }
     }
 }

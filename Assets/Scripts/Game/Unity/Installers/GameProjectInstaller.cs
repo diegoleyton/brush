@@ -131,6 +131,10 @@ namespace Game.Unity.Installers
                 .To<RemoteProfilesService>()
                 .AsSingle();
 
+            Container.BindInterfacesAndSelfTo<ChildGameStateSyncService>()
+                .AsSingle()
+                .NonLazy();
+
             Container.Bind<IAssetLoader>()
                 .To<AddressablesAssetLoader>()
                 .AsSingle();

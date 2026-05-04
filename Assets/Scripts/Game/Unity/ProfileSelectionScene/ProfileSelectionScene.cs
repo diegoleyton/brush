@@ -40,10 +40,12 @@ namespace Game.Unity.ProfileSelectionScene
 
         private ClientGameStateStore gameStateStore_;
         private IProfilesService profilesService_;
+        private IChildGameStateSyncService childGameStateSyncService_;
         private EventDispatcher dispatcher_;
         private ScreenBlocker screenBlocker_;
         private bool dispatcherSubscribed_;
         private bool isLeavingScene_;
+        private bool isPreparingSelectedProfile_;
         private int pendingProfileIndex_ = -1;
         private Coroutine delayedExitCoroutine_;
         private IDisposable selectionDelayBlockScope_;
@@ -54,12 +56,14 @@ namespace Game.Unity.ProfileSelectionScene
             IGameNavigationService navigationService,
             ClientGameStateStore gameStateStore,
             IProfilesService profilesService,
+            IChildGameStateSyncService childGameStateSyncService,
             ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
             gameStateStore_ = gameStateStore;
             profilesService_ = profilesService;
+            childGameStateSyncService_ = childGameStateSyncService;
             screenBlocker_ = screenBlocker;
         }
 
@@ -72,6 +76,7 @@ namespace Game.Unity.ProfileSelectionScene
         private void OnEnable()
         {
             isLeavingScene_ = false;
+            isPreparingSelectedProfile_ = false;
             pendingProfileIndex_ = -1;
 
             if (initialized_)
@@ -122,16 +127,13 @@ namespace Game.Unity.ProfileSelectionScene
                     onCancelled: null));
         }
 
-        private void OnProfileSwitched(ProfileSwitchedEvent _)
+        private void OnProfileSwitched(ProfileSwitchedEvent _event)
         {
             RefreshProfileButtons();
 
-            if (pendingProfileIndex_ >= 0 && delayedExitCoroutine_ == null)
+            if (pendingProfileIndex_ >= 0 && delayedExitCoroutine_ == null && !isPreparingSelectedProfile_)
             {
-                isLeavingScene_ = true;
-                DisposeSelectionDelayBlockScope();
-                selectionDelayBlockScope_ = screenBlocker_?.BlockScope("ProfileSelectionDelay");
-                delayedExitCoroutine_ = StartCoroutine(GoBackAfterDelay());
+                _ = PrepareSelectedProfileAndExitAsync();
             }
         }
 
@@ -215,7 +217,11 @@ namespace Game.Unity.ProfileSelectionScene
             int currentProfileIndex = gameStateStore_.CurrentProfileIndex;
             if (currentProfileIndex == profileIndex)
             {
-                GoBack();
+                if (!isPreparingSelectedProfile_)
+                {
+                    _ = PrepareSelectedProfileAndExitAsync();
+                }
+
                 return;
             }
 
@@ -238,6 +244,44 @@ namespace Game.Unity.ProfileSelectionScene
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
+            }
+        }
+
+        private async Task PrepareSelectedProfileAndExitAsync()
+        {
+            if (isPreparingSelectedProfile_)
+            {
+                return;
+            }
+
+            isPreparingSelectedProfile_ = true;
+            isLeavingScene_ = true;
+            DisposeSelectionDelayBlockScope();
+            selectionDelayBlockScope_ = screenBlocker_?.BlockScope("ProfileSelectionDelay");
+
+            try
+            {
+                if (childGameStateSyncService_ != null)
+                {
+                    await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
+                }
+
+                if (!isActiveAndEnabled || delayedExitCoroutine_ != null)
+                {
+                    return;
+                }
+
+                delayedExitCoroutine_ = StartCoroutine(GoBackAfterDelay());
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                DisposeSelectionDelayBlockScope();
+                isLeavingScene_ = false;
+            }
+            finally
+            {
+                isPreparingSelectedProfile_ = false;
             }
         }
 

@@ -14,5 +14,11 @@ namespace Game.Core.Services
         Task<Profile> CreateAsync(string name, string petName, int pictureId);
 
         Task<bool> DeleteAsync(string remoteProfileId);
+
+        Task<bool> UpdateProfileAsync(string remoteProfileId, string name, string petName, int pictureId, bool isActive);
+
+        Task<ChildGameStateSnapshot> GetGameStateAsync(string remoteProfileId);
+
+        Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot);
     }
 }
