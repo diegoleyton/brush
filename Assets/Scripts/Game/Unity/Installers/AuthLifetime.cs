@@ -7,7 +7,7 @@ using Zenject;
 namespace Game.Unity.Installers
 {
     /// <summary>
-    /// Restores the Marmilo auth session during startup.
+    /// Warms up auth session restoration during startup so later flows can depend on a hydrated service.
     /// </summary>
     public sealed class AuthLifetime : IInitializable
     {
@@ -33,7 +33,7 @@ namespace Game.Unity.Installers
             }
             catch (Exception exception)
             {
-                logger_?.Log($"[Auth] Failed to initialize Marmilo auth service: {exception}");
+                logger_?.Log($"[Auth] Failed to initialize auth service: {exception}");
             }
         }
     }

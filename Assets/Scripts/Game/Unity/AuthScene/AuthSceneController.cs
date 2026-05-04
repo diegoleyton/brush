@@ -10,8 +10,8 @@ using Zenject;
 namespace Game.Unity.AuthScene
 {
     /// <summary>
-    /// Scene entry point for Marmilo authentication flows.
-    /// Hosts a serialized auth panel and participates in the regular navigation system.
+    /// Scene entry point for authentication flows.
+    /// Owns post-auth routing so the auth view stays focused on inputs and feedback.
     /// </summary>
     public sealed class AuthSceneController : SceneBase
     {

@@ -8,7 +8,7 @@ using Game.Core.Events;
 namespace Game.Core.Services
 {
     /// <summary>
-    /// Server-backed profile application service that keeps the local client state store in sync.
+    /// Server-backed profile service that keeps the client state store aligned with remote child profiles.
     /// </summary>
     public sealed class RemoteProfilesService : IProfilesService
     {
@@ -66,8 +66,6 @@ namespace Game.Core.Services
             {
                 dispatcher_?.Send(new ProfileSwitchedEvent());
             }
-
-            dispatcher_?.Send(new LocalDataChangedEvent());
         }
 
         public async Task<Profile> CreateAsync(string name, string petName, int pictureId)

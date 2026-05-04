@@ -16,6 +16,7 @@ namespace Game.Core.Services
         private readonly IRemoteIdentityProviderClient identityProviderClient_;
         private readonly IParentAccountApiClient parentAccountApiClient_;
         private readonly IGameLogger logger_;
+        private Task initializeTask_;
 
         public AuthService(
             IDataStorage dataStorage,
@@ -34,6 +35,24 @@ namespace Game.Core.Services
         public bool HasSession => CurrentSession != null && CurrentSession.HasUsableAccessToken;
 
         public async Task InitializeAsync()
+        {
+            if (initializeTask_ == null)
+            {
+                initializeTask_ = InitializeCoreAsync();
+            }
+
+            try
+            {
+                await initializeTask_;
+            }
+            catch
+            {
+                initializeTask_ = null;
+                throw;
+            }
+        }
+
+        private async Task InitializeCoreAsync()
         {
             DataLoadResult<AuthSession> loadResult =
                 await dataStorage_.LoadAsync<AuthSession>(SessionStorageKey);
@@ -105,6 +124,7 @@ namespace Game.Core.Services
         public async Task LogoutAsync()
         {
             CurrentSession = null;
+            initializeTask_ = Task.CompletedTask;
             await dataStorage_.SaveAsync(SessionStorageKey, new AuthSession());
             logger_?.Log("[Auth] Cleared auth session.");
         }
@@ -112,6 +132,7 @@ namespace Game.Core.Services
         private async Task PersistSessionAsync(AuthSession session)
         {
             CurrentSession = session;
+            initializeTask_ = Task.CompletedTask;
             await dataStorage_.SaveAsync(SessionStorageKey, session);
             logger_?.Log($"[Auth] Persisted session for {session.Email}.");
         }

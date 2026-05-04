@@ -13,7 +13,8 @@ using GameState = Game.Core.Data.Data;
 namespace Game.Core.Services
 {
     /// <summary>
-    /// Central repository responsible for reading and mutating persisted game state.
+    /// Transitional gameplay facade over the client state store.
+    /// Remote-backed areas are being extracted into dedicated services over time.
     /// </summary>
     public class DataRepository
     {

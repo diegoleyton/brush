@@ -69,27 +69,21 @@ namespace Game.Core.Services
             string remoteProfileId = currentProfile.RemoteProfileId;
             if (hydratedProfileIds_.Contains(remoteProfileId))
             {
-                logger_?.Log($"[GameStateSync] Skipping load for {remoteProfileId} because it is already hydrated.");
                 return;
             }
 
-            logger_?.Log($"[GameStateSync] Loading child game state for profile {remoteProfileId}.");
             ChildGameStateSnapshot snapshot = await childrenApiClient_.GetGameStateAsync(remoteProfileId);
             if (snapshot == null)
             {
-                logger_?.Log($"[GameStateSync] No child game state snapshot returned for profile {remoteProfileId}.");
                 return;
             }
 
             bool remoteStateWasUninitialized = IsUninitializedSnapshot(snapshot);
-            logger_?.Log(
-                $"[GameStateSync] Snapshot for {remoteProfileId} uninitialized={remoteStateWasUninitialized}.");
             ApplySnapshot(currentProfile, snapshot, remoteStateWasUninitialized);
             hydratedProfileIds_.Add(remoteProfileId);
 
             if (remoteStateWasUninitialized)
             {
-                logger_?.Log($"[GameStateSync] Seeding remote child game state for profile {remoteProfileId} from local defaults.");
                 await PushCurrentProfileStateAsync();
             }
         }
@@ -150,7 +144,6 @@ namespace Game.Core.Services
                     bool updated = await childrenApiClient_.UpdateGameStateAsync(currentProfile.RemoteProfileId, snapshot);
                     if (!updated)
                     {
-                        logger_?.Log($"[GameStateSync] Failed to push child game state for profile {currentProfile.RemoteProfileId}.");
                         return;
                     }
                 }
@@ -197,12 +190,6 @@ namespace Game.Core.Services
                 {
                     profile.InventoryData = snapshot.InventoryState;
                 }
-
-                logger_?.Log(
-                    $"[GameStateSync] Applied snapshot to profile {profile.RemoteProfileId}. " +
-                    $"preserveExistingDefaults={preserveExistingDefaults}, " +
-                    $"petName={(profile.PetData?.Name ?? "<null>")}, " +
-                    $"inventory={DescribeInventory(profile.InventoryData)}.");
 
                 dispatcher_?.Send(new ProfileUpdatedEvent());
                 dispatcher_?.Send(new PendingRewardEvent());
@@ -288,23 +275,6 @@ namespace Game.Core.Services
 
         private static bool IsEmptyInventoryBucket(System.Collections.Generic.Dictionary<int, int> items) =>
             items == null || items.Count == 0;
-
-        private static string DescribeInventory(Inventory inventory)
-        {
-            if (inventory == null)
-            {
-                return "<null>";
-            }
-
-            return
-                $"placeable:{inventory.PlaceableObjects?.Count ?? 0}, " +
-                $"paint:{inventory.Paint?.Count ?? 0}, " +
-                $"food:{inventory.Food?.Count ?? 0}, " +
-                $"skin:{inventory.Skin?.Count ?? 0}, " +
-                $"hat:{inventory.Hat?.Count ?? 0}, " +
-                $"dress:{inventory.Dress?.Count ?? 0}, " +
-                $"eyes:{inventory.Eyes?.Count ?? 0}";
-        }
 
         private bool CanSyncCurrentProfile(out Profile currentProfile)
         {

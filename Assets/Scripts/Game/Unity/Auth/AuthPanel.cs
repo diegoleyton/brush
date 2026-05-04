@@ -7,8 +7,8 @@ using Zenject;
 namespace Game.Unity.Auth
 {
     /// <summary>
-    /// Reusable auth panel for creating accounts, logging in, and navigating to profile flows.
-    /// All UI references are provided through serialized fields so the panel can be reused in scenes or prefabs.
+    /// Reusable auth view for account creation and login.
+    /// Navigation stays outside this component so it can be reused in any auth scene or prefab.
     /// </summary>
     public sealed class AuthPanel : MonoBehaviour
     {
@@ -177,7 +177,6 @@ namespace Game.Unity.Auth
         private void RefreshButtonState()
         {
             bool enableAuthActions = !isBusy_;
-            bool hasSession = authService_ != null && authService_.HasSession;
 
             SetButtonState(createAccountButton_, enableAuthActions);
             SetButtonState(loginButton_, enableAuthActions);

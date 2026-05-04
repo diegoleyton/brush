@@ -148,9 +148,7 @@ namespace Game.Core.Services
                 return null;
             }
 
-            ChildGameStateSnapshot snapshot = payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body);
-            logger_?.Log($"[GameStateApi] Loaded child game state for {remoteProfileId}: {DescribeSnapshot(snapshot)}");
-            return snapshot;
+            return payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body);
         }
 
         public async Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot)
@@ -177,7 +175,6 @@ namespace Game.Core.Services
                     body: body,
                     isIdempotent: false));
 
-            logger_?.Log($"[GameStateApi] Pushed child game state for {remoteProfileId}: {DescribeSnapshot(snapshot)}");
             return response.IsSuccess;
         }
 
@@ -214,7 +211,7 @@ namespace Game.Core.Services
             if (!response.IsSuccess)
             {
                 string errorMessage = TryParseErrorMessage(response.Body);
-                logger_?.Log($"[Profiles] Remote request failed: {response.StatusCode} {errorMessage}");
+                logger_?.Log($"[ChildrenApi] Remote request failed: {response.StatusCode} {errorMessage}");
             }
 
             return response;
@@ -266,40 +263,6 @@ namespace Game.Core.Services
             (value ?? string.Empty)
             .Replace("\\", "\\\\")
             .Replace("\"", "\\\"");
-
-        private static string DescribeSnapshot(ChildGameStateSnapshot snapshot)
-        {
-            if (snapshot == null)
-            {
-                return "snapshot=null";
-            }
-
-            return
-                $"pendingReward={snapshot.PendingReward}, " +
-                $"muted={snapshot.Muted}, " +
-                $"brushMinutes={snapshot.BrushSessionDurationMinutes}, " +
-                $"petName={(snapshot.PetState?.Name ?? "<null>")}, " +
-                $"roomObjects={snapshot.RoomState?.PlaceableObjects?.Count ?? 0}, " +
-                $"paintedSurfaces={snapshot.RoomState?.PaintedSurfaces?.Count ?? 0}, " +
-                $"inventory={DescribeInventory(snapshot.InventoryState)}";
-        }
-
-        private static string DescribeInventory(Inventory inventory)
-        {
-            if (inventory == null)
-            {
-                return "<null>";
-            }
-
-            return
-                $"placeable:{inventory.PlaceableObjects?.Count ?? 0}, " +
-                $"paint:{inventory.Paint?.Count ?? 0}, " +
-                $"food:{inventory.Food?.Count ?? 0}, " +
-                $"skin:{inventory.Skin?.Count ?? 0}, " +
-                $"hat:{inventory.Hat?.Count ?? 0}, " +
-                $"dress:{inventory.Dress?.Count ?? 0}, " +
-                $"eyes:{inventory.Eyes?.Count ?? 0}";
-        }
 
         [Serializable]
         private sealed class ChildProfileListEnvelope
