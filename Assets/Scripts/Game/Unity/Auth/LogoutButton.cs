@@ -1,4 +1,6 @@
 using System;
+using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.ScreenBlocker;
 using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
@@ -28,13 +30,18 @@ namespace Game.Unity.Auth
 
         private IAuthService authService_;
         private IGameNavigationService navigationService_;
+        private ScreenBlocker screenBlocker_;
         private bool isBusy_;
 
         [Inject]
-        public void Construct(IAuthService authService, IGameNavigationService navigationService)
+        public void Construct(
+            IAuthService authService,
+            IGameNavigationService navigationService,
+            ScreenBlocker screenBlocker)
         {
             authService_ = authService;
             navigationService_ = navigationService;
+            screenBlocker_ = screenBlocker;
         }
 
         private void Awake()
@@ -91,6 +98,12 @@ namespace Game.Unity.Auth
 
             isBusy_ = true;
             RefreshButtonState();
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "Logout",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.auth.logout",
+                    "Signing out..."));
 
             try
             {
@@ -116,6 +129,7 @@ namespace Game.Unity.Auth
             }
             finally
             {
+                blockScope?.Dispose();
                 isBusy_ = false;
                 RefreshButtonState();
             }

@@ -15,9 +15,17 @@ namespace Flowbit.Utilities.ScreenBlocker
         [SerializeField]
         private Text loadingText_;
 
+        [SerializeField]
+        [Min(0f)]
+        private float loadingFeedbackDelaySeconds_ = 0.35f;
+
+        [SerializeField]
+        private bool showElapsedSeconds_ = false;
+
         private string loadingMessage_;
         private bool showLoadingWithTime_;
         private float loadingStartedAtRealtime_;
+        private bool loadingVisible_;
 
         private void Awake()
         {
@@ -28,7 +36,12 @@ namespace Flowbit.Utilities.ScreenBlocker
 
         private void Update()
         {
-            if (loadingText_ == null || !loadingText_.gameObject.activeSelf)
+            if (!loadingVisible_ && ShouldShowLoadingVisual())
+            {
+                SetLoadingVisibility(true);
+            }
+
+            if (loadingText_ == null || !loadingVisible_ || !loadingText_.gameObject.activeSelf)
             {
                 return;
             }
@@ -44,21 +57,16 @@ namespace Flowbit.Utilities.ScreenBlocker
         public void ShowLoading(string message, bool showLoadingWithTime, float loadingStartedAtRealtime)
         {
             ValidateDependencies();
-            if (loadingVisualRoot_ != null)
-            {
-                loadingVisualRoot_.SetActive(true);
-            }
-
-            if (loadingText_ == null)
-            {
-                return;
-            }
-
             loadingMessage_ = string.IsNullOrWhiteSpace(message) ? "Loading..." : message.Trim();
             showLoadingWithTime_ = showLoadingWithTime;
             loadingStartedAtRealtime_ = loadingStartedAtRealtime;
-            loadingText_.text = BuildLoadingText();
-            loadingText_.gameObject.SetActive(true);
+            SetLoadingVisibility(false);
+
+            if (loadingText_ != null && ShouldShowLoadingVisual())
+            {
+                loadingText_.text = BuildLoadingText();
+                SetLoadingVisibility(true);
+            }
         }
 
         public void HideLoading()
@@ -66,23 +74,38 @@ namespace Flowbit.Utilities.ScreenBlocker
             loadingMessage_ = string.Empty;
             showLoadingWithTime_ = false;
             loadingStartedAtRealtime_ = 0f;
-
-            if (loadingVisualRoot_ != null)
-            {
-                loadingVisualRoot_.SetActive(false);
-            }
+            SetLoadingVisibility(false);
 
             if (loadingText_ != null)
             {
                 loadingText_.text = string.Empty;
-                loadingText_.gameObject.SetActive(false);
+            }
+        }
+
+        private bool ShouldShowLoadingVisual()
+        {
+            return Time.realtimeSinceStartup - loadingStartedAtRealtime_ >= loadingFeedbackDelaySeconds_;
+        }
+
+        private void SetLoadingVisibility(bool visible)
+        {
+            loadingVisible_ = visible;
+
+            if (loadingVisualRoot_ != null)
+            {
+                loadingVisualRoot_.SetActive(visible);
+            }
+
+            if (loadingText_ != null)
+            {
+                loadingText_.gameObject.SetActive(visible);
             }
         }
 
         private string BuildLoadingText()
         {
             string message = string.IsNullOrWhiteSpace(loadingMessage_) ? "Loading..." : loadingMessage_;
-            if (!showLoadingWithTime_)
+            if (!showLoadingWithTime_ || !showElapsedSeconds_)
             {
                 return message;
             }

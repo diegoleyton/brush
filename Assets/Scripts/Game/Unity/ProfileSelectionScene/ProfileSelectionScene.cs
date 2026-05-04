@@ -4,6 +4,7 @@ using System.Collections;
 using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.Localization;
 using Flowbit.Utilities.ScreenBlocker;
 
 using Game.Core.Data;
@@ -236,6 +237,12 @@ namespace Game.Unity.ProfileSelectionScene
                 return;
             }
 
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "ProfileSelectionRefresh",
+                showLoadingWithTime: true,
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.profiles.refresh",
+                    "Loading profiles..."));
             try
             {
                 await profilesService_.RefreshAsync();
@@ -244,6 +251,10 @@ namespace Game.Unity.ProfileSelectionScene
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
+            }
+            finally
+            {
+                blockScope?.Dispose();
             }
         }
 
@@ -257,13 +268,25 @@ namespace Game.Unity.ProfileSelectionScene
             isPreparingSelectedProfile_ = true;
             isLeavingScene_ = true;
             DisposeSelectionDelayBlockScope();
-            selectionDelayBlockScope_ = screenBlocker_?.BlockScope("ProfileSelectionDelay");
 
             try
             {
-                if (childGameStateSyncService_ != null)
+                IDisposable loadingScope = screenBlocker_?.BlockScope(
+                    "ProfileSelectionLoad",
+                    showLoadingWithTime: true,
+                    loadingMessage: LocalizationServiceLocator.GetText(
+                        "loading.profiles.select",
+                        "Loading profile..."));
+                try
                 {
-                    await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
+                    if (childGameStateSyncService_ != null)
+                    {
+                        await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
+                    }
+                }
+                finally
+                {
+                    loadingScope?.Dispose();
                 }
 
                 if (!isActiveAndEnabled || delayedExitCoroutine_ != null)
@@ -271,6 +294,7 @@ namespace Game.Unity.ProfileSelectionScene
                     return;
                 }
 
+                selectionDelayBlockScope_ = screenBlocker_?.BlockScope("ProfileSelectionDelay");
                 delayedExitCoroutine_ = StartCoroutine(GoBackAfterDelay());
             }
             catch (Exception exception)

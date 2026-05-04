@@ -82,6 +82,7 @@
     <Compile Include="Assets/Scripts/Utilities/Unity/UnsedAssets/Editor/UnusedAssetSelector.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Navigation/Core/NavigationService.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/UI/ScrollRectExtensions.cs" />
+    <Compile Include="Assets/Scripts/Utilities/Unity/RemoteCommunication/DevelopmentRemoteSimulationSettings.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/Audio/IAudioSourcePool.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/DayNightVisuals/DayNightVisual.cs" />
     <Compile Include="Assets/Scripts/Utilities/Unity/AssetLoader/IAssetLoader.cs" />

@@ -112,6 +112,9 @@ namespace Game.Unity.Installers
                 .To<DefaultRemoteRetryPolicy>()
                 .AsSingle();
 
+            Container.Bind<DevelopmentRemoteSimulationSettings>()
+                .AsSingle();
+
             Container.Bind<IRemoteRequestDispatcher>()
                 .To<RemoteRequestDispatcher>()
                 .AsSingle();

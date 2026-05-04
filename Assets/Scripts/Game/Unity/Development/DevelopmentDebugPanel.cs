@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flowbit.Utilities.Core.Events;
+using Flowbit.Utilities.ScreenBlocker;
+using Flowbit.Utilities.Unity.RemoteCommunication;
 using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Events;
@@ -33,6 +35,8 @@ namespace Game.Unity.Development
         private EventDispatcher dispatcher_;
         private IChildrenApiClient childrenApiClient_;
         private IChildGameStateSyncService childGameStateSyncService_;
+        private ScreenBlocker screenBlocker_;
+        private DevelopmentRemoteSimulationSettings remoteSimulationSettings_;
 
         private bool isOpen_;
         private Rect windowRect_ = new Rect(24f, 96f, 560f, 820f);
@@ -53,13 +57,17 @@ namespace Game.Unity.Development
             IRoomGameplayService roomGameplayService,
             EventDispatcher dispatcher,
             IChildrenApiClient childrenApiClient,
-            IChildGameStateSyncService childGameStateSyncService)
+            IChildGameStateSyncService childGameStateSyncService,
+            ScreenBlocker screenBlocker,
+            DevelopmentRemoteSimulationSettings remoteSimulationSettings)
         {
             repository_ = repository;
             roomGameplayService_ = roomGameplayService;
             dispatcher_ = dispatcher;
             childrenApiClient_ = childrenApiClient;
             childGameStateSyncService_ = childGameStateSyncService;
+            screenBlocker_ = screenBlocker;
+            remoteSimulationSettings_ = remoteSimulationSettings;
         }
 
         private void Awake()
@@ -161,6 +169,7 @@ namespace Game.Unity.Development
             scrollPosition_ = GUILayout.BeginScrollView(scrollPosition_, GUILayout.Height(660f));
 
             DrawCoinsSection();
+            DrawRemoteSimulationSection();
             DrawPendingRewardSection();
             DrawInventorySection(InteractionPointType.PLACEABLE_OBJECT, "Placeable Objects", roomGameplayService_.AddPlaceableObject);
             DrawInventorySection(InteractionPointType.FOOD, "Food", roomGameplayService_.AddFood);
@@ -220,6 +229,33 @@ namespace Game.Unity.Development
             GUILayout.Space(8f);
         }
 
+        private void DrawRemoteSimulationSection()
+        {
+            GUILayout.Label("Network Simulation");
+
+            bool simulateSlowNetwork = remoteSimulationSettings_ != null && remoteSimulationSettings_.SimulateSlowNetwork;
+            bool newSimulateSlowNetwork = GUILayout.Toggle(simulateSlowNetwork, "Slow Network");
+            if (remoteSimulationSettings_ != null && newSimulateSlowNetwork != simulateSlowNetwork)
+            {
+                remoteSimulationSettings_.SimulateSlowNetwork = newSimulateSlowNetwork;
+                feedback_ = newSimulateSlowNetwork ? "Slow network enabled." : "Slow network disabled.";
+            }
+
+            bool simulateUnresponsiveNetwork =
+                remoteSimulationSettings_ != null && remoteSimulationSettings_.SimulateUnresponsiveNetwork;
+            bool newSimulateUnresponsiveNetwork = GUILayout.Toggle(simulateUnresponsiveNetwork, "Unresponsive Network");
+            if (remoteSimulationSettings_ != null &&
+                newSimulateUnresponsiveNetwork != simulateUnresponsiveNetwork)
+            {
+                remoteSimulationSettings_.SimulateUnresponsiveNetwork = newSimulateUnresponsiveNetwork;
+                feedback_ = newSimulateUnresponsiveNetwork
+                    ? "Unresponsive network enabled."
+                    : "Unresponsive network disabled.";
+            }
+
+            GUILayout.Space(8f);
+        }
+
         private async Task AddCoinsAsync(int amount)
         {
             Profile currentProfile = repository_?.CurrentProfile;
@@ -235,20 +271,32 @@ namespace Game.Unity.Development
                 return;
             }
 
-            bool granted = await childrenApiClient_.GrantCoinsAsync(
-                currentProfile.RemoteProfileId,
-                amount,
-                "Debug panel grant");
-
-            if (!granted)
+            IDisposable blockScope = screenBlocker_?.BlockScope(
+                "DebugGrantCoins",
+                showLoadingWithTime: true,
+                loadingMessage: "Granting coins...");
+            bool granted;
+            try
             {
-                feedback_ = "Failed to grant coins.";
-                return;
+                granted = await childrenApiClient_.GrantCoinsAsync(
+                    currentProfile.RemoteProfileId,
+                    amount,
+                    "Debug panel grant");
+
+                if (!granted)
+                {
+                    feedback_ = "Failed to grant coins.";
+                    return;
+                }
+
+                if (childGameStateSyncService_ != null)
+                {
+                    await childGameStateSyncService_.ReloadCurrentProfileAsync();
+                }
             }
-
-            if (childGameStateSyncService_ != null)
+            finally
             {
-                await childGameStateSyncService_.ReloadCurrentProfileAsync();
+                blockScope?.Dispose();
             }
 
             feedback_ = $"+{amount} coins";

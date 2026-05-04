@@ -16,14 +16,17 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
         private readonly IRemoteRetryPolicy retryPolicy_;
         private readonly IGameLogger logger_;
         private readonly SemaphoreSlim concurrencyGate_;
+        private readonly DevelopmentRemoteSimulationSettings simulationSettings_;
 
         public RemoteRequestDispatcher(
             IRemoteRetryPolicy retryPolicy,
             IGameLogger logger,
+            DevelopmentRemoteSimulationSettings simulationSettings,
             int maxConcurrentRequests = 4)
         {
             retryPolicy_ = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
             logger_ = logger;
+            simulationSettings_ = simulationSettings;
             concurrencyGate_ = new SemaphoreSlim(Math.Max(1, maxConcurrentRequests), Math.Max(1, maxConcurrentRequests));
         }
 
@@ -62,6 +65,33 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
 
         private async Task<RemoteResponse> SendOnceAsync(RemoteRequest request)
         {
+            if (simulationSettings_?.SimulateUnresponsiveNetwork == true)
+            {
+                double timeoutSeconds = Math.Max(1, request.TimeoutSeconds);
+                double extraDelaySeconds = Math.Max(0f, simulationSettings_.UnresponsiveNetworkExtraDelaySeconds);
+                await Task.Delay(TimeSpan.FromSeconds(timeoutSeconds + extraDelaySeconds));
+
+                string simulatedTimeoutError = "Simulated network timeout.";
+                logger_?.Log($"[Remote] Simulated unresponsive network for {request.Method} {request.Url}.");
+                return new RemoteResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = 0,
+                    Body = string.Empty,
+                    ErrorMessage = simulatedTimeoutError,
+                    IsNetworkError = true
+                };
+            }
+
+            if (simulationSettings_?.SimulateSlowNetwork == true)
+            {
+                double delaySeconds = Math.Max(0f, simulationSettings_.SlowNetworkDelaySeconds);
+                if (delaySeconds > 0f)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                }
+            }
+
             using UnityWebRequest unityWebRequest = new UnityWebRequest(request.Url, ToUnityMethod(request.Method));
             unityWebRequest.timeout = request.TimeoutSeconds;
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
