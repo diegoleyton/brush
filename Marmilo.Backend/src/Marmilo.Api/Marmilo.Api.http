@@ -1,0 +1,6 @@
+@MarmiloApiHostAddress = http://localhost:5086
+
+GET {{MarmiloApiHostAddress}}/health
+Accept: application/json
+
+###

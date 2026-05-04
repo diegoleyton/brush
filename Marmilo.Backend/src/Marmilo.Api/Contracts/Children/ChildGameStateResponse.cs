@@ -1,0 +1,13 @@
+using System.Text.Json;
+
+namespace Marmilo.Api.Contracts.Children;
+
+public sealed record ChildGameStateResponse(
+    Guid ChildId,
+    int CoinsBalance,
+    int BrushSessionDurationMinutes,
+    bool PendingReward,
+    bool Muted,
+    JsonElement PetState,
+    JsonElement RoomState,
+    JsonElement InventoryState);

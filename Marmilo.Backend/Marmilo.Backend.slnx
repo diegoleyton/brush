@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Marmilo.Api/Marmilo.Api.csproj" />
+    <Project Path="src/Marmilo.Domain/Marmilo.Domain.csproj" />
+    <Project Path="src/Marmilo.Infrastructure/Marmilo.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Marmilo.Api.Tests/Marmilo.Api.Tests.csproj" />
+    <Project Path="tests/Marmilo.Domain.Tests/Marmilo.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
