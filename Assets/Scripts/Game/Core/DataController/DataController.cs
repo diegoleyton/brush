@@ -10,16 +10,16 @@ namespace Game.Core.DataController
     /// </summary>
     public sealed class DataController : System.IDisposable
     {
-        private readonly DataRepository repository_;
+        private readonly IRoomGameplayService roomGameplayService_;
         private readonly EventDispatcher dispatcher_;
         private bool disposed_;
 
         /// <summary>
         /// Creates a new data controller and starts listening for room data events.
         /// </summary>
-        public DataController(DataRepository repository, EventDispatcher dispatcher)
+        public DataController(IRoomGameplayService roomGameplayService, EventDispatcher dispatcher)
         {
-            repository_ = repository;
+            roomGameplayService_ = roomGameplayService;
             dispatcher_ = dispatcher;
 
             dispatcher_?.Subscribe<RoomObjectPlacedEvent>(OnRoomObjectPlaced);
@@ -57,47 +57,47 @@ namespace Game.Core.DataController
 
         private void OnRoomObjectPlaced(RoomObjectPlacedEvent eventData)
         {
-            repository_?.SetRoomObject(eventData.TargetId, eventData.ItemId);
+            roomGameplayService_?.SetRoomObject(eventData.TargetId, eventData.ItemId);
         }
 
         private void OnRoomPaintApplied(RoomPaintAppliedEvent eventData)
         {
-            repository_?.PaintRoomSurface(eventData.TargetId, eventData.ItemId);
+            roomGameplayService_?.PaintRoomSurface(eventData.TargetId, eventData.ItemId);
         }
 
         private void OnRoomObjectMoved(RoomObjectMovedEvent eventData)
         {
-            repository_?.MoveRoomObject(eventData.SourceTargetId, eventData.TargetId);
+            roomGameplayService_?.MoveRoomObject(eventData.SourceTargetId, eventData.TargetId);
         }
 
         private void OnRoomObjectReturnedToInventory(RoomObjectReturnedToInventoryEvent eventData)
         {
-            repository_?.ReturnRoomObjectToInventory(eventData.SourceTargetId);
+            roomGameplayService_?.ReturnRoomObjectToInventory(eventData.SourceTargetId);
         }
 
         private void OnRoomFoodApplied(RoomFoodAppliedEvent eventData)
         {
-            repository_?.FeedPet(eventData.ItemId);
+            roomGameplayService_?.FeedPet(eventData.ItemId);
         }
 
         private void OnRoomSkinApplied(RoomSkinAppliedEvent eventData)
         {
-            repository_?.SetPetSkin(eventData.ItemId);
+            roomGameplayService_?.SetPetSkin(eventData.ItemId);
         }
 
         private void OnRoomHatApplied(RoomHatAppliedEvent eventData)
         {
-            repository_?.SetPetHat(eventData.ItemId);
+            roomGameplayService_?.SetPetHat(eventData.ItemId);
         }
 
         private void OnRoomDressApplied(RoomDressAppliedEvent eventData)
         {
-            repository_?.SetPetDress(eventData.ItemId);
+            roomGameplayService_?.SetPetDress(eventData.ItemId);
         }
 
         private void OnRoomEyesApplied(RoomEyesAppliedEvent eventData)
         {
-            repository_?.SetPetEyes(eventData.ItemId);
+            roomGameplayService_?.SetPetEyes(eventData.ItemId);
         }
     }
 }

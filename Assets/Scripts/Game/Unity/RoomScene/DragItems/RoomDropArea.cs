@@ -21,7 +21,7 @@ namespace Game.Unity.RoomScene
     public sealed class RoomDropArea : UIDropTarget
     {
         private EventDispatcher dispatcher_;
-        private DataRepository repository_;
+        private IRoomGameplayService roomGameplayService_;
         private RoomSettings roomSettings_;
 
         [SerializeField]
@@ -45,10 +45,10 @@ namespace Game.Unity.RoomScene
         public int TargetId => targetId_;
 
         [Inject]
-        public void Construct(EventDispatcher dispatcher, DataRepository repository, RoomSettings roomSettings)
+        public void Construct(EventDispatcher dispatcher, IRoomGameplayService roomGameplayService, RoomSettings roomSettings)
         {
             dispatcher_ = dispatcher;
-            repository_ = repository;
+            roomGameplayService_ = roomGameplayService;
             roomSettings_ = roomSettings;
         }
 
@@ -149,7 +149,7 @@ namespace Game.Unity.RoomScene
 
         private bool CanApplyDraggedItem(RoomInventoryItemData data)
         {
-            if (repository_ == null)
+            if (roomGameplayService_ == null)
             {
                 return true;
             }
@@ -164,9 +164,9 @@ namespace Game.Unity.RoomScene
                 case InteractionPointType.SKIN:
                 case InteractionPointType.HAT:
                 case InteractionPointType.DRESS:
-                    return repository_.GetAppliedPetItemId(supportedInventoryType_) != data.ItemId;
+                    return roomGameplayService_.GetAppliedPetItemId(supportedInventoryType_) != data.ItemId;
                 case InteractionPointType.FOOD:
-                    return repository_.CanPetEat == PetEatStatus.OK;
+                    return roomGameplayService_.CanPetEat == PetEatStatus.OK;
                 default:
                     return true;
             }
@@ -179,12 +179,12 @@ namespace Game.Unity.RoomScene
                 return true;
             }
 
-            return !repository_.RoomHasObject(targetId_, itemId);
+            return !roomGameplayService_.RoomHasObject(targetId_, itemId);
         }
 
         private bool CanApplyPaint(int itemId)
         {
-            return !repository_.RoomSurfaceHasPaint(targetId_, itemId);
+            return !roomGameplayService_.RoomSurfaceHasPaint(targetId_, itemId);
         }
 
         private void OnRoomInventoryDragEnded(RoomInventoryDragEndedEvent _)

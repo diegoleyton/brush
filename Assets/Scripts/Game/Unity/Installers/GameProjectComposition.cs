@@ -97,10 +97,18 @@ namespace Game.Unity.Installers
         public DataRepository CreateDataRepository(
             ClientGameStateStore gameStateStore,
             IProfileService profileService,
+            IRoomGameplayService roomGameplayService,
+            EventDispatcher dispatcher)
+        {
+            return new DataRepository(gameStateStore, profileService, roomGameplayService, dispatcher);
+        }
+
+        public IRoomGameplayService CreateRoomGameplayService(
+            ClientGameStateStore gameStateStore,
             EventDispatcher dispatcher,
             IGameLogger logger)
         {
-            return new DataRepository(gameStateStore, profileService, dispatcher, logger);
+            return new RoomGameplayService(gameStateStore, dispatcher, logger);
         }
 
         /// <summary>
@@ -130,9 +138,9 @@ namespace Game.Unity.Installers
         /// <summary>
         /// Creates the runtime data controller.
         /// </summary>
-        public DataController CreateDataController(DataRepository repository, EventDispatcher dispatcher)
+        public DataController CreateDataController(IRoomGameplayService roomGameplayService, EventDispatcher dispatcher)
         {
-            return new DataController(repository, dispatcher);
+            return new DataController(roomGameplayService, dispatcher);
         }
 
         /// <summary>

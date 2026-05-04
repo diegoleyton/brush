@@ -90,6 +90,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Editor/DressLayoutCaptureEditor.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UISettings.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentDebugPanel.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetFoodController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ProfileManagementScene/ProfileManagementProfileRowView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/AssetNameResolver.cs" />

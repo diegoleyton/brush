@@ -131,6 +131,14 @@ namespace Game.Unity.Installers
                 .To<RemoteProfilesService>()
                 .AsSingle();
 
+            Container.Bind<IRewardClaimService>()
+                .To<RewardClaimService>()
+                .AsSingle();
+
+            Container.Bind<IMarketPurchaseService>()
+                .To<MarketPurchaseService>()
+                .AsSingle();
+
             Container.BindInterfacesAndSelfTo<ChildGameStateSyncService>()
                 .AsSingle()
                 .NonLazy();
@@ -224,19 +232,27 @@ namespace Game.Unity.Installers
                         ctx.Container.Resolve<EventDispatcher>()))
                 .AsSingle();
 
+            Container.Bind<IRoomGameplayService>()
+                .FromMethod(ctx =>
+                    composition.CreateRoomGameplayService(
+                        ctx.Container.Resolve<ClientGameStateStore>(),
+                        ctx.Container.Resolve<EventDispatcher>(),
+                        ctx.Container.Resolve<IGameLogger>()))
+                .AsSingle();
+
             Container.Bind<DataRepository>()
                 .FromMethod(ctx =>
                     composition.CreateDataRepository(
                         ctx.Container.Resolve<ClientGameStateStore>(),
                         ctx.Container.Resolve<IProfileService>(),
-                        ctx.Container.Resolve<EventDispatcher>(),
-                        ctx.Container.Resolve<IGameLogger>()))
+                        ctx.Container.Resolve<IRoomGameplayService>(),
+                        ctx.Container.Resolve<EventDispatcher>()))
                 .AsSingle();
 
             Container.BindInterfacesAndSelfTo<DataController>()
                 .FromMethod(ctx =>
                     composition.CreateDataController(
-                        ctx.Container.Resolve<DataRepository>(),
+                        ctx.Container.Resolve<IRoomGameplayService>(),
                         ctx.Container.Resolve<EventDispatcher>()))
                 .AsSingle()
                 .NonLazy();
@@ -287,6 +303,11 @@ namespace Game.Unity.Installers
                 .NonLazy();
 
             Container.BindInterfacesTo<DevelopmentProfileBootstrap>()
+                .AsSingle()
+                .NonLazy();
+
+            Container.Bind<DevelopmentDebugPanel>()
+                .FromNewComponentOnNewGameObject()
                 .AsSingle()
                 .NonLazy();
         }

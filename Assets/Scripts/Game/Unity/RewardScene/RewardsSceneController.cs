@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Unity.Instantiator;
@@ -24,7 +25,7 @@ namespace Game.Unity.RewardScene
         [SerializeField]
         private RewardView rewardView_;
 
-        private DataRepository dataRepository_;
+        private IRewardClaimService rewardClaimService_;
         private ScreenBlocker screenBlocker_;
         private IObjectInstantiator instantiator_;
         private RewardSceneFlowController flowController_;
@@ -33,12 +34,12 @@ namespace Game.Unity.RewardScene
         public void Construct(
             EventDispatcher dispatcher,
             IGameNavigationService navigationService,
-            DataRepository dataRepository,
+            IRewardClaimService rewardClaimService,
             ScreenBlocker screenBlocker,
             [Inject(Id = InstantiatorIds.Dependency)] IObjectInstantiator instantiator)
         {
             base.Construct(dispatcher, navigationService);
-            dataRepository_ = dataRepository;
+            rewardClaimService_ = rewardClaimService;
             screenBlocker_ = screenBlocker;
             instantiator_ = instantiator;
         }
@@ -56,7 +57,7 @@ namespace Game.Unity.RewardScene
             rewardView_?.Validate();
 
             flowController_ = new RewardSceneFlowController(
-                dataRepository_,
+                rewardClaimService_,
                 screenBlocker_,
                 NavigationService,
                 rewardView_);
@@ -83,7 +84,7 @@ namespace Game.Unity.RewardScene
     /// </summary>
     internal sealed class RewardSceneFlowController
     {
-        private readonly DataRepository dataRepository_;
+        private readonly IRewardClaimService rewardClaimService_;
         private readonly ScreenBlocker screenBlocker_;
         private readonly IGameNavigationService navigationService_;
         private readonly RewardView rewardView_;
@@ -92,12 +93,12 @@ namespace Game.Unity.RewardScene
         private bool waitingToFinish_;
 
         public RewardSceneFlowController(
-            DataRepository dataRepository,
+            IRewardClaimService rewardClaimService,
             ScreenBlocker screenBlocker,
             IGameNavigationService navigationService,
             RewardView rewardView)
         {
-            dataRepository_ = dataRepository;
+            rewardClaimService_ = rewardClaimService;
             screenBlocker_ = screenBlocker;
             navigationService_ = navigationService;
             rewardView_ = rewardView ?? throw new ArgumentNullException(nameof(rewardView));
@@ -122,16 +123,30 @@ namespace Game.Unity.RewardScene
                 yield break;
             }
 
-            if (rewardGiven_ || dataRepository_ == null)
+            if (rewardGiven_ || rewardClaimService_ == null)
             {
                 yield break;
             }
 
-            Reward[] rewards = dataRepository_.GiveRewards();
+            Task<Reward[]> claimTask = rewardClaimService_.ClaimAsync();
+            yield return new WaitUntil(() => claimTask.IsCompleted);
+
+            if (claimTask.IsFaulted)
+            {
+                if (claimTask.Exception != null)
+                {
+                    throw claimTask.Exception;
+                }
+
+                throw new InvalidOperationException(
+                    $"{nameof(RewardSceneFlowController)} failed to claim rewards.");
+            }
+
+            Reward[] rewards = claimTask.Result;
             if (rewards == null || rewards.Length < 2)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(RewardSceneFlowController)} expected two rewards from {nameof(DataRepository.GiveRewards)}.");
+                    $"{nameof(RewardSceneFlowController)} expected two rewards from {nameof(IRewardClaimService)}.");
             }
 
             rewardGiven_ = true;

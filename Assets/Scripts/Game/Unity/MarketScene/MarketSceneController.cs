@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 
@@ -42,6 +43,8 @@ namespace Game.Unity.MarketScene
         private InteractionPointType selectedItemType_ = InteractionPointType.PLACEABLE_OBJECT;
 
         private DataRepository repository_;
+        private IRoomGameplayService roomGameplayService_;
+        private IMarketPurchaseService marketPurchaseService_;
         private EventDispatcher dispatcher_;
         private bool dispatcherSubscribed_;
 
@@ -49,11 +52,15 @@ namespace Game.Unity.MarketScene
         public void Construct(
             EventDispatcher dispatcher,
             IGameNavigationService navigationService,
-            DataRepository repository)
+            DataRepository repository,
+            IRoomGameplayService roomGameplayService,
+            IMarketPurchaseService marketPurchaseService)
         {
             base.Construct(dispatcher, navigationService);
             dispatcher_ = dispatcher;
             repository_ = repository;
+            roomGameplayService_ = roomGameplayService;
+            marketPurchaseService_ = marketPurchaseService;
         }
 
         private void Awake()
@@ -115,12 +122,6 @@ namespace Game.Unity.MarketScene
             Refresh();
         }
 
-        private void OnMarketPurchaseCompleted(MarketPurchaseCompletedEvent purchaseCompletedEvent)
-        {
-            OnMarketPurchaseCompleted(purchaseCompletedEvent.Status);
-            Refresh();
-        }
-
         private void SubscribeToDispatcher()
         {
             if (dispatcherSubscribed_ || dispatcher_ == null)
@@ -132,7 +133,6 @@ namespace Game.Unity.MarketScene
             dispatcher_.Subscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Subscribe<ProfileUpdatedEvent>(OnProfileUpdated);
-            dispatcher_.Subscribe<MarketPurchaseCompletedEvent>(OnMarketPurchaseCompleted);
             dispatcherSubscribed_ = true;
         }
 
@@ -147,7 +147,6 @@ namespace Game.Unity.MarketScene
             dispatcher_.Unsubscribe<InventoryUpdatedEvent>(OnInventoryUpdated);
             dispatcher_.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
             dispatcher_.Unsubscribe<ProfileUpdatedEvent>(OnProfileUpdated);
-            dispatcher_.Unsubscribe<MarketPurchaseCompletedEvent>(OnMarketPurchaseCompleted);
             dispatcherSubscribed_ = false;
         }
 
@@ -259,12 +258,13 @@ namespace Game.Unity.MarketScene
 
         private void TryPurchase(MarketItemDefinition definition)
         {
-            if (definition == null || repository_ == null)
+            if (definition == null || repository_ == null || marketPurchaseService_ == null)
             {
                 return;
             }
 
-            if (repository_.IsMarketItemAlreadyOwned(definition.ItemType, definition.ItemId))
+            if (roomGameplayService_ != null &&
+                roomGameplayService_.IsMarketItemAlreadyOwned(definition.ItemType, definition.ItemId))
             {
                 confirmMessageView_?.ShowAlreadyOwnedMessage();
                 return;
@@ -279,8 +279,15 @@ namespace Game.Unity.MarketScene
             NavigationService.Navigate(
                 SceneType.ConfirmPopup,
                 new ConfirmPopupParams(
-                    onAccept: () => repository_.PurchaseMarketItem(definition.ItemType, definition.ItemId),
+                    onAccept: () => _ = PurchaseConfirmedAsync(definition),
                     onCancel: null));
+        }
+
+        private async Task PurchaseConfirmedAsync(MarketItemDefinition definition)
+        {
+            MarketPurchaseStatus status = await marketPurchaseService_.PurchaseAsync(definition);
+            OnMarketPurchaseCompleted(status);
+            Refresh();
         }
 
         private void ClearFeedback()

@@ -20,5 +20,11 @@ namespace Game.Core.Services
         Task<ChildGameStateSnapshot> GetGameStateAsync(string remoteProfileId);
 
         Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot);
+
+        Task<Reward[]> ClaimRewardsAsync(string remoteProfileId);
+
+        Task<MarketPurchaseStatus> PurchaseMarketItemAsync(string remoteProfileId, MarketItemDefinition itemDefinition);
+
+        Task<bool> GrantCoinsAsync(string remoteProfileId, int amount, string reason);
     }
 }

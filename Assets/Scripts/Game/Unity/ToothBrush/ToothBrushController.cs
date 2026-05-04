@@ -56,6 +56,7 @@ namespace Game.Unity.ToothBrush
         private const float DefaultMoveDuration = 0.3f;
 
         private DataRepository dataRepository_;
+        private IRoomGameplayService roomGameplayService_;
         private ScreenBlocker screenBlocker_;
         private EventDispatcher dispatcher_;
 
@@ -109,10 +110,12 @@ namespace Game.Unity.ToothBrush
             EventDispatcher dispatcher,
             IGameNavigationService navigationService,
             DataRepository dataRepository,
+            IRoomGameplayService roomGameplayService,
             ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
             dataRepository_ = dataRepository;
+            roomGameplayService_ = roomGameplayService;
             screenBlocker_ = screenBlocker;
             dispatcher_ = dispatcher;
         }
@@ -159,8 +162,8 @@ namespace Game.Unity.ToothBrush
                 SetPetColor(skinColor);
             }
 
-            int brushPaintItemId = dataRepository_ != null
-                ? dataRepository_.GetRoomSurfacePaintId(RoomSurfaceIds.Toothbrush)
+            int brushPaintItemId = roomGameplayService_ != null
+                ? roomGameplayService_.GetRoomSurfacePaintId(RoomSurfaceIds.Toothbrush)
                 : DefaultProfileState.NoPaintItemId;
             Color brushColor = brushPaintItemId > DefaultProfileState.NoPaintItemId
                 ? RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, brushPaintItemId)
@@ -172,7 +175,7 @@ namespace Game.Unity.ToothBrush
 
         private void OnFinish()
         {
-            if (dataRepository_ != null && dataRepository_.Brush())
+            if (roomGameplayService_ != null && roomGameplayService_.Brush())
             {
                 dataRepository_.SetPendingReward(true);
                 NavigationService.NavigateWithoutHistory(SceneType.RewardsScene);

@@ -437,6 +437,125 @@ public sealed class ChildrenController : ControllerBase
         }
     }
 
+    [HttpPost("{childId:guid}/claim-rewards")]
+    public async Task<ActionResult<RewardClaimResponse>> ClaimRewards(
+        Guid childId,
+        CancellationToken cancellationToken)
+    {
+        var familyId = await ResolveCurrentFamilyIdAsync(cancellationToken);
+        if (familyId == null)
+        {
+            return Unauthorized(new
+            {
+                message = $"Missing or invalid {DevelopmentAuthDefaults.ParentAuthUserIdHeaderName} header, or no family exists for the parent."
+            });
+        }
+
+        var childProfile = await FindChildProfileAsync(familyId.Value, childId, cancellationToken);
+        if (childProfile == null)
+        {
+            return NotFound(new
+            {
+                message = "Child profile was not found."
+            });
+        }
+
+        var gameState = await FindChildGameStateAsync(childId, cancellationToken);
+        if (gameState == null)
+        {
+            return NotFound(new
+            {
+                message = "Child game state was not found."
+            });
+        }
+
+        gameState.EnsureDefaults(childProfile.PetName);
+
+        if (!gameState.PendingReward)
+        {
+            return BadRequest(new
+            {
+                message = "No pending reward is available for this child profile."
+            });
+        }
+
+        var rewards = ChildRewardEngine.GenerateRewards();
+        ChildRewardEngine.ApplyRewardClaim(gameState, rewards);
+        await dbContext_.SaveChangesAsync(cancellationToken);
+
+        return Ok(new RewardClaimResponse(
+            rewards.Select(reward => new RewardClaimItemResponse(
+                reward.Kind,
+                reward.RewardType,
+                reward.CurrencyType,
+                reward.Id,
+                reward.Quantity)).ToList()));
+    }
+
+    [HttpPost("{childId:guid}/market-purchases")]
+    public async Task<ActionResult> CreateInGameMarketPurchase(
+        Guid childId,
+        [FromBody] CreateInGameMarketPurchaseRequest request,
+        CancellationToken cancellationToken)
+    {
+        var familyId = await ResolveCurrentFamilyIdAsync(cancellationToken);
+        if (familyId == null)
+        {
+            return Unauthorized(new
+            {
+                message = $"Missing or invalid {DevelopmentAuthDefaults.ParentAuthUserIdHeaderName} header, or no family exists for the parent."
+            });
+        }
+
+        var childProfile = await FindChildProfileAsync(familyId.Value, childId, cancellationToken);
+        if (childProfile == null)
+        {
+            return NotFound(new
+            {
+                message = "Child profile was not found."
+            });
+        }
+
+        var gameState = await FindChildGameStateAsync(childId, cancellationToken);
+        if (gameState == null)
+        {
+            return NotFound(new
+            {
+                message = "Child game state was not found."
+            });
+        }
+
+        gameState.EnsureDefaults(childProfile.PetName);
+
+        if (!InGameMarketCatalog.TryGet(request.ItemType, request.ItemId, out var itemDefinition))
+        {
+            return NotFound(new
+            {
+                message = "Market item was not found."
+            });
+        }
+
+        if (InGameMarketPurchaseEngine.IsAlreadyOwned(gameState, itemDefinition))
+        {
+            return BadRequest(new
+            {
+                message = "Item is already owned."
+            });
+        }
+
+        if (gameState.CoinsBalance < itemDefinition.Price)
+        {
+            return BadRequest(new
+            {
+                message = "Not enough coins to buy this item."
+            });
+        }
+
+        InGameMarketPurchaseEngine.ApplyPurchase(gameState, itemDefinition);
+        await dbContext_.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
+
     [HttpPost("{childId:guid}/redemptions")]
     public async Task<ActionResult<RedemptionResponse>> CreateRedemption(
         Guid childId,

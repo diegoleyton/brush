@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 
 using Flowbit.Utilities.Core.Events;
-using Flowbit.Utilities.Core.Logger;
 
 using Game.Core.Configuration;
 using Game.Core.Data;
@@ -19,9 +18,9 @@ namespace Game.Core.Services
     public class DataRepository
     {
         private readonly EventDispatcher dispatcher_;
-        private readonly IGameLogger logger_;
         private readonly ClientGameStateStore gameStateStore_;
         private readonly IProfileService profileService_;
+        private readonly IRoomGameplayService roomGameplayService_;
 
         public GameState Data => gameStateStore_.Data;
 
@@ -29,18 +28,16 @@ namespace Game.Core.Services
 
         public List<Profile> AllProfiles => gameStateStore_.AllProfiles;
 
-        private static long Now => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
         public DataRepository(
             ClientGameStateStore gameStateStore,
             IProfileService profileService,
-            EventDispatcher dispatcher,
-            IGameLogger logger)
+            IRoomGameplayService roomGameplayService,
+            EventDispatcher dispatcher)
         {
             gameStateStore_ = gameStateStore ?? throw new ArgumentNullException(nameof(gameStateStore));
             profileService_ = profileService ?? throw new ArgumentNullException(nameof(profileService));
+            roomGameplayService_ = roomGameplayService ?? throw new ArgumentNullException(nameof(roomGameplayService));
             dispatcher_ = dispatcher;
-            logger_ = logger;
         }
 
         public bool CanUseName(string name) => profileService_.CanUseName(name);
@@ -55,8 +52,13 @@ namespace Game.Core.Services
 
         public void SetPendingReward(bool pendingReward)
         {
+            if (CurrentProfile == null)
+            {
+                return;
+            }
+
             CurrentProfile.PendingReward = pendingReward;
-            dispatcher_.Send(new PendingRewardEvent());
+            dispatcher_?.Send(new PendingRewardEvent());
             NotifyDataChanged();
         }
 
@@ -87,7 +89,7 @@ namespace Game.Core.Services
                     throw new ArgumentOutOfRangeException(nameof(currencyType), currencyType, null);
             }
 
-            dispatcher_.Send(new CurrencyUpdatedEvent());
+            dispatcher_?.Send(new CurrencyUpdatedEvent());
             NotifyDataChanged();
         }
 
@@ -113,26 +115,26 @@ namespace Game.Core.Services
 
             if (!MarketCatalog.TryGet(itemType, itemId, out MarketItemDefinition itemDefinition))
             {
-                dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ITEM_NOT_FOUND, null));
+                dispatcher_?.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ITEM_NOT_FOUND, null));
                 return MarketPurchaseStatus.ITEM_NOT_FOUND;
             }
 
             if (IsMarketItemAlreadyOwned(itemType, itemId))
             {
-                dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ALREADY_OWNED, itemDefinition));
+                dispatcher_?.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ALREADY_OWNED, itemDefinition));
                 return MarketPurchaseStatus.ALREADY_OWNED;
             }
 
             Dictionary<int, int> items = CurrentProfile.InventoryData.GetInventoryItems(itemType);
             if (items.TryGetValue(itemId, out int currentQuantity) && currentQuantity == -1)
             {
-                dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ALREADY_OWNED, itemDefinition));
+                dispatcher_?.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.ALREADY_OWNED, itemDefinition));
                 return MarketPurchaseStatus.ALREADY_OWNED;
             }
 
             if (!CanAfford(itemDefinition.CurrencyType, itemDefinition.Price))
             {
-                dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.NOT_ENOUGH_CURRENCY, itemDefinition));
+                dispatcher_?.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.NOT_ENOUGH_CURRENCY, itemDefinition));
                 return MarketPurchaseStatus.NOT_ENOUGH_CURRENCY;
             }
 
@@ -147,7 +149,7 @@ namespace Game.Core.Services
             }
 
             NotifyInventoryChanged();
-            dispatcher_.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.OK, itemDefinition));
+            dispatcher_?.Send(new MarketPurchaseCompletedEvent(MarketPurchaseStatus.OK, itemDefinition));
             NotifyDataChanged();
             return MarketPurchaseStatus.OK;
         }
@@ -219,443 +221,83 @@ namespace Game.Core.Services
                 return;
             }
 
-            dispatcher_.Send(new ProfileUpdatedEvent());
+            dispatcher_?.Send(new ProfileUpdatedEvent());
             NotifyDataChanged();
         }
 
-        public PetEatStatus CanPetEat
-        {
-            get
-            {
-                long now = Now;
-                if ((now - CurrentProfile.PetData.lastBrushTime) < GameRules.EatBlockedAfterBrushSeconds)
-                {
-                    return PetEatStatus.NO_AFTER_BRUSHING;
-                }
+        public PetEatStatus CanPetEat => roomGameplayService_.CanPetEat;
 
-                if ((now - CurrentProfile.PetData.lastEatTime) < GameRules.EatLimitWindowSeconds &&
-                    CurrentProfile.PetData.eatCount >= 3)
-                {
-                    return PetEatStatus.NO_MORE;
-                }
+        public bool IsTimeToBrush => roomGameplayService_.IsTimeToBrush;
 
-                return PetEatStatus.OK;
-            }
-        }
+        public bool RoomHasObject(int locationId, int itemId) => roomGameplayService_.RoomHasObject(locationId, itemId);
 
-        public bool IsTimeToBrush => Now - CurrentProfile.PetData.lastBrushTime > GameRules.BrushCooldownSeconds;
+        public bool RoomSurfaceHasPaint(int surfaceId, int paintItemId) =>
+            roomGameplayService_.RoomSurfaceHasPaint(surfaceId, paintItemId);
 
-        public bool RoomHasObject(int locationId, int itemId)
-        {
-            PlacedRoomObjectLocation roomObject = FindRoomObject(locationId);
-            return roomObject?.Item != null && roomObject.Item.ItemId == itemId;
-        }
+        public int GetRoomSurfacePaintId(int surfaceId) => roomGameplayService_.GetRoomSurfacePaintId(surfaceId);
 
-        public bool RoomSurfaceHasPaint(int surfaceId, int paintItemId)
-        {
-            RoomPaintSurfaceState surface = FindRoomSurface(surfaceId);
-            return surface != null && surface.PaintId == paintItemId;
-        }
+        public int GetAppliedPetItemId(InteractionPointType interactionPointType) =>
+            roomGameplayService_.GetAppliedPetItemId(interactionPointType);
 
-        public int GetRoomSurfacePaintId(int surfaceId)
-        {
-            RoomPaintSurfaceState surface = FindRoomSurface(surfaceId);
-            return surface?.PaintId ?? DefaultProfileState.NoPaintItemId;
-        }
+        public bool IsMarketItemAlreadyOwned(InteractionPointType itemType, int itemId) =>
+            roomGameplayService_.IsMarketItemAlreadyOwned(itemType, itemId);
 
-        public int GetAppliedPetItemId(InteractionPointType interactionPointType)
-        {
-            if (CurrentProfile?.PetData == null)
-            {
-                return 0;
-            }
+        public void PetEat() => roomGameplayService_.PetEat();
 
-            switch (interactionPointType)
-            {
-                case InteractionPointType.EYES:
-                    return CurrentProfile.PetData.EyesItemId;
-                case InteractionPointType.SKIN:
-                    return CurrentProfile.PetData.SkinItemId;
-                case InteractionPointType.HAT:
-                    return CurrentProfile.PetData.HatItemId;
-                case InteractionPointType.DRESS:
-                    return CurrentProfile.PetData.DressItemId;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(interactionPointType), interactionPointType, null);
-            }
-        }
+        public bool Brush() => roomGameplayService_.Brush();
 
-        public bool IsMarketItemAlreadyOwned(InteractionPointType itemType, int itemId)
-        {
-            if (CurrentProfile?.InventoryData == null)
-            {
-                return false;
-            }
+        public void ResetPetTimes() => roomGameplayService_.ResetPetTimes();
 
-            if (itemType == InteractionPointType.DRESS &&
-                CurrentProfile.PetData != null &&
-                CurrentProfile.PetData.DressItemId == itemId)
-            {
-                return true;
-            }
+        public void SetRoomItem(int targetId, int itemId, InteractionPointType interactionPointType) =>
+            roomGameplayService_.SetRoomItem(targetId, itemId, interactionPointType);
 
-            Dictionary<int, int> items = CurrentProfile.InventoryData.GetInventoryItems(itemType);
-            return items.TryGetValue(itemId, out int quantity) && quantity == -1;
-        }
+        public void SetRoomObject(int locationId, int itemId) => roomGameplayService_.SetRoomObject(locationId, itemId);
 
-        public void PetEat()
-        {
-            if ((Now - CurrentProfile.PetData.lastEatTime) > GameRules.EatLimitWindowSeconds)
-            {
-                CurrentProfile.PetData.eatCount = 0;
-            }
+        public void RemoveRoomObject(int locationId) => roomGameplayService_.RemoveRoomObject(locationId);
 
-            CurrentProfile.PetData.eatCount++;
-            CurrentProfile.PetData.lastEatTime = Now;
-            NotifyDataChanged();
-        }
+        public void MoveRoomObject(int sourceLocationId, int targetLocationId) =>
+            roomGameplayService_.MoveRoomObject(sourceLocationId, targetLocationId);
 
-        public bool Brush()
-        {
-            if (!IsTimeToBrush)
-            {
-                return false;
-            }
+        public void ReturnRoomObjectToInventory(int sourceLocationId) =>
+            roomGameplayService_.ReturnRoomObjectToInventory(sourceLocationId);
 
-            CurrentProfile.PetData.lastBrushTime = Now;
-            NotifyDataChanged();
-            return true;
-        }
+        public void PaintRoomSurface(int surfaceId, int paintItemId) =>
+            roomGameplayService_.PaintRoomSurface(surfaceId, paintItemId);
 
-        public void ResetPetTimes()
-        {
-            if (CurrentProfile?.PetData == null)
-            {
-                return;
-            }
+        public void SetPetEyes(int itemId) => roomGameplayService_.SetPetEyes(itemId);
 
-            CurrentProfile.PetData.lastEatTime = -1;
-            CurrentProfile.PetData.eatCount = 0;
-            CurrentProfile.PetData.lastBrushTime = -1;
-            logger_?.Log("[PetData] Reset pet timers.");
-            NotifyDataChanged();
-        }
+        public void SetPetHat(int itemId) => roomGameplayService_.SetPetHat(itemId);
 
-        public void SetRoomItem(int targetId, int itemId, InteractionPointType interactionPointType)
-        {
-            switch (interactionPointType)
-            {
-                case InteractionPointType.PLACEABLE_OBJECT:
-                    SetRoomObject(targetId, itemId);
-                    return;
-                case InteractionPointType.PAINT:
-                    PaintRoomSurface(targetId, itemId);
-                    return;
-                case InteractionPointType.EYES:
-                    SetPetEyes(itemId);
-                    return;
-                case InteractionPointType.HAT:
-                    SetPetHat(itemId);
-                    return;
-                case InteractionPointType.SKIN:
-                    SetPetSkin(itemId);
-                    return;
-                case InteractionPointType.DRESS:
-                    SetPetDress(itemId);
-                    return;
-                case InteractionPointType.FOOD:
-                    FeedPet(itemId);
-                    return;
-            }
-        }
+        public void SetPetSkin(int itemId) => roomGameplayService_.SetPetSkin(itemId);
 
-        public void SetRoomObject(int locationId, int itemId)
-        {
-            if (RoomHasObject(locationId, itemId))
-            {
-                logger_?.LogWarning($"[RoomData] Failed to place object {itemId} at room location {locationId}.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
-                return;
-            }
+        public void SetPetDress(int itemId) => roomGameplayService_.SetPetDress(itemId);
 
-            PlacedRoomObjectLocation roomObject = GetOrCreateRoomObject(locationId);
-            ReturnPlacedRoomObjectToInventory(roomObject.Item);
-            roomObject.Item = new PlacedRoomObject
-            {
-                ItemId = itemId,
-                PaintId = DefaultProfileState.NoPaintItemId
-            };
-            logger_?.Log($"[RoomData] Placed object {itemId} at room location {locationId}.");
+        public void FeedPet(int itemId) => roomGameplayService_.FeedPet(itemId);
 
-            ConsumeInventoryItemAndNotify(InteractionPointType.PLACEABLE_OBJECT, itemId);
-            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, itemId, locationId);
-        }
+        public void AddPlaceableObject(int id, int quantity) => roomGameplayService_.AddPlaceableObject(id, quantity);
 
-        public void RemoveRoomObject(int locationId)
-        {
-            PlacedRoomObjectLocation roomObject = FindRoomObject(locationId);
-            if (roomObject?.Item == null)
-            {
-                return;
-            }
+        public void AddPaint(int id, int quantity) => roomGameplayService_.AddPaint(id, quantity);
 
-            ReturnPlacedRoomObjectToInventory(roomObject.Item);
-            roomObject.Item = null;
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
+        public void AddFood(int id, int quantity) => roomGameplayService_.AddFood(id, quantity);
 
-        public void MoveRoomObject(int sourceLocationId, int targetLocationId)
-        {
-            PlacedRoomObjectLocation sourceRoomObject = FindRoomObject(sourceLocationId);
-            if (sourceRoomObject?.Item == null)
-            {
-                return;
-            }
+        public void AddSkin(int id, int quantity) => roomGameplayService_.AddSkin(id, quantity);
 
-            PlacedRoomObject sourceItem = sourceRoomObject.Item;
+        public void AddHat(int id, int quantity) => roomGameplayService_.AddHat(id, quantity);
 
-            if (sourceLocationId == targetLocationId)
-            {
-                NotifyDataChanged();
-                NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, targetLocationId);
-                return;
-            }
+        public void AddDress(int id, int quantity) => roomGameplayService_.AddDress(id, quantity);
 
-            PlacedRoomObjectLocation targetRoomObject = GetOrCreateRoomObject(targetLocationId);
-            PlacedRoomObject displacedTargetItem = targetRoomObject.Item;
+        public void AddEyes(int id, int quantity) => roomGameplayService_.AddEyes(id, quantity);
 
-            targetRoomObject.Item = sourceItem;
-            sourceRoomObject.Item = displacedTargetItem;
-
-            logger_?.Log(
-                $"[RoomData] Moved object {sourceItem.ItemId} from room location {sourceLocationId} to {targetLocationId}.");
-            NotifyDataChanged();
-            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, targetLocationId);
-        }
-
-        public void ReturnRoomObjectToInventory(int sourceLocationId)
-        {
-            PlacedRoomObjectLocation sourceRoomObject = FindRoomObject(sourceLocationId);
-            if (sourceRoomObject?.Item == null)
-            {
-                return;
-            }
-
-            PlacedRoomObject sourceItem = sourceRoomObject.Item;
-            ReturnPlacedRoomObjectToInventory(sourceItem);
-            sourceRoomObject.Item = null;
-            logger_?.Log(
-                $"[RoomData] Returned object {sourceItem.ItemId} from room location {sourceLocationId} to inventory.");
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-            NotifyRoomDataItemApplied(InteractionPointType.PLACEABLE_OBJECT, sourceItem.ItemId, sourceLocationId);
-        }
-
-        public void PaintRoomSurface(int surfaceId, int paintItemId)
-        {
-            RoomPaintSurfaceState surface = GetOrCreateRoomSurface(surfaceId);
-            if (surface.PaintId == paintItemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to paint surface {surfaceId} with item {paintItemId}: already applied.");
-                NotifyRoomDataItemApplyFailed(InteractionPointType.PAINT, paintItemId, surfaceId);
-                return;
-            }
-
-            surface.PaintId = paintItemId;
-            logger_?.Log($"[RoomData] Painted surface {surfaceId} with item {paintItemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.PAINT, paintItemId);
-            NotifyRoomDataItemApplied(InteractionPointType.PAINT, paintItemId, surfaceId);
-        }
-
-        public void SetPetEyes(int itemId)
-        {
-            if (CurrentProfile.PetData.EyesItemId == itemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to apply pet eyes item {itemId}: already applied.");
-                NotifyPetDataApplyFailed(InteractionPointType.EYES, itemId);
-                return;
-            }
-
-            CurrentProfile.PetData.EyesItemId = itemId;
-            logger_?.Log($"[RoomData] Applied pet eyes item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.EYES, itemId);
-            NotifyPetDataApplied(InteractionPointType.EYES, itemId);
-        }
-
-        public void SetPetHat(int itemId)
-        {
-            if (CurrentProfile.PetData.HatItemId == itemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to apply pet hat item {itemId}: already applied.");
-                NotifyPetDataApplyFailed(InteractionPointType.HAT, itemId);
-                return;
-            }
-
-            CurrentProfile.PetData.HatItemId = itemId;
-            logger_?.Log($"[RoomData] Applied pet hat item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.HAT, itemId);
-            NotifyPetDataApplied(InteractionPointType.HAT, itemId);
-        }
-
-        public void SetPetSkin(int itemId)
-        {
-            if (CurrentProfile.PetData.SkinItemId == itemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to apply pet skin item {itemId}: already applied.");
-                NotifyPetDataApplyFailed(InteractionPointType.SKIN, itemId);
-                return;
-            }
-
-            CurrentProfile.PetData.SkinItemId = itemId;
-            logger_?.Log($"[RoomData] Applied pet skin item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.SKIN, itemId);
-            NotifyPetDataApplied(InteractionPointType.SKIN, itemId);
-        }
-
-        public void SetPetDress(int itemId)
-        {
-            if (CurrentProfile.PetData.DressItemId == itemId)
-            {
-                logger_?.LogWarning($"[RoomData] Failed to apply pet dress item {itemId}: already applied.");
-                NotifyPetDataApplyFailed(InteractionPointType.DRESS, itemId);
-                return;
-            }
-
-            int previousDressItemId = CurrentProfile.PetData.DressItemId;
-            CurrentProfile.PetData.DressItemId = itemId;
-
-            if (itemId > 0)
-            {
-                CurrentProfile.InventoryData.Dress.Remove(itemId);
-            }
-
-            EnsureDefaultDressOwned();
-
-            if (previousDressItemId > 0)
-            {
-                UnlockOwnedDress(previousDressItemId);
-            }
-
-            logger_?.Log($"[RoomData] Applied pet dress item {itemId}.");
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-            NotifyPetDataApplied(InteractionPointType.DRESS, itemId);
-        }
-
-        public void FeedPet(int itemId)
-        {
-            PetEatStatus petEatStatus = CanPetEat;
-            if (petEatStatus != PetEatStatus.OK)
-            {
-                logger_?.LogWarning($"[Food] Failed to feed pet with item {itemId}. Reason: {petEatStatus}");
-                NotifyPetDataApplyFailed(InteractionPointType.FOOD, itemId);
-                return;
-            }
-
-            PetEat();
-            logger_?.Log($"[Food] Successfully fed pet with item {itemId}.");
-            ConsumeInventoryItemAndNotify(InteractionPointType.FOOD, itemId);
-            NotifyPetDataApplied(InteractionPointType.FOOD, itemId);
-        }
-
-        public void AddPlaceableObject(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddPaint(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.Paint, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddFood(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.Food, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddSkin(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.Skin, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddHat(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.Hat, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddDress(int id, int quantity)
-        {
-            if (id == DefaultProfileState.DefaultPetDressItemId)
-            {
-                EnsureDefaultDressOwned();
-            }
-            else if (quantity > 0)
-            {
-                UnlockOwnedDress(id);
-            }
-
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void AddEyes(int id, int quantity)
-        {
-            AddInventoryItem(CurrentProfile.InventoryData.Eyes, id, quantity);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        public void SetMuted(bool muted)
-        {
-            CurrentProfile.Muted = muted;
-            NotifyDataChanged();
-        }
+        public void SetMuted(bool muted) => roomGameplayService_.SetMuted(muted);
 
         private void NotifyDataChanged()
         {
-            dispatcher_.Send(new LocalDataChangedEvent());
-        }
-
-        private void NotifyRoomDataItemApplied(
-            InteractionPointType itemType,
-            int itemId,
-            int targetId)
-        {
-            dispatcher_.Send(new RoomDataItemAppliedEvent(itemType, itemId, targetId));
-        }
-
-        private void NotifyRoomDataItemApplyFailed(
-            InteractionPointType itemType,
-            int itemId,
-            int targetId)
-        {
-            dispatcher_.Send(new RoomDataItemApplyFailedEvent(itemType, itemId, targetId));
-        }
-
-        private void NotifyPetDataApplied(InteractionPointType itemType, int itemId)
-        {
-            dispatcher_.Send(new PetDataAppliedEvent(itemType, itemId));
-        }
-
-        private void NotifyPetDataApplyFailed(InteractionPointType itemType, int itemId)
-        {
-            dispatcher_.Send(new PetDataApplyFailedEvent(itemType, itemId));
+            dispatcher_?.Send(new LocalDataChangedEvent());
         }
 
         private void NotifyInventoryChanged()
         {
-            dispatcher_.Send(new InventoryUpdatedEvent());
+            dispatcher_?.Send(new InventoryUpdatedEvent());
         }
 
         private void ApplyReward(Reward reward)
@@ -709,27 +351,8 @@ namespace Game.Core.Services
                     throw new ArgumentOutOfRangeException(nameof(currencyType), currencyType, null);
             }
 
-            dispatcher_.Send(new CurrencyUpdatedEvent());
+            dispatcher_?.Send(new CurrencyUpdatedEvent());
         }
-
-        private Pet CreatePet(string name)
-        {
-            return new Pet
-            {
-                Name = name,
-                lastEatTime = -1,
-                eatCount = 0,
-                lastBrushTime = -1,
-                EyesItemId = DefaultProfileState.DefaultPetEyesItemId,
-                SkinItemId = DefaultProfileState.DefaultPetSkinItemId,
-                HatItemId = DefaultProfileState.DefaultPetHatItemId,
-                DressItemId = DefaultProfileState.DefaultPetDressItemId
-            };
-        }
-
-        private Room CreateRoom() => new Room();
-
-        private Inventory CreateInventory() => DefaultProfileState.CreateInventory();
 
         private void AddInventoryItem(InteractionPointType itemType, int id, int quantity) =>
             AddInventoryItem(CurrentProfile.InventoryData.GetInventoryItems(itemType), id, quantity);
@@ -754,88 +377,6 @@ namespace Game.Core.Services
             {
                 items[id] = quantity;
             }
-        }
-
-        private void ConsumeInventoryItemAndNotify(InteractionPointType interactionPointType, int itemId)
-        {
-            AddInventoryItem(interactionPointType, itemId, -1);
-            NotifyInventoryChanged();
-            NotifyDataChanged();
-        }
-
-        private void ReturnPlacedRoomObjectToInventory(PlacedRoomObject roomObject)
-        {
-            if (roomObject == null)
-            {
-                return;
-            }
-
-            AddInventoryItem(CurrentProfile.InventoryData.PlaceableObjects, roomObject.ItemId, 1);
-        }
-
-        private PlacedRoomObject GetPlacedRoomObject(int locationId) => FindRoomObject(locationId)?.Item;
-
-        private PlacedRoomObjectLocation FindRoomObject(int locationId)
-        {
-            List<PlacedRoomObjectLocation> roomObjects = CurrentProfile.RoomData.PlaceableObjects;
-
-            for (int index = 0; index < roomObjects.Count; index++)
-            {
-                PlacedRoomObjectLocation roomObject = roomObjects[index];
-                if (roomObject.LocationId == locationId)
-                {
-                    return roomObject;
-                }
-            }
-
-            return null;
-        }
-
-        private PlacedRoomObjectLocation GetOrCreateRoomObject(int locationId)
-        {
-            PlacedRoomObjectLocation existingObject = FindRoomObject(locationId);
-            if (existingObject != null)
-            {
-                return existingObject;
-            }
-
-            PlacedRoomObjectLocation newObject = new PlacedRoomObjectLocation { LocationId = locationId };
-            CurrentProfile.RoomData.PlaceableObjects.Add(newObject);
-            return newObject;
-        }
-
-        private RoomPaintSurfaceState FindRoomSurface(int surfaceId)
-        {
-            List<RoomPaintSurfaceState> paintedSurfaces = CurrentProfile.RoomData.PaintedSurfaces;
-
-            for (int index = 0; index < paintedSurfaces.Count; index++)
-            {
-                RoomPaintSurfaceState surface = paintedSurfaces[index];
-                if (surface.SurfaceId == surfaceId)
-                {
-                    return surface;
-                }
-            }
-
-            return null;
-        }
-
-        private RoomPaintSurfaceState GetOrCreateRoomSurface(int surfaceId)
-        {
-            RoomPaintSurfaceState existingSurface = FindRoomSurface(surfaceId);
-            if (existingSurface != null)
-            {
-                return existingSurface;
-            }
-
-            RoomPaintSurfaceState newSurface = new RoomPaintSurfaceState
-            {
-                SurfaceId = surfaceId,
-                PaintId = DefaultProfileState.NoPaintItemId
-            };
-
-            CurrentProfile.RoomData.PaintedSurfaces.Add(newSurface);
-            return newSurface;
         }
     }
 }

@@ -178,6 +178,122 @@ namespace Game.Core.Services
             return response.IsSuccess;
         }
 
+        public async Task<Reward[]> ClaimRewardsAsync(string remoteProfileId)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return null;
+            }
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/claim-rewards",
+                    RemoteRequestMethod.Post,
+                    isIdempotent: false));
+
+            if (!response.IsSuccess)
+            {
+                return null;
+            }
+
+            RewardClaimResponseEnvelope envelope = payloadCodec_.Deserialize<RewardClaimResponseEnvelope>(response.Body);
+            if (envelope?.rewards == null)
+            {
+                return null;
+            }
+
+            List<Reward> rewards = new List<Reward>(envelope.rewards.Length);
+            for (int index = 0; index < envelope.rewards.Length; index++)
+            {
+                RewardClaimDto reward = envelope.rewards[index];
+                if (reward == null)
+                {
+                    continue;
+                }
+
+                rewards.Add(new Reward
+                {
+                    Kind = (RewardKind)reward.kind,
+                    RewardType = (InteractionPointType)reward.rewardType,
+                    CurrencyType = (CurrencyType)reward.currencyType,
+                    Id = reward.id,
+                    Quantity = reward.quantity
+                });
+            }
+
+            return rewards.ToArray();
+        }
+
+        public async Task<MarketPurchaseStatus> PurchaseMarketItemAsync(string remoteProfileId, MarketItemDefinition itemDefinition)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId) || itemDefinition == null)
+            {
+                return MarketPurchaseStatus.ITEM_NOT_FOUND;
+            }
+
+            string body = payloadCodec_.Serialize(new CreateInGameMarketPurchaseRequest
+            {
+                ItemType = (int)itemDefinition.ItemType,
+                ItemId = itemDefinition.ItemId
+            });
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/market-purchases",
+                    RemoteRequestMethod.Post,
+                    body: body,
+                    isIdempotent: false));
+
+            if (response.IsSuccess)
+            {
+                return MarketPurchaseStatus.OK;
+            }
+
+            if (response.StatusCode == 404)
+            {
+                return MarketPurchaseStatus.ITEM_NOT_FOUND;
+            }
+
+            string errorMessage = TryParseErrorMessage(response.Body);
+            if (errorMessage.Contains("already owned", StringComparison.OrdinalIgnoreCase))
+            {
+                return MarketPurchaseStatus.ALREADY_OWNED;
+            }
+
+            if (errorMessage.Contains("enough coins", StringComparison.OrdinalIgnoreCase))
+            {
+                return MarketPurchaseStatus.NOT_ENOUGH_CURRENCY;
+            }
+
+            if (response.StatusCode == 401)
+            {
+                return MarketPurchaseStatus.NO_CURRENT_PROFILE;
+            }
+
+            return MarketPurchaseStatus.ITEM_NOT_FOUND;
+        }
+
+        public async Task<bool> GrantCoinsAsync(string remoteProfileId, int amount, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId) || amount <= 0)
+            {
+                return false;
+            }
+
+            string body = "{\"amount\":" + amount +
+                          ",\"reason\":\"" + EscapeJson(string.IsNullOrWhiteSpace(reason) ? "Debug grant" : reason) +
+                          "\"}";
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/grants",
+                    RemoteRequestMethod.Post,
+                    body: body,
+                    isIdempotent: false));
+
+            return response.IsSuccess;
+        }
+
         private async Task<RemoteResponse> SendAuthorizedAsync(RemoteRequest request)
         {
             string token = authService_.CurrentSession?.AccessToken;
@@ -271,6 +387,12 @@ namespace Game.Core.Services
         }
 
         [Serializable]
+        private sealed class RewardClaimResponseEnvelope
+        {
+            public RewardClaimDto[] rewards;
+        }
+
+        [Serializable]
         private sealed class ChildProfileDto
         {
             public string id;
@@ -280,6 +402,24 @@ namespace Game.Core.Services
             public int pictureId;
             public bool isActive;
         }
+
+        [Serializable]
+        private sealed class RewardClaimDto
+        {
+            public int kind;
+            public int rewardType;
+            public int currencyType;
+            public int id;
+            public int quantity;
+        }
+
+        [Serializable]
+        private sealed class CreateInGameMarketPurchaseRequest
+        {
+            public int ItemType;
+            public int ItemId;
+        }
+
 
         [Serializable]
         private sealed class UpdateChildGameStateRequest

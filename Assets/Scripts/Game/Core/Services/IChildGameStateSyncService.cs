@@ -8,5 +8,7 @@ namespace Game.Core.Services
     public interface IChildGameStateSyncService
     {
         Task EnsureCurrentProfileLoadedAsync();
+
+        Task ReloadCurrentProfileAsync();
     }
 }

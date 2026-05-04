@@ -18,11 +18,16 @@ namespace Game.Unity.Development
     public sealed class DevelopmentProfileBootstrap : IInitializable
     {
         private readonly DataRepository repository_;
+        private readonly IRoomGameplayService roomGameplayService_;
         private readonly DevelopmentProfileSettings settings_;
 
-        public DevelopmentProfileBootstrap(DataRepository repository, DevelopmentProfileSettings settings)
+        public DevelopmentProfileBootstrap(
+            DataRepository repository,
+            IRoomGameplayService roomGameplayService,
+            DevelopmentProfileSettings settings)
         {
             repository_ = repository;
+            roomGameplayService_ = roomGameplayService;
             settings_ = settings;
         }
 
@@ -153,43 +158,43 @@ namespace Game.Unity.Development
                 InteractionPointType.PLACEABLE_OBJECT,
                 repository_.CurrentProfile.InventoryData.PlaceableObjects,
                 settings_.PlaceableObjects,
-                repository_.AddPlaceableObject);
+                roomGameplayService_.AddPlaceableObject);
 
             EnsureInventoryCategory(
                 InteractionPointType.PAINT,
                 repository_.CurrentProfile.InventoryData.Paint,
                 settings_.Paint,
-                repository_.AddPaint);
+                roomGameplayService_.AddPaint);
 
             EnsureInventoryCategory(
                 InteractionPointType.FOOD,
                 repository_.CurrentProfile.InventoryData.Food,
                 settings_.Food,
-                repository_.AddFood);
+                roomGameplayService_.AddFood);
 
             EnsureInventoryCategory(
                 InteractionPointType.HAT,
                 repository_.CurrentProfile.InventoryData.Hat,
                 settings_.Hat,
-                repository_.AddHat);
+                roomGameplayService_.AddHat);
 
             EnsureInventoryCategory(
                 InteractionPointType.SKIN,
                 repository_.CurrentProfile.InventoryData.Skin,
                 settings_.Skin,
-                repository_.AddSkin);
+                roomGameplayService_.AddSkin);
 
             EnsureInventoryCategory(
                 InteractionPointType.DRESS,
                 repository_.CurrentProfile.InventoryData.Dress,
                 settings_.Dress,
-                repository_.AddDress);
+                roomGameplayService_.AddDress);
 
             EnsureInventoryCategory(
                 InteractionPointType.EYES,
                 repository_.CurrentProfile.InventoryData.Eyes,
                 settings_.Eyes,
-                repository_.AddEyes);
+                roomGameplayService_.AddEyes);
         }
 
         private void ResetPetTimesIfNeeded()
@@ -204,7 +209,7 @@ namespace Game.Unity.Development
                 return;
             }
 
-            repository_.ResetPetTimes();
+            roomGameplayService_.ResetPetTimes();
         }
 
         private bool ShouldResetPetTimesOnStartup()

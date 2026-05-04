@@ -24,7 +24,7 @@ namespace Game.Unity.RoomScene
 
         private readonly PetView petView_;
         private readonly EventDispatcher dispatcher_;
-        private readonly DataRepository repository_;
+        private readonly IRoomGameplayService roomGameplayService_;
         private readonly InventoryDropEffectPositionTracker dropEffectPositionTracker_;
         private readonly ScreenBlocker screenBlocker_;
 
@@ -38,13 +38,13 @@ namespace Game.Unity.RoomScene
         public PetFoodController(
             PetView petView,
             EventDispatcher dispatcher,
-            DataRepository repository,
+            IRoomGameplayService roomGameplayService,
             InventoryDropEffectPositionTracker dropEffectPositionTracker,
             ScreenBlocker screenBlocker)
         {
             petView_ = petView;
             dispatcher_ = dispatcher;
-            repository_ = repository;
+            roomGameplayService_ = roomGameplayService;
             dropEffectPositionTracker_ = dropEffectPositionTracker;
             screenBlocker_ = screenBlocker;
             if (petView_ != null)
@@ -77,12 +77,12 @@ namespace Game.Unity.RoomScene
             ResetFoodState();
             isFoodDragActive_ = true;
 
-            if (petView_ == null || repository_ == null)
+            if (petView_ == null || roomGameplayService_ == null)
             {
                 return;
             }
 
-            petView_.PrepareToEat(repository_.CanPetEat);
+            petView_.PrepareToEat(roomGameplayService_.CanPetEat);
         }
 
         private void OnRoomInventoryDropAccepted(RoomInventoryDropAcceptedEvent eventData)

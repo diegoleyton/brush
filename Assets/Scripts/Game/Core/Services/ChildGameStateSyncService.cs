@@ -11,7 +11,6 @@ namespace Game.Core.Services
 {
     /// <summary>
     /// Keeps the currently selected child profile hydrated from the backend and pushes local state changes back.
-    /// Coins are intentionally left local for now until the economy flow is fully migrated.
     /// </summary>
     public sealed class ChildGameStateSyncService : IChildGameStateSyncService, IInitializable, IDisposable
     {
@@ -61,13 +60,23 @@ namespace Game.Core.Services
 
         public async Task EnsureCurrentProfileLoadedAsync()
         {
+            await LoadCurrentProfileAsync(forceReload: false);
+        }
+
+        public async Task ReloadCurrentProfileAsync()
+        {
+            await LoadCurrentProfileAsync(forceReload: true);
+        }
+
+        private async Task LoadCurrentProfileAsync(bool forceReload)
+        {
             if (!CanSyncCurrentProfile(out Profile currentProfile))
             {
                 return;
             }
 
             string remoteProfileId = currentProfile.RemoteProfileId;
-            if (hydratedProfileIds_.Contains(remoteProfileId))
+            if (!forceReload && hydratedProfileIds_.Contains(remoteProfileId))
             {
                 return;
             }
@@ -169,6 +178,8 @@ namespace Game.Core.Services
             isApplyingRemoteState_ = true;
             try
             {
+                profile.Coins = Math.Max(0, snapshot.CoinsBalance);
+
                 if (!preserveExistingDefaults && snapshot.BrushSessionDurationMinutes > 0)
                 {
                     profile.BrushSessionDurationMinutes = snapshot.BrushSessionDurationMinutes;
