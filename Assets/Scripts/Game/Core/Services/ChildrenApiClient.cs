@@ -251,7 +251,9 @@ namespace Game.Core.Services
         {
             if (string.IsNullOrWhiteSpace(remoteProfileId))
             {
-                return null;
+                throw new RemoteRequestFailedException(
+                    "Could not claim rewards.",
+                    isNetworkError: false);
             }
 
             RemoteResponse response = await SendAuthorizedAsync(
@@ -262,13 +264,16 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
-                return null;
+                throw new RemoteRequestFailedException(
+                    ResolveRemoteErrorMessage(response, "Could not claim rewards."),
+                    response.IsNetworkError,
+                    response.StatusCode);
             }
 
             RewardClaimResponseEnvelope envelope = payloadCodec_.Deserialize<RewardClaimResponseEnvelope>(response.Body);
             if (envelope?.rewards == null)
             {
-                return null;
+                throw new InvalidOperationException("Reward claim response did not contain rewards.");
             }
 
             List<Reward> rewards = new List<Reward>(envelope.rewards.Length);

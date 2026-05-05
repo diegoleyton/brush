@@ -4,14 +4,15 @@ using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Localization;
+using Flowbit.Utilities.RemoteCommunication;
 using Flowbit.Utilities.ScreenBlocker;
 using Flowbit.Utilities.Unity.Instantiator;
-using Flowbit.Utilities.Unity.UI;
 
 using Game.Core.Data;
 using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
+using Game.Unity.UI;
 
 using UnityEngine;
 
@@ -59,6 +60,7 @@ namespace Game.Unity.RewardScene
             rewardView_?.Validate();
 
             flowController_ = new RewardSceneFlowController(
+                StartRoutine,
                 rewardClaimService_,
                 screenBlocker_,
                 NavigationService,
@@ -79,6 +81,14 @@ namespace Game.Unity.RewardScene
         {
             flowController_.ActivateFinalAnimationObjects();
         }
+
+        private void StartRoutine(IEnumerator routine)
+        {
+            if (routine != null)
+            {
+                StartCoroutine(routine);
+            }
+        }
     }
 
     /// <summary>
@@ -86,6 +96,7 @@ namespace Game.Unity.RewardScene
     /// </summary>
     internal sealed class RewardSceneFlowController
     {
+        private readonly Action<IEnumerator> startCoroutine_;
         private readonly IRewardClaimService rewardClaimService_;
         private readonly ScreenBlocker screenBlocker_;
         private readonly IGameNavigationService navigationService_;
@@ -95,11 +106,13 @@ namespace Game.Unity.RewardScene
         private bool waitingToFinish_;
 
         public RewardSceneFlowController(
+            Action<IEnumerator> startCoroutine,
             IRewardClaimService rewardClaimService,
             ScreenBlocker screenBlocker,
             IGameNavigationService navigationService,
             RewardView rewardView)
         {
+            startCoroutine_ = startCoroutine ?? throw new ArgumentNullException(nameof(startCoroutine));
             rewardClaimService_ = rewardClaimService;
             screenBlocker_ = screenBlocker;
             navigationService_ = navigationService;
@@ -142,20 +155,18 @@ namespace Game.Unity.RewardScene
 
             if (claimTask.IsFaulted)
             {
-                if (claimTask.Exception != null)
-                {
-                    throw claimTask.Exception;
-                }
-
-                throw new InvalidOperationException(
-                    $"{nameof(RewardSceneFlowController)} failed to claim rewards.");
+                HandleClaimFailure(UnwrapTaskException(claimTask.Exception));
+                yield break;
             }
 
             Reward[] rewards = claimTask.Result;
             if (rewards == null || rewards.Length < 2)
             {
-                throw new InvalidOperationException(
-                    $"{nameof(RewardSceneFlowController)} expected two rewards from {nameof(IRewardClaimService)}.");
+                ShowClaimErrorPopup(
+                    LocalizationServiceLocator.GetText(
+                        "rewards.claim.error",
+                        "Could not claim rewards."));
+                yield break;
             }
 
             rewardGiven_ = true;
@@ -170,6 +181,54 @@ namespace Game.Unity.RewardScene
             {
                 blockerScope?.Dispose();
             }
+        }
+
+        private void HandleClaimFailure(Exception exception)
+        {
+            string fallbackMessage = LocalizationServiceLocator.GetText(
+                "rewards.claim.error",
+                "Could not claim rewards.");
+            string message = RemoteOperationMessageFormatter.Format(exception, fallbackMessage);
+
+            if (exception is RemoteRequestFailedException remoteException && remoteException.IsNetworkError)
+            {
+                navigationService_?.Navigate(
+                    SceneType.RetryPopup,
+                    new RetryPopupParams(
+                        message,
+                        onRetry: () => startCoroutine_(GiveRewards()),
+                        onCancel: navigationService_?.Back,
+                        title: LocalizationServiceLocator.GetText(
+                            "rewards.retry.popup_title",
+                            "Connection problem")));
+                return;
+            }
+
+            ShowClaimErrorPopup(message);
+        }
+
+        private void ShowClaimErrorPopup(string message)
+        {
+            navigationService_?.Navigate(
+                SceneType.ErrorPopup,
+                new ErrorPopupParams(
+                    message,
+                    title: LocalizationServiceLocator.GetText(
+                        "rewards.error.popup_title",
+                        "Could not claim reward"),
+                    onClose: navigationService_?.Back));
+        }
+
+        private static Exception UnwrapTaskException(AggregateException exception)
+        {
+            if (exception == null)
+            {
+                return new InvalidOperationException("Reward claim failed.");
+            }
+
+            return exception.InnerExceptions.Count == 1 && exception.InnerException != null
+                ? exception.InnerException
+                : exception.Flatten();
         }
     }
 }
