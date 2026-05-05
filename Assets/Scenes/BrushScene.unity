@@ -269,6 +269,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 174596308}
   m_CullTransparentMesh: 1
+--- !u!1 &263007941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 263007943}
+  - component: {fileID: 263007942}
+  m_Layer: 0
+  m_Name: BrushSceneController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &263007942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263007941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fce68719f6cf4b49894bd1337c8487a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneType_: 2
+  view_: {fileID: 1835030606764855049}
+--- !u!4 &263007943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263007941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 946.4796, y: 609.6452, z: -10.80876}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &595931419
 GameObject:
   m_ObjectHideFlags: 0
@@ -1980,7 +2026,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b40525d44d3349efbf6b61573a1f15f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneType_: 2
   mouthTop: {fileID: 741138964608283523}
   mouthBottom: {fileID: 6066767858765091457}
   mouthBackground: {fileID: 5108338315594673413}
@@ -2754,7 +2799,7 @@ GameObject:
   - component: {fileID: 1835030606764855049}
   - component: {fileID: 1790150021061732642}
   m_Layer: 5
-  m_Name: BrushScene
+  m_Name: BrushView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5776,6 +5821,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 927565121}
+  - {fileID: 263007943}
   - {fileID: 1841955168}
   - {fileID: 1232827918}
   - {fileID: 9190000000000000003}

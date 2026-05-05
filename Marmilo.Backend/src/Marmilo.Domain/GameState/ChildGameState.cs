@@ -5,6 +5,7 @@ namespace Marmilo.Domain.GameState;
 public sealed class ChildGameState
 {
     public const int DefaultBrushSessionDurationMinutes = 2;
+    public const long BrushCooldownSeconds = 5 * 60 * 60;
 
     private ChildGameState()
     {
@@ -108,6 +109,22 @@ public sealed class ChildGameState
         }
 
         return changed;
+    }
+
+    public bool TryCompleteBrushSession(string petName, long nowUnixSeconds)
+    {
+        string normalizedPetStateJson = ChildGameStateDefaults.NormalizePetStateJson(PetStateJson, petName);
+        long lastBrushTime = ChildGameStateDefaults.GetLastBrushTime(normalizedPetStateJson, petName);
+
+        if (lastBrushTime > 0 && (nowUnixSeconds - lastBrushTime) <= BrushCooldownSeconds)
+        {
+            return false;
+        }
+
+        PetStateJson = ChildGameStateDefaults.SetLastBrushTime(normalizedPetStateJson, petName, nowUnixSeconds);
+        PendingReward = true;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        return true;
     }
 
     private static string ValidateJson(string json, string paramName)

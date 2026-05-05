@@ -221,6 +221,32 @@ namespace Game.Core.Services
             };
         }
 
+        public async Task<ChildGameStateSnapshot> CompleteBrushSessionAsync(string remoteProfileId)
+        {
+            if (string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                throw new RemoteRequestFailedException(
+                    "Could not complete brush session.",
+                    isNetworkError: false);
+            }
+
+            RemoteResponse response = await SendAuthorizedAsync(
+                new RemoteRequest(
+                    $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/brush-completions",
+                    RemoteRequestMethod.Post,
+                    isIdempotent: false));
+
+            if (!response.IsSuccess)
+            {
+                throw new RemoteRequestFailedException(
+                    ResolveRemoteErrorMessage(response, "Could not complete brush session."),
+                    response.IsNetworkError,
+                    response.StatusCode);
+            }
+
+            return payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body);
+        }
+
         public async Task<Reward[]> ClaimRewardsAsync(string remoteProfileId)
         {
             if (string.IsNullOrWhiteSpace(remoteProfileId))

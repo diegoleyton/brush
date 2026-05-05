@@ -79,6 +79,8 @@
     <Compile Include="Assets/Scripts/Game/Core/Services/IMarketPurchaseService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Reward.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ClientGameStateStore.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/BrushCompletionService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/IBrushCompletionService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/AuthService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/RewardClaimService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/BackendApiClient.cs" />

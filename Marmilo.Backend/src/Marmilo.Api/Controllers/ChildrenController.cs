@@ -493,6 +493,54 @@ public sealed class ChildrenController : ControllerBase
                 reward.Quantity)).ToList()));
     }
 
+    [HttpPost("{childId:guid}/brush-completions")]
+    public async Task<ActionResult<ChildGameStateResponse>> CompleteBrushSession(
+        Guid childId,
+        CancellationToken cancellationToken)
+    {
+        var familyId = await ResolveCurrentFamilyIdAsync(cancellationToken);
+        if (familyId == null)
+        {
+            return Unauthorized(new
+            {
+                message = $"Missing or invalid {DevelopmentAuthDefaults.ParentAuthUserIdHeaderName} header, or no family exists for the parent."
+            });
+        }
+
+        var childProfile = await FindChildProfileAsync(familyId.Value, childId, cancellationToken);
+        if (childProfile == null)
+        {
+            return NotFound(new
+            {
+                message = "Child profile was not found."
+            });
+        }
+
+        var gameState = await FindChildGameStateAsync(childId, cancellationToken);
+        if (gameState == null)
+        {
+            return NotFound(new
+            {
+                message = "Child game state was not found."
+            });
+        }
+
+        gameState.EnsureDefaults(childProfile.PetName);
+
+        if (!gameState.TryCompleteBrushSession(
+                childProfile.PetName,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+        {
+            return BadRequest(new
+            {
+                message = "Brush session is still on cooldown."
+            });
+        }
+
+        await dbContext_.SaveChangesAsync(cancellationToken);
+        return Ok(ToGameStateResponse(gameState));
+    }
+
     [HttpPost("{childId:guid}/market-purchases")]
     public async Task<ActionResult> CreateInGameMarketPurchase(
         Guid childId,

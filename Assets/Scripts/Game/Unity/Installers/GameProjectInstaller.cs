@@ -149,6 +149,10 @@ namespace Game.Unity.Installers
                 .To<RewardClaimService>()
                 .AsSingle();
 
+            Container.Bind<IBrushCompletionService>()
+                .To<BrushCompletionService>()
+                .AsSingle();
+
             Container.Bind<IMarketPurchaseService>()
                 .To<MarketPurchaseService>()
                 .AsSingle();

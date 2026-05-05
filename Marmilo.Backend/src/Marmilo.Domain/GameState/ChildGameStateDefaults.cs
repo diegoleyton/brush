@@ -64,6 +64,23 @@ public static class ChildGameStateDefaults
         return JsonSerializer.Serialize(payload);
     }
 
+    public static long GetLastBrushTime(string json, string petName)
+    {
+        PetStatePayload payload = TryDeserialize(
+            NormalizePetStateJson(json, petName),
+            new PetStatePayload());
+        return payload.LastBrushTime;
+    }
+
+    public static string SetLastBrushTime(string json, string petName, long lastBrushTime)
+    {
+        PetStatePayload payload = TryDeserialize(
+            NormalizePetStateJson(json, petName),
+            new PetStatePayload());
+        payload.LastBrushTime = lastBrushTime;
+        return JsonSerializer.Serialize(payload);
+    }
+
     public static string NormalizeRoomStateJson(string json)
     {
         RoomStatePayload payload = TryDeserialize(json, new RoomStatePayload());

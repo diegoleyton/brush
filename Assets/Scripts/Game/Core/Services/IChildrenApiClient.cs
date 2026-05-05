@@ -21,6 +21,8 @@ namespace Game.Core.Services
 
         Task<ChildGameStateSyncPushResult> PushGameStateAsync(string remoteProfileId, string baseRevision, ChildGameStateSnapshot snapshot);
 
+        Task<ChildGameStateSnapshot> CompleteBrushSessionAsync(string remoteProfileId);
+
         Task<Reward[]> ClaimRewardsAsync(string remoteProfileId);
 
         Task<MarketPurchaseStatus> PurchaseMarketItemAsync(string remoteProfileId, MarketItemDefinition itemDefinition);

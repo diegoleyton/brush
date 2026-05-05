@@ -2,19 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-using Flowbit.Utilities.Core.Events;
-using Flowbit.Utilities.ScreenBlocker;
 using Game.Core.Configuration;
-using Game.Core.Data;
-using Game.Core.Services;
-using Game.Unity.Definitions;
 using Game.Unity.RoomScene;
-using Game.Unity.Scenes;
 
 using UnityEngine;
 using UnityEngine.UI;
-
-using Zenject;
 
 namespace Game.Unity.ToothBrush
 {
@@ -49,16 +41,11 @@ namespace Game.Unity.ToothBrush
     }
 
     /// <summary>
-    /// Controls the toothbrush minigame flow, visuals, pause state, and reward completion.
+    /// View for the toothbrush minigame, owning all serialized tuning, animation, and visual behavior.
     /// </summary>
-    public class ToothbrushingScene : SceneBase
+    public class ToothBrushView : MonoBehaviour
     {
         private const float DefaultMoveDuration = 0.3f;
-
-        private DataRepository dataRepository_;
-        private IRoomGameplayService roomGameplayService_;
-        private ScreenBlocker screenBlocker_;
-        private EventDispatcher dispatcher_;
 
         [Header("Mouth Parts")]
         [SerializeField] private RectTransform mouthTop;
@@ -83,7 +70,6 @@ namespace Game.Unity.ToothBrush
         [SerializeField] private BrushTimer[] brushTimers_;
 
         [Header("Animation Settings")]
-        private float moveDuration = DefaultMoveDuration;
         [SerializeField] private float transitionDuration = 0.5f;
         [SerializeField] private float initialWaitDuration = 4f;
         [SerializeField] private float zoneWaitDuration = 2f;
@@ -97,109 +83,53 @@ namespace Game.Unity.ToothBrush
         [Header("Background")]
         [SerializeField] private Image petImage_;
 
+        private readonly PauseService pauseService_ = new PauseService();
+
+        private Action onFinished_;
         private RectTransform brushImageTransform;
         private float brushImageStartY;
         private float brushImageStartYRot;
+        private float moveDuration = DefaultMoveDuration;
         private bool isInTop_;
-        private readonly PauseService pauseService_ = new PauseService();
         private MouthTarget currentZone_;
-        private bool started_;
-
-        [Inject]
-        public void Construct(
-            EventDispatcher dispatcher,
-            IGameNavigationService navigationService,
-            DataRepository dataRepository,
-            IRoomGameplayService roomGameplayService,
-            ScreenBlocker screenBlocker)
-        {
-            base.Construct(dispatcher, navigationService);
-            dataRepository_ = dataRepository;
-            roomGameplayService_ = roomGameplayService;
-            screenBlocker_ = screenBlocker;
-            dispatcher_ = dispatcher;
-        }
 
         private void Awake()
         {
-            sceneType_ = SceneType.BrushScene;
             ValidateSerializedReferences();
         }
 
-        public void Pause()
+        public void Prepare(float desiredBrushDurationMinutes, Color petColor, Color brushColor, Action onFinished)
         {
-            NavigationService.Navigate(SceneType.ConfirmPopup, new ConfirmPopupParams(Play, NavigationService.Back));
-            PauseInt(PauseType.PAUSE_MENU);
-        }
-
-        public void Play()
-        {
-            Continue(PauseType.PAUSE_MENU);
-
-            if (started_)
-            {
-                return;
-            }
-
-            started_ = true;
-            brushAnim_.Pause((int)PauseType.INTERNAL);
-            StartCoroutine(BrushAll());
-            brushImageTransform = brushImage.rectTransform;
-            brushImageStartY = brushImageTransform.anchoredPosition.y;
-            brushImageStartYRot = brushImageTransform.localEulerAngles.z;
-        }
-
-        protected override void Initialize()
-        {
+            onFinished_ = onFinished;
+            moveDuration = ResolveMoveDuration(desiredBrushDurationMinutes);
             brushAnim_.Pause();
-            started_ = false;
-            moveDuration = ResolveMoveDuration();
-
-            if (dataRepository_?.CurrentProfile?.PetData != null)
-            {
-                int skinItemId = dataRepository_.CurrentProfile.PetData.SkinItemId;
-                Color skinColor = RoomItemVisuals.GetItemColor(InteractionPointType.SKIN, skinItemId);
-                SetPetColor(skinColor);
-            }
-
-            int brushPaintItemId = roomGameplayService_ != null
-                ? roomGameplayService_.GetRoomSurfacePaintId(RoomSurfaceIds.Toothbrush)
-                : DefaultProfileState.NoPaintItemId;
-            Color brushColor = brushPaintItemId > DefaultProfileState.NoPaintItemId
-                ? RoomItemVisuals.GetItemColor(InteractionPointType.PAINT, brushPaintItemId)
-                : DefaultProfileState.DefaultRoomSurfaceColor;
+            SetPetColor(petColor);
             SetBrushColor(brushColor);
-
-            Play();
         }
 
-        private void OnFinish()
-        {
-            if (roomGameplayService_ != null && roomGameplayService_.Brush())
-            {
-                dataRepository_.SetPendingReward(true);
-                NavigationService.NavigateWithoutHistory(SceneType.RewardsScene);
-                return;
-            }
-            NavigationService.Back();
-        }
-
-        private void PauseInt(PauseType pauseType)
+        public void PauseVisuals(PauseType pauseType)
         {
             pauseService_.Pause((int)pauseType);
             brushAnim_.Pause((int)pauseType);
             currentZone_.dirt?.Pause((int)pauseType);
             currentZone_.timer?.Pause((int)pauseType);
-            dispatcher_?.Send(new BrushPausedEvent(true));
         }
 
-        private void Continue(PauseType pauseType)
+        public void ResumeVisuals(PauseType pauseType)
         {
             pauseService_.Play((int)pauseType);
             brushAnim_.Play((int)pauseType);
             currentZone_.dirt?.Play((int)pauseType);
             currentZone_.timer?.Play((int)pauseType);
-            dispatcher_?.Send(new BrushPausedEvent(false));
+        }
+
+        public void BeginBrushSequence()
+        {
+            brushAnim_.Pause((int)PauseType.INTERNAL);
+            StartCoroutine(BrushAll());
+            brushImageTransform = brushImage.rectTransform;
+            brushImageStartY = brushImageTransform.anchoredPosition.y;
+            brushImageStartYRot = brushImageTransform.localEulerAngles.z;
         }
 
         private void SetPetColor(Color color)
@@ -264,59 +194,45 @@ namespace Game.Unity.ToothBrush
 
                 target.dirt?.Run(moveDuration);
                 brushAnim_.Play((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_STARTED));
                 yield return Move(target.rectTransform1, target.rectTransform2);
                 brushAnim_.Pause((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_ENDED));
 
                 yield return StartCoroutine(MoveAndBrushCoroutine(transitionTransform, transitionDuration));
                 SetBrushOrientation(BrushOrientation.Bottom, target.position);
                 yield return StartCoroutine(Wait(zoneWaitDuration));
                 target.dirt?.Run(moveDuration);
                 brushAnim_.Play((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_STARTED));
                 yield return Move(target.rectTransform2Side, target.rectTransform1Side);
                 brushAnim_.Pause((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_ENDED));
 
                 yield return StartCoroutine(MoveAndBrushCoroutine(transitionTransform, transitionDuration));
                 SetBrushOrientation(BrushOrientation.Front, target.position);
                 yield return StartCoroutine(Wait(zoneWaitDuration));
                 target.dirt?.Run(moveDuration);
                 brushAnim_.Play((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_STARTED));
                 yield return Move(target.rectTransform1, target.rectTransform2);
                 brushAnim_.Pause((int)PauseType.INTERNAL);
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_ENDED));
-
-                dispatcher_?.Send(new InteractionEvent(InteractionEventType.BRUSH_ZONE_READY));
             }
 
-            IDisposable blockerScope = screenBlocker_?.BlockScope("ToothbrushFinish");
-            try
-            {
-                StartCoroutine(FadeOut(brushImage2, transitionDuration));
-                yield return StartCoroutine(FadeOut(brushImage, transitionDuration));
-                yield return StartCoroutine(Wait(finishDuration));
-            }
-            finally
-            {
-                blockerScope?.Dispose();
-            }
-
-            OnFinish();
+            yield return StartCoroutine(FinishSequence());
+            onFinished_?.Invoke();
         }
 
-        private float ResolveMoveDuration()
+        private IEnumerator FinishSequence()
+        {
+            StartCoroutine(FadeOut(brushImage2, transitionDuration));
+            yield return StartCoroutine(FadeOut(brushImage, transitionDuration));
+            yield return StartCoroutine(Wait(finishDuration));
+        }
+
+        private float ResolveMoveDuration(float desiredBrushDurationMinutes)
         {
             if (targets_ == null || targets_.Count <= 0)
             {
                 return DefaultMoveDuration;
             }
 
-            float desiredMinutes = dataRepository_?.GetBrushSessionDurationMinutes() ??
-                DefaultProfileState.DefaultBrushSessionDurationMinutes;
-            float desiredSeconds = desiredMinutes * 60f;
+            float desiredSeconds = desiredBrushDurationMinutes * 60f;
             float fixedDuration =
                 (targets_.Count * (initialWaitDuration + (2f * zoneWaitDuration) + (6f * transitionDuration))) +
                 transitionDuration +
@@ -470,7 +386,7 @@ namespace Game.Unity.ToothBrush
                 petImage_ == null)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(ToothbrushingScene)} is missing one or more required serialized references.");
+                    $"{nameof(ToothBrushView)} is missing one or more required serialized references.");
             }
         }
     }
