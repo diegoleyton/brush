@@ -24,6 +24,7 @@ namespace Game.Core.Data
     public class Profile
     {
         public string RemoteProfileId;
+        public string RemoteGameStateRevision;
         public string Name;
         public int ProfilePictureId;
         public int Coins = DefaultProfileState.InitialCoins;

@@ -19,7 +19,7 @@ namespace Game.Core.Services
 
         Task<ChildGameStateSnapshot> GetGameStateAsync(string remoteProfileId);
 
-        Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot);
+        Task<ChildGameStateSyncPushResult> PushGameStateAsync(string remoteProfileId, string baseRevision, ChildGameStateSnapshot snapshot);
 
         Task<Reward[]> ClaimRewardsAsync(string remoteProfileId);
 

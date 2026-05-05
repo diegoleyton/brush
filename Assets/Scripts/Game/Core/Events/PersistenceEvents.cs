@@ -23,4 +23,11 @@ namespace Game.Core.Events
     public sealed class LocalDataChangedEvent : IEvent
     {
     }
+
+    /// <summary>
+    /// Emitted after locally optimistic child game state changes that should be synchronized remotely.
+    /// </summary>
+    public sealed class ChildGameStateLocallyChangedEvent : IEvent
+    {
+    }
 }

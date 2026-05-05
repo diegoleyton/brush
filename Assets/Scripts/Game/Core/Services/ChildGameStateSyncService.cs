@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Core.Logger;
+using Flowbit.Utilities.Storage;
 using Game.Core.Data;
 using Game.Core.Events;
 using Zenject;
@@ -10,40 +11,56 @@ using Zenject;
 namespace Game.Core.Services
 {
     /// <summary>
-    /// Keeps the currently selected child profile hydrated from the backend and pushes local state changes back.
+    /// Keeps the currently selected child profile hydrated from the backend, while supporting optimistic local updates
+    /// with persisted pending sync when transport-level failures happen.
     /// </summary>
     public sealed class ChildGameStateSyncService : IChildGameStateSyncService, IInitializable, IDisposable
     {
+        private const string PendingSyncStorageKey = "child_game_state_pending_sync";
+        private const int BackgroundSyncIntervalMilliseconds = 5000;
+
         private readonly EventDispatcher dispatcher_;
         private readonly ClientGameStateStore gameStateStore_;
         private readonly IChildrenApiClient childrenApiClient_;
         private readonly IAuthService authService_;
+        private readonly IDataStorage dataStorage_;
         private readonly IGameLogger logger_;
         private readonly HashSet<string> hydratedProfileIds_ = new(StringComparer.Ordinal);
 
+        private PendingChildGameStateSyncEnvelope pendingSyncEnvelope_ = new PendingChildGameStateSyncEnvelope();
+        private Task ensurePendingSyncLoadedTask_;
         private bool isDisposed_;
         private bool isApplyingRemoteState_;
         private bool isPushInFlight_;
         private bool pushRequestedWhileInFlight_;
+        private bool isOffline_;
+
+        public bool HasPendingSync => HasPendingSyncEntries();
+
+        public bool IsOffline => isOffline_;
 
         public ChildGameStateSyncService(
             EventDispatcher dispatcher,
             ClientGameStateStore gameStateStore,
             IChildrenApiClient childrenApiClient,
             IAuthService authService,
+            IDataStorage dataStorage,
             IGameLogger logger)
         {
             dispatcher_ = dispatcher;
             gameStateStore_ = gameStateStore;
             childrenApiClient_ = childrenApiClient;
             authService_ = authService;
+            dataStorage_ = dataStorage;
             logger_ = logger;
         }
 
         public void Initialize()
         {
             dispatcher_?.Subscribe<ProfileSwitchedEvent>(OnProfileSwitched);
-            dispatcher_?.Subscribe<LocalDataChangedEvent>(OnLocalDataChanged);
+            dispatcher_?.Subscribe<ChildGameStateLocallyChangedEvent>(OnLocalDataChanged);
+            _ = EnsurePendingSyncLoadedAsync();
+            _ = RunBackgroundSyncLoopAsync();
         }
 
         public void Dispose()
@@ -55,46 +72,77 @@ namespace Game.Core.Services
 
             isDisposed_ = true;
             dispatcher_?.Unsubscribe<ProfileSwitchedEvent>(OnProfileSwitched);
-            dispatcher_?.Unsubscribe<LocalDataChangedEvent>(OnLocalDataChanged);
+            dispatcher_?.Unsubscribe<ChildGameStateLocallyChangedEvent>(OnLocalDataChanged);
         }
 
-        public async Task EnsureCurrentProfileLoadedAsync()
+        public async Task<bool> EnsureCurrentProfileLoadedAsync()
         {
-            await LoadCurrentProfileAsync(forceReload: false);
+            return await LoadCurrentProfileAsync(forceReload: false);
         }
 
-        public async Task ReloadCurrentProfileAsync()
+        public async Task<bool> ReloadCurrentProfileAsync()
         {
-            await LoadCurrentProfileAsync(forceReload: true);
+            return await LoadCurrentProfileAsync(forceReload: true);
         }
 
-        private async Task LoadCurrentProfileAsync(bool forceReload)
+        private async Task<bool> LoadCurrentProfileAsync(bool forceReload)
         {
+            await EnsurePendingSyncLoadedAsync();
+
             if (!CanSyncCurrentProfile(out Profile currentProfile))
             {
-                return;
+                return true;
             }
 
             string remoteProfileId = currentProfile.RemoteProfileId;
-            if (!forceReload && hydratedProfileIds_.Contains(remoteProfileId))
+            PendingChildGameStateSyncEntry pendingEntry = FindPendingEntry(remoteProfileId);
+
+            if (!forceReload && pendingEntry == null && hydratedProfileIds_.Contains(remoteProfileId))
             {
-                return;
+                return true;
             }
 
             ChildGameStateSnapshot snapshot = await childrenApiClient_.GetGameStateAsync(remoteProfileId);
             if (snapshot == null)
             {
-                return;
+                isOffline_ = true;
+                PublishSyncStatus();
+                return false;
+            }
+
+            isOffline_ = false;
+            hydratedProfileIds_.Add(remoteProfileId);
+
+            if (pendingEntry != null)
+            {
+                if (string.Equals(pendingEntry.BaseRevision, snapshot.Revision, StringComparison.Ordinal))
+                {
+                    await FlushPendingSyncAsync(remoteProfileId);
+                    return true;
+                }
+
+                ApplySnapshot(currentProfile, snapshot, preserveExistingDefaults: false);
+                await RemovePendingEntryAsync(remoteProfileId);
+                PublishFailure("Local changes were discarded because newer data exists on the server.");
+                return true;
             }
 
             bool remoteStateWasUninitialized = IsUninitializedSnapshot(snapshot);
             ApplySnapshot(currentProfile, snapshot, remoteStateWasUninitialized);
-            hydratedProfileIds_.Add(remoteProfileId);
 
             if (remoteStateWasUninitialized)
             {
-                await PushCurrentProfileStateAsync();
+                UpsertPendingEntry(currentProfile);
+                await SavePendingSyncEnvelopeAsync();
+                PublishSyncStatus();
+                await FlushPendingSyncAsync(remoteProfileId);
             }
+            else
+            {
+                PublishSyncStatus();
+            }
+
+            return true;
         }
 
         private async void OnProfileSwitched(ProfileSwitchedEvent _)
@@ -102,12 +150,14 @@ namespace Game.Core.Services
             await EnsureCurrentProfileLoadedAsync();
         }
 
-        private async void OnLocalDataChanged(LocalDataChangedEvent _)
+        private async void OnLocalDataChanged(ChildGameStateLocallyChangedEvent _)
         {
             if (isApplyingRemoteState_ || isDisposed_)
             {
                 return;
             }
+
+            await EnsurePendingSyncLoadedAsync();
 
             if (!CanSyncCurrentProfile(out Profile currentProfile))
             {
@@ -119,19 +169,18 @@ namespace Game.Core.Services
                 return;
             }
 
+            UpsertPendingEntry(currentProfile);
+            await SavePendingSyncEnvelopeAsync();
+            PublishSyncStatus();
+
+            await FlushPendingSyncAsync(currentProfile.RemoteProfileId);
+        }
+
+        private async Task FlushPendingSyncAsync(string preferredRemoteProfileId = null)
+        {
             if (isPushInFlight_)
             {
                 pushRequestedWhileInFlight_ = true;
-                return;
-            }
-
-            await PushCurrentProfileStateAsync();
-        }
-
-        private async Task PushCurrentProfileStateAsync()
-        {
-            if (!CanSyncCurrentProfile(out Profile currentProfile))
-            {
                 return;
             }
 
@@ -142,30 +191,98 @@ namespace Game.Core.Services
                 {
                     pushRequestedWhileInFlight_ = false;
 
-                    await childrenApiClient_.UpdateProfileAsync(
-                        currentProfile.RemoteProfileId,
-                        currentProfile.Name,
-                        currentProfile.PetData?.Name ?? string.Empty,
-                        currentProfile.ProfilePictureId,
-                        isActive: true);
-
-                    ChildGameStateSnapshot snapshot = CreateSnapshot(currentProfile);
-                    bool updated = await childrenApiClient_.UpdateGameStateAsync(currentProfile.RemoteProfileId, snapshot);
-                    if (!updated)
+                    List<PendingChildGameStateSyncEntry> flushOrder = BuildFlushOrder(preferredRemoteProfileId);
+                    for (int index = 0; index < flushOrder.Count; index++)
                     {
-                        return;
+                        PendingChildGameStateSyncEntry entry = flushOrder[index];
+                        if (entry == null || string.IsNullOrWhiteSpace(entry.RemoteProfileId))
+                        {
+                            continue;
+                        }
+
+                        ChildGameStateSyncPushResult result = await childrenApiClient_.PushGameStateAsync(
+                            entry.RemoteProfileId,
+                            entry.BaseRevision,
+                            entry.Snapshot);
+
+                        if (result == null)
+                        {
+                            isOffline_ = true;
+                            PublishSyncStatus();
+                            return;
+                        }
+
+                        switch (result.Status)
+                        {
+                            case ChildGameStateSyncPushStatus.Success:
+                                await HandleSuccessfulPushAsync(entry.RemoteProfileId, result.Snapshot ?? entry.Snapshot);
+                                break;
+
+                            case ChildGameStateSyncPushStatus.TransportFailure:
+                                isOffline_ = true;
+                                PublishSyncStatus();
+                                return;
+
+                            case ChildGameStateSyncPushStatus.Conflict:
+                            case ChildGameStateSyncPushStatus.ServerRejected:
+                                isOffline_ = false;
+                                await HandleRejectedPushAsync(entry.RemoteProfileId, result.ErrorMessage);
+                                return;
+
+                            default:
+                                isOffline_ = true;
+                                PublishSyncStatus();
+                                return;
+                        }
                     }
                 }
-                while (pushRequestedWhileInFlight_);
+                while (pushRequestedWhileInFlight_ && !isDisposed_);
             }
             catch (Exception exception)
             {
-                logger_?.Log($"[GameStateSync] Failed to push child game state: {exception.Message}");
+                isOffline_ = true;
+                logger_?.Log($"[GameStateSync] Failed to synchronize child game state: {exception.Message}");
+                PublishSyncStatus();
             }
             finally
             {
                 isPushInFlight_ = false;
             }
+        }
+
+        private async Task HandleSuccessfulPushAsync(string remoteProfileId, ChildGameStateSnapshot snapshot)
+        {
+            isOffline_ = false;
+
+            Profile profile = FindProfile(remoteProfileId);
+            if (profile != null && snapshot != null)
+            {
+                ApplySnapshot(profile, snapshot, preserveExistingDefaults: false);
+            }
+
+            await RemovePendingEntryAsync(remoteProfileId);
+            PublishSyncStatus();
+        }
+
+        private async Task HandleRejectedPushAsync(string remoteProfileId, string errorMessage)
+        {
+            await RemovePendingEntryAsync(remoteProfileId);
+
+            ChildGameStateSnapshot latestSnapshot = await childrenApiClient_.GetGameStateAsync(remoteProfileId);
+            if (latestSnapshot != null)
+            {
+                Profile profile = FindProfile(remoteProfileId);
+                if (profile != null)
+                {
+                    ApplySnapshot(profile, latestSnapshot, preserveExistingDefaults: false);
+                    hydratedProfileIds_.Add(remoteProfileId);
+                }
+            }
+
+            PublishSyncStatus();
+            PublishFailure(string.IsNullOrWhiteSpace(errorMessage)
+                ? "Changes could not be saved."
+                : errorMessage);
         }
 
         private void ApplySnapshot(Profile profile, ChildGameStateSnapshot snapshot, bool preserveExistingDefaults)
@@ -178,6 +295,7 @@ namespace Game.Core.Services
             isApplyingRemoteState_ = true;
             try
             {
+                profile.RemoteGameStateRevision = snapshot.Revision ?? string.Empty;
                 profile.Coins = Math.Max(0, snapshot.CoinsBalance);
 
                 if (!preserveExistingDefaults && snapshot.BrushSessionDurationMinutes > 0)
@@ -218,6 +336,7 @@ namespace Game.Core.Services
             return new ChildGameStateSnapshot
             {
                 ChildId = profile.RemoteProfileId ?? string.Empty,
+                Revision = profile.RemoteGameStateRevision ?? string.Empty,
                 CoinsBalance = profile.Coins,
                 BrushSessionDurationMinutes = (int)Math.Max(1f, MathF.Round(profile.BrushSessionDurationMinutes)),
                 PendingReward = profile.PendingReward,
@@ -226,6 +345,197 @@ namespace Game.Core.Services
                 RoomState = profile.RoomData ?? new Room(),
                 InventoryState = profile.InventoryData ?? new Inventory()
             };
+        }
+
+        private async Task EnsurePendingSyncLoadedAsync()
+        {
+            if (ensurePendingSyncLoadedTask_ == null)
+            {
+                ensurePendingSyncLoadedTask_ = LoadPendingSyncEnvelopeAsync();
+            }
+
+            await ensurePendingSyncLoadedTask_;
+        }
+
+        private async Task LoadPendingSyncEnvelopeAsync()
+        {
+            DataLoadResult<PendingChildGameStateSyncEnvelope> loadResult =
+                await dataStorage_.LoadAsync<PendingChildGameStateSyncEnvelope>(PendingSyncStorageKey);
+
+            pendingSyncEnvelope_ = loadResult.Found && loadResult.Data != null
+                ? loadResult.Data
+                : new PendingChildGameStateSyncEnvelope();
+
+            pendingSyncEnvelope_.Entries ??= new List<PendingChildGameStateSyncEntry>();
+            PublishSyncStatus();
+        }
+
+        private async Task SavePendingSyncEnvelopeAsync()
+        {
+            pendingSyncEnvelope_ ??= new PendingChildGameStateSyncEnvelope();
+            pendingSyncEnvelope_.Entries ??= new List<PendingChildGameStateSyncEntry>();
+            await dataStorage_.SaveAsync(PendingSyncStorageKey, pendingSyncEnvelope_);
+        }
+
+        private void UpsertPendingEntry(Profile profile)
+        {
+            if (profile == null || string.IsNullOrWhiteSpace(profile.RemoteProfileId))
+            {
+                return;
+            }
+
+            pendingSyncEnvelope_ ??= new PendingChildGameStateSyncEnvelope();
+            pendingSyncEnvelope_.Entries ??= new List<PendingChildGameStateSyncEntry>();
+
+            PendingChildGameStateSyncEntry existingEntry = FindPendingEntry(profile.RemoteProfileId);
+            ChildGameStateSnapshot snapshot = CreateSnapshot(profile);
+
+            if (existingEntry == null)
+            {
+                pendingSyncEnvelope_.Entries.Add(new PendingChildGameStateSyncEntry
+                {
+                    RemoteProfileId = profile.RemoteProfileId,
+                    BaseRevision = profile.RemoteGameStateRevision ?? string.Empty,
+                    Snapshot = snapshot
+                });
+                return;
+            }
+
+            existingEntry.Snapshot = snapshot;
+        }
+
+        private PendingChildGameStateSyncEntry FindPendingEntry(string remoteProfileId)
+        {
+            if (pendingSyncEnvelope_?.Entries == null || string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return null;
+            }
+
+            for (int index = 0; index < pendingSyncEnvelope_.Entries.Count; index++)
+            {
+                PendingChildGameStateSyncEntry entry = pendingSyncEnvelope_.Entries[index];
+                if (entry != null &&
+                    string.Equals(entry.RemoteProfileId, remoteProfileId, StringComparison.Ordinal))
+                {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        private async Task RemovePendingEntryAsync(string remoteProfileId)
+        {
+            if (pendingSyncEnvelope_?.Entries == null || string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return;
+            }
+
+            pendingSyncEnvelope_.Entries.RemoveAll(entry =>
+                entry != null && string.Equals(entry.RemoteProfileId, remoteProfileId, StringComparison.Ordinal));
+
+            await SavePendingSyncEnvelopeAsync();
+        }
+
+        private List<PendingChildGameStateSyncEntry> BuildFlushOrder(string preferredRemoteProfileId)
+        {
+            List<PendingChildGameStateSyncEntry> order = new List<PendingChildGameStateSyncEntry>();
+            if (pendingSyncEnvelope_?.Entries == null || pendingSyncEnvelope_.Entries.Count == 0)
+            {
+                return order;
+            }
+
+            if (!string.IsNullOrWhiteSpace(preferredRemoteProfileId))
+            {
+                PendingChildGameStateSyncEntry preferredEntry = FindPendingEntry(preferredRemoteProfileId);
+                if (preferredEntry != null)
+                {
+                    order.Add(preferredEntry);
+                }
+            }
+
+            for (int index = 0; index < pendingSyncEnvelope_.Entries.Count; index++)
+            {
+                PendingChildGameStateSyncEntry entry = pendingSyncEnvelope_.Entries[index];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(preferredRemoteProfileId) &&
+                    string.Equals(entry.RemoteProfileId, preferredRemoteProfileId, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                order.Add(entry);
+            }
+
+            return order;
+        }
+
+        private Profile FindProfile(string remoteProfileId)
+        {
+            if (gameStateStore_?.AllProfiles == null || string.IsNullOrWhiteSpace(remoteProfileId))
+            {
+                return null;
+            }
+
+            for (int index = 0; index < gameStateStore_.AllProfiles.Count; index++)
+            {
+                Profile profile = gameStateStore_.AllProfiles[index];
+                if (profile != null &&
+                    string.Equals(profile.RemoteProfileId, remoteProfileId, StringComparison.Ordinal))
+                {
+                    return profile;
+                }
+            }
+
+            return null;
+        }
+
+        private async Task RunBackgroundSyncLoopAsync()
+        {
+            while (!isDisposed_)
+            {
+                try
+                {
+                    await Task.Delay(BackgroundSyncIntervalMilliseconds);
+                }
+                catch
+                {
+                    return;
+                }
+
+                if (isDisposed_)
+                {
+                    return;
+                }
+
+                await EnsurePendingSyncLoadedAsync();
+
+                if (authService_ == null || !authService_.HasSession || !HasPendingSyncEntries())
+                {
+                    continue;
+                }
+
+                await FlushPendingSyncAsync();
+            }
+        }
+
+        private bool HasPendingSyncEntries() =>
+            pendingSyncEnvelope_?.Entries != null && pendingSyncEnvelope_.Entries.Count > 0;
+
+        private void PublishSyncStatus()
+        {
+            dispatcher_?.Send(new ChildGameStateSyncStatusChangedEvent(
+                hasPendingSync: HasPendingSyncEntries(),
+                isOffline: isOffline_));
+        }
+
+        private void PublishFailure(string message)
+        {
+            dispatcher_?.Send(new ChildGameStateSyncFailureEvent(message));
         }
 
         private static bool IsUninitializedSnapshot(ChildGameStateSnapshot snapshot)
@@ -284,7 +594,7 @@ namespace Game.Core.Services
                    IsEmptyInventoryBucket(inventory.Eyes);
         }
 
-        private static bool IsEmptyInventoryBucket(System.Collections.Generic.Dictionary<int, int> items) =>
+        private static bool IsEmptyInventoryBucket(Dictionary<int, int> items) =>
             items == null || items.Count == 0;
 
         private bool CanSyncCurrentProfile(out Profile currentProfile)

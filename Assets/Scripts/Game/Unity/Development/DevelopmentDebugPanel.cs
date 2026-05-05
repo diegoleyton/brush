@@ -8,7 +8,6 @@ using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Events;
 using Game.Core.Services;
-using Game.Unity.RoomScene;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -16,7 +15,7 @@ using Zenject;
 namespace Game.Unity.Development
 {
     /// <summary>
-    /// Editor/development-only debug overlay for mutating the active profile while iterating on RoomScene.
+    /// Editor/development-only debug overlay for mutating the active profile while iterating quickly in any scene.
     /// The UI is generated in code so it can be dropped in automatically without scene wiring.
     /// </summary>
     public sealed class DevelopmentDebugPanel : MonoBehaviour
@@ -241,6 +240,18 @@ namespace Game.Unity.Development
                 feedback_ = newSimulateSlowNetwork ? "Slow network enabled." : "Slow network disabled.";
             }
 
+            bool simulateNetworkFailure =
+                remoteSimulationSettings_ != null && remoteSimulationSettings_.SimulateNetworkFailure;
+            bool newSimulateNetworkFailure = GUILayout.Toggle(simulateNetworkFailure, "Network Failure");
+            if (remoteSimulationSettings_ != null &&
+                newSimulateNetworkFailure != simulateNetworkFailure)
+            {
+                remoteSimulationSettings_.SimulateNetworkFailure = newSimulateNetworkFailure;
+                feedback_ = newSimulateNetworkFailure
+                    ? "Network failure enabled."
+                    : "Network failure disabled.";
+            }
+
             bool simulateUnresponsiveNetwork =
                 remoteSimulationSettings_ != null && remoteSimulationSettings_.SimulateUnresponsiveNetwork;
             bool newSimulateUnresponsiveNetwork = GUILayout.Toggle(simulateUnresponsiveNetwork, "Unresponsive Network");
@@ -452,23 +463,7 @@ namespace Game.Unity.Development
                 return false;
             }
 
-            if (FindFirstObjectByType<RoomController>() != null)
-            {
-                return true;
-            }
-
-            string activeSceneName = SceneManager.GetActiveScene().name;
-            bool sceneLooksLikeRoom =
-                !string.IsNullOrWhiteSpace(activeSceneName) &&
-                activeSceneName.IndexOf("Room", StringComparison.OrdinalIgnoreCase) >= 0;
-
-            if (!sceneLooksLikeRoom)
-            {
-                LogRenderBlocked(
-                    $"Room gate blocked rendering. Scene={activeSceneName}, RoomControllerFound=false");
-            }
-
-            return sceneLooksLikeRoom;
+            return true;
         }
 
         private void LogRenderBlocked(string reason)

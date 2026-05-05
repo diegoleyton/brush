@@ -118,6 +118,7 @@ namespace Game.Core.Services
             store_.CurrentProfile.ProfilePictureId = pictureId;
             dispatcher_?.Send(new ProfileUpdatedEvent());
             NotifyDataChanged();
+            dispatcher_?.Send(new ChildGameStateLocallyChangedEvent());
         }
 
         public void SetPetName(string name)
@@ -135,6 +136,7 @@ namespace Game.Core.Services
             store_.CurrentProfile.PetData.Name = name;
             dispatcher_?.Send(new ProfileUpdatedEvent());
             NotifyDataChanged();
+            dispatcher_?.Send(new ChildGameStateLocallyChangedEvent());
         }
 
         private void NotifyDataChanged()

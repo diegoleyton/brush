@@ -91,6 +91,7 @@
     <Compile Include="Assets/Scripts/Game/Core/Services/RoomGameplayService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IAuthService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/AuthSession.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSyncPushResult.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IProfilesService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/BankEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSyncService.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Assets/Scripts/Game/Core/Data/Economy.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ChildrenApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IRoomGameplayService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSyncPushStatus.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Data/Definitions.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ChildGameStateSnapshot.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/InventoryEvents.cs" />
@@ -109,9 +111,11 @@
     <Compile Include="Assets/Scripts/Game/Core/Services/PersistentGameDataService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IRemoteIdentityProviderClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/RoomSurfaceIds.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/PendingChildGameStateSyncEnvelope.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/ApiErrorResponse.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Events/AppEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/LocalProfileService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/ChildGameStateSyncEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/BackendSettings.cs" />
   </ItemGroup>
   <ItemGroup>

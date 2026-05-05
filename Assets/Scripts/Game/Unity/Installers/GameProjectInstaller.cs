@@ -25,6 +25,7 @@ using Game.Unity.Instantiator;
 using Game.Unity.RoomScene;
 using Game.Unity.Scenes;
 using Game.Unity.Settings;
+using Game.Unity.Sync;
 using Game.Unity.UI;
 
 using Zenject;
@@ -153,6 +154,10 @@ namespace Game.Unity.Installers
                 .AsSingle();
 
             Container.BindInterfacesAndSelfTo<ChildGameStateSyncService>()
+                .AsSingle()
+                .NonLazy();
+
+            Container.BindInterfacesAndSelfTo<ChildGameStateSyncFailurePresenter>()
                 .AsSingle()
                 .NonLazy();
 

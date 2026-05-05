@@ -7,8 +7,12 @@ namespace Game.Core.Services
     /// </summary>
     public interface IChildGameStateSyncService
     {
-        Task EnsureCurrentProfileLoadedAsync();
+        bool HasPendingSync { get; }
 
-        Task ReloadCurrentProfileAsync();
+        bool IsOffline { get; }
+
+        Task<bool> EnsureCurrentProfileLoadedAsync();
+
+        Task<bool> ReloadCurrentProfileAsync();
     }
 }

@@ -71,6 +71,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionButtonView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/RemoteOperationMessageFormatter.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Scenes/ErrorPopupParams.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/SceneNavigationNodeResolver.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/DressItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/IItemView.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomPlacedObjectDraggable.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/SceneTransitionOverlay.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketSceneController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Scenes/RetryPopup.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponentController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PasswordPopup.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Audio/SoundId.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/RoomItemVisuals.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Installers/AuthLifetime.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Sync/ChildGameStateSyncStatusIndicator.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Pet/PetView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/ItemViewRegistry.cs" />
@@ -145,6 +148,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/GameNavigationService.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemListUI.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/CurrencyItemView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Scenes/RetryPopupParams.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropVisual.cs" />
@@ -155,6 +159,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/RoomInventoryGameEvents.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Instantiator/DependencyObjectInstantiator.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketTabButtonView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Scenes/ErrorPopup.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryView.cs" />
@@ -167,6 +172,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketConfirmMessageView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/InstantiatorIds.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomViewController.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Sync/ChildGameStateSyncFailurePresenter.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/SkinItemView.cs" />
   </ItemGroup>
   <ItemGroup>

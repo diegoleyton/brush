@@ -127,7 +127,17 @@ namespace Game.Unity.AuthScene
 
                 if (childGameStateSyncService_ != null)
                 {
-                    await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
+                    bool loadedCurrentProfile = await childGameStateSyncService_.EnsureCurrentProfileLoadedAsync();
+                    if (!loadedCurrentProfile)
+                    {
+                        FeedbackMessage feedbackMessage = authPanel_.GetComponent<FeedbackMessage>();
+                        feedbackMessage?.ShowError(
+                            LocalizationServiceLocator.GetText(
+                                "auth.redirect.profile_load_error",
+                                "Could not load profile. Please try again."),
+                            durationSeconds: 3f);
+                        return;
+                    }
                 }
 
                 if (gameStateStore_.AllProfiles.Count > 1)

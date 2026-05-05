@@ -4,6 +4,7 @@ namespace Marmilo.Api.Contracts.Children;
 
 public sealed record ChildGameStateResponse(
     Guid ChildId,
+    string Revision,
     int CoinsBalance,
     int BrushSessionDurationMinutes,
     bool PendingReward,

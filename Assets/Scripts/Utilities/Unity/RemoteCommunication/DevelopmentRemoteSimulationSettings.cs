@@ -7,6 +7,8 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
     {
         public bool SimulateSlowNetwork { get; set; }
 
+        public bool SimulateNetworkFailure { get; set; }
+
         public bool SimulateUnresponsiveNetwork { get; set; }
 
         public float SlowNetworkDelaySeconds { get; set; } = 2f;

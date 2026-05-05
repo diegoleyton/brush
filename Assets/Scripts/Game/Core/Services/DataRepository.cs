@@ -293,6 +293,7 @@ namespace Game.Core.Services
         private void NotifyDataChanged()
         {
             dispatcher_?.Send(new LocalDataChangedEvent());
+            dispatcher_?.Send(new ChildGameStateLocallyChangedEvent());
         }
 
         private void NotifyInventoryChanged()

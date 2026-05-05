@@ -65,6 +65,20 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
 
         private async Task<RemoteResponse> SendOnceAsync(RemoteRequest request)
         {
+            if (simulationSettings_?.SimulateNetworkFailure == true)
+            {
+                const string simulatedNetworkFailureError = "Simulated network failure.";
+                logger_?.Log($"[Remote] Simulated network failure for {request.Method} {request.Url}.");
+                return new RemoteResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = 0,
+                    Body = string.Empty,
+                    ErrorMessage = simulatedNetworkFailureError,
+                    IsNetworkError = true
+                };
+            }
+
             if (simulationSettings_?.SimulateUnresponsiveNetwork == true)
             {
                 double timeoutSeconds = Math.Max(1, request.TimeoutSeconds);

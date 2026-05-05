@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: SceneSettings
   m_EditorClassIdentifier: 
   sceneEntries_:
+  - SceneType: 0
+    SceneName: AuthScene
+    TargetType: 0
+    Prefab: {fileID: 0}
   - SceneType: 1
     SceneName: RoomScene
     TargetType: 0
@@ -41,6 +45,18 @@ MonoBehaviour:
     SceneName: ProfileManagementScene
     TargetType: 0
     Prefab: {fileID: 0}
+  - SceneType: 8
+    SceneName: MarketScene
+    TargetType: 0
+    Prefab: {fileID: 0}
+  - SceneType: 9
+    SceneName: ErrorPopup
+    TargetType: 1
+    Prefab: {fileID: 5699784235750688586, guid: 5e5faa28abdaa455c96ff8049f5375f4, type: 3}
+  - SceneType: 10
+    SceneName: RetryPopup
+    TargetType: 1
+    Prefab: {fileID: 5699784235750688586, guid: 3aa9e373fe7e4eabb0dc09e03d596437, type: 3}
   <TransitionNext>k__BackingField: {fileID: 8873921252752505752, guid: 2fdcc266e14be49caa427ba278f7f8f6, type: 3}
   <TransitionPrev>k__BackingField: {fileID: 8380803026297557488, guid: 91a36af228fc64c389b6805989376f10, type: 3}
   <PopupTransitionOpen>k__BackingField: {fileID: 5875002038121400883, guid: 8830391a1fcd44d338427b765178364d, type: 3}

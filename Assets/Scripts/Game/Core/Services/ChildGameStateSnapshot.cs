@@ -10,6 +10,7 @@ namespace Game.Core.Services
     public sealed class ChildGameStateSnapshot
     {
         public string childId;
+        public string revision;
         public int coinsBalance;
         public int brushSessionDurationMinutes;
         public bool pendingReward;
@@ -28,6 +29,12 @@ namespace Game.Core.Services
         {
             get => coinsBalance;
             set => coinsBalance = value;
+        }
+
+        public string Revision
+        {
+            get => revision;
+            set => revision = value;
         }
 
         public int BrushSessionDurationMinutes

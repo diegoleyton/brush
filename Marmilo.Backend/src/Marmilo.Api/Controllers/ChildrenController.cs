@@ -10,6 +10,7 @@ using Marmilo.Domain.Rewards;
 using Marmilo.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Marmilo.Api.Controllers;
@@ -695,6 +696,17 @@ public sealed class ChildrenController : ControllerBase
 
         try
         {
+            string currentRevision = GetGameStateRevision(gameState);
+            if (!string.IsNullOrWhiteSpace(request.BaseRevision) &&
+                !string.Equals(request.BaseRevision, currentRevision, StringComparison.Ordinal))
+            {
+                return Conflict(new
+                {
+                    message = "Child game state changed on the server.",
+                    revision = currentRevision
+                });
+            }
+
             gameState.Update(
                 request.BrushSessionDurationMinutes,
                 request.PendingReward,
@@ -767,6 +779,7 @@ public sealed class ChildrenController : ControllerBase
 
     private static ChildGameStateResponse ToGameStateResponse(ChildGameState gameState) => new(
         gameState.ChildProfileId,
+        GetGameStateRevision(gameState),
         gameState.CoinsBalance,
         gameState.BrushSessionDurationMinutes,
         gameState.PendingReward,
@@ -774,6 +787,9 @@ public sealed class ChildrenController : ControllerBase
         ParseJson(gameState.PetStateJson),
         ParseJson(gameState.RoomStateJson),
         ParseJson(gameState.InventoryStateJson));
+
+    private static string GetGameStateRevision(ChildGameState gameState) =>
+        gameState.UpdatedAt.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
 
     private static JsonElement ParseJson(string json)
     {

@@ -65,6 +65,7 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteRequestFailedException.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/RemoteRequestMethod.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/RemoteCommunication/IRemoteRequestDispatcher.cs" />
     <Compile Include="Assets/Scripts/Utilities/Core/Events/IEvent.cs" />

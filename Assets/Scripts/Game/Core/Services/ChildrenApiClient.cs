@@ -43,7 +43,10 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
-                return Array.Empty<Profile>();
+                throw new RemoteRequestFailedException(
+                    ResolveRemoteErrorMessage(response, "Could not load profiles."),
+                    response.IsNetworkError,
+                    response.StatusCode);
             }
 
             ChildProfileListEnvelope envelope = payloadCodec_.Deserialize<ChildProfileListEnvelope>(response.Body);
@@ -151,15 +154,23 @@ namespace Game.Core.Services
             return payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body);
         }
 
-        public async Task<bool> UpdateGameStateAsync(string remoteProfileId, ChildGameStateSnapshot snapshot)
+        public async Task<ChildGameStateSyncPushResult> PushGameStateAsync(
+            string remoteProfileId,
+            string baseRevision,
+            ChildGameStateSnapshot snapshot)
         {
             if (string.IsNullOrWhiteSpace(remoteProfileId) || snapshot == null)
             {
-                return false;
+                return new ChildGameStateSyncPushResult
+                {
+                    Status = ChildGameStateSyncPushStatus.ServerRejected,
+                    ErrorMessage = "Missing child game state payload."
+                };
             }
 
             string body = payloadCodec_.Serialize(new UpdateChildGameStateRequest
             {
+                BaseRevision = baseRevision ?? string.Empty,
                 BrushSessionDurationMinutes = snapshot.BrushSessionDurationMinutes,
                 PendingReward = snapshot.PendingReward,
                 Muted = snapshot.Muted,
@@ -175,7 +186,39 @@ namespace Game.Core.Services
                     body: body,
                     isIdempotent: false));
 
-            return response.IsSuccess;
+            if (response.IsSuccess)
+            {
+                return new ChildGameStateSyncPushResult
+                {
+                    Status = ChildGameStateSyncPushStatus.Success,
+                    Snapshot = payloadCodec_.Deserialize<ChildGameStateSnapshot>(response.Body)
+                };
+            }
+
+            string errorMessage = TryParseErrorMessage(response.Body);
+            if (response.IsNetworkError)
+            {
+                return new ChildGameStateSyncPushResult
+                {
+                    Status = ChildGameStateSyncPushStatus.TransportFailure,
+                    ErrorMessage = errorMessage
+                };
+            }
+
+            if (response.StatusCode == 409)
+            {
+                return new ChildGameStateSyncPushResult
+                {
+                    Status = ChildGameStateSyncPushStatus.Conflict,
+                    ErrorMessage = errorMessage
+                };
+            }
+
+            return new ChildGameStateSyncPushResult
+            {
+                Status = ChildGameStateSyncPushStatus.ServerRejected,
+                ErrorMessage = errorMessage
+            };
         }
 
         public async Task<Reward[]> ClaimRewardsAsync(string remoteProfileId)
@@ -375,6 +418,28 @@ namespace Game.Core.Services
             }
         }
 
+        private string ResolveRemoteErrorMessage(RemoteResponse response, string fallbackMessage)
+        {
+            if (response == null)
+            {
+                return fallbackMessage;
+            }
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+            {
+                return response.ErrorMessage;
+            }
+
+            string parsedBodyMessage = TryParseErrorMessage(response.Body);
+            if (!string.IsNullOrWhiteSpace(parsedBodyMessage) &&
+                !string.Equals(parsedBodyMessage, "Request failed.", StringComparison.Ordinal))
+            {
+                return parsedBodyMessage;
+            }
+
+            return fallbackMessage;
+        }
+
         private static string EscapeJson(string value) =>
             (value ?? string.Empty)
             .Replace("\\", "\\\\")
@@ -424,6 +489,7 @@ namespace Game.Core.Services
         [Serializable]
         private sealed class UpdateChildGameStateRequest
         {
+            public string BaseRevision;
             public int BrushSessionDurationMinutes;
             public bool PendingReward;
             public bool Muted;
