@@ -13,7 +13,7 @@ namespace Game.Core.Services
         public string revision;
         public int coinsBalance;
         public int brushSessionDurationMinutes;
-        public bool pendingReward;
+        public int pendingRewardCount;
         public bool muted;
         public Pet petState = new Pet();
         public Room roomState = new Room();
@@ -43,10 +43,10 @@ namespace Game.Core.Services
             set => brushSessionDurationMinutes = value;
         }
 
-        public bool PendingReward
+        public int PendingRewardCount
         {
-            get => pendingReward;
-            set => pendingReward = value;
+            get => pendingRewardCount;
+            set => pendingRewardCount = Math.Max(0, value);
         }
 
         public bool Muted

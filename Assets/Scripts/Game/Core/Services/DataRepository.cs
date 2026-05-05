@@ -50,15 +50,18 @@ namespace Game.Core.Services
         public void ModifyCurrentProfile(string name, string petName, int pictureId) =>
             profileService_.ModifyCurrentProfile(name, petName, pictureId);
 
-        public void SetPendingReward(bool pendingReward)
+        public void SetPendingReward(bool pendingReward) =>
+            SetPendingRewardCount(pendingReward ? 1 : 0);
+
+        public void SetPendingRewardCount(int pendingRewardCount)
         {
             if (CurrentProfile == null)
             {
                 return;
             }
 
-            CurrentProfile.PendingReward = pendingReward;
-            dispatcher_?.Send(new PendingRewardEvent());
+            CurrentProfile.PendingRewardCount = Math.Max(0, pendingRewardCount);
+            dispatcher_?.Send(new PendingRewardEvent(CurrentProfile.PendingRewardCount));
             NotifyDataChanged();
         }
 
@@ -156,7 +159,7 @@ namespace Game.Core.Services
 
         public Reward[] GiveRewards()
         {
-            SetPendingReward(false);
+            SetPendingRewardCount(Math.Max(0, CurrentProfile.PendingRewardCount - 1));
             Reward[] rewards = new Reward[2];
 
             rewards[0] = GameRules.GetGuaranteedFoodReward();

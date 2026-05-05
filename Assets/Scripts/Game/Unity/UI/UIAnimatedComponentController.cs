@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace Game.Unity.UI
@@ -10,6 +9,17 @@ namespace Game.Unity.UI
     /// </summary>
     public sealed class UIAnimatedComponentController : MonoBehaviour
     {
+        [Serializable]
+        private sealed class AnimationProfile
+        {
+            public Color[] Colors = Array.Empty<Color>();
+            public float MinimumScale = 1f;
+            public float MaximumScale = 1f;
+            public float ScaleCycleDurationSeconds = 1f;
+            public float ColorCycleDurationSeconds = 1f;
+        }
+
+        [Header("Subtle Animation")]
         [SerializeField]
         private Color[] colors_ = Array.Empty<Color>();
 
@@ -28,6 +38,30 @@ namespace Game.Unity.UI
         [SerializeField]
         [Min(0f)]
         private float colorCycleDurationSeconds_ = 2f;
+
+        [Header("Bold Animation")]
+        [SerializeField]
+        private Color[] boldColors_ =
+        {
+            new Color(1f, 0.82f, 0.2f, 1f),
+            new Color(1f, 0.45f, 0.1f, 1f)
+        };
+
+        [SerializeField]
+        [Min(0f)]
+        private float boldMinimumScale_ = 0.85f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float boldMaximumScale_ = 1.18f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float boldScaleCycleDurationSeconds_ = 0.8f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float boldColorCycleDurationSeconds_ = 1.1f;
 
         private readonly List<UIAnimatedComponent> components_ = new List<UIAnimatedComponent>();
 
@@ -71,8 +105,12 @@ namespace Game.Unity.UI
                 return;
             }
 
-            float scale = EvaluateScale();
-            Color color = EvaluateColor();
+            AnimationProfile subtleProfile = GetProfile(UIAnimatedComponentAnimationType.Subtle);
+            AnimationProfile boldProfile = GetProfile(UIAnimatedComponentAnimationType.Bold);
+            float subtleScale = EvaluateScale(subtleProfile);
+            Color subtleColor = EvaluateColor(subtleProfile);
+            float boldScale = EvaluateScale(boldProfile);
+            Color boldColor = EvaluateColor(boldProfile);
 
             for (int index = components_.Count - 1; index >= 0; index--)
             {
@@ -83,43 +121,75 @@ namespace Game.Unity.UI
                     continue;
                 }
 
-                component.ApplyAnimationState(scale, color);
+                if (component.AnimationType == UIAnimatedComponentAnimationType.Bold)
+                {
+                    component.ApplyAnimationState(boldScale, boldColor);
+                    continue;
+                }
+
+                component.ApplyAnimationState(subtleScale, subtleColor);
             }
         }
 
-        private float EvaluateScale()
+        private float EvaluateScale(AnimationProfile profile)
         {
-            float duration = scaleCycleDurationSeconds_;
+            float duration = profile.ScaleCycleDurationSeconds;
             if (duration <= 0f)
             {
-                return maximumScale_;
+                return profile.MaximumScale;
             }
 
             float normalizedTime = Mathf.PingPong(Time.unscaledTime / duration, 1f);
             float easedTime = Mathf.SmoothStep(0f, 1f, normalizedTime);
-            return Mathf.Lerp(minimumScale_, maximumScale_, easedTime);
+            return Mathf.Lerp(profile.MinimumScale, profile.MaximumScale, easedTime);
         }
 
-        private Color EvaluateColor()
+        private Color EvaluateColor(AnimationProfile profile)
         {
-            if (colors_.Length == 1)
+            if (profile.Colors.Length == 1)
             {
-                return colors_[0];
+                return profile.Colors[0];
             }
 
-            float duration = colorCycleDurationSeconds_;
+            float duration = profile.ColorCycleDurationSeconds;
             if (duration <= 0f)
             {
-                return colors_[0];
+                return profile.Colors[0];
             }
 
             float totalProgress = Time.unscaledTime / duration;
-            int currentIndex = Mathf.FloorToInt(totalProgress) % colors_.Length;
-            int nextIndex = (currentIndex + 1) % colors_.Length;
+            int currentIndex = Mathf.FloorToInt(totalProgress) % profile.Colors.Length;
+            int nextIndex = (currentIndex + 1) % profile.Colors.Length;
             float blend = totalProgress - Mathf.Floor(totalProgress);
             float easedBlend = Mathf.SmoothStep(0f, 1f, blend);
 
-            return Color.Lerp(colors_[currentIndex], colors_[nextIndex], easedBlend);
+            return Color.Lerp(profile.Colors[currentIndex], profile.Colors[nextIndex], easedBlend);
+        }
+
+        private AnimationProfile GetProfile(UIAnimatedComponentAnimationType animationType)
+        {
+            switch (animationType)
+            {
+                case UIAnimatedComponentAnimationType.Bold:
+                    return new AnimationProfile
+                    {
+                        Colors = boldColors_,
+                        MinimumScale = boldMinimumScale_,
+                        MaximumScale = boldMaximumScale_,
+                        ScaleCycleDurationSeconds = boldScaleCycleDurationSeconds_,
+                        ColorCycleDurationSeconds = boldColorCycleDurationSeconds_
+                    };
+                case UIAnimatedComponentAnimationType.Subtle:
+                default:
+                    return new AnimationProfile
+                    {
+                        Colors = colors_,
+                        MinimumScale = minimumScale_,
+                        MaximumScale = maximumScale_,
+                        ScaleCycleDurationSeconds = scaleCycleDurationSeconds_,
+                        ColorCycleDurationSeconds = colorCycleDurationSeconds_
+                    };
+            }
         }
 
         private void ValidateReferences()
@@ -130,16 +200,28 @@ namespace Game.Unity.UI
                     $"{nameof(UIAnimatedComponentController)} requires a {nameof(UISettings)} binding.");
             }
 
-            if (minimumScale_ > maximumScale_)
+            ValidateProfile(GetProfile(UIAnimatedComponentAnimationType.Subtle), "subtle animation");
+            ValidateProfile(GetProfile(UIAnimatedComponentAnimationType.Bold), "bold animation");
+        }
+
+        private static void ValidateProfile(AnimationProfile profile, string profileName)
+        {
+            if (profile == null)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(UIAnimatedComponentController)} requires {nameof(minimumScale_)} to be less than or equal to {nameof(maximumScale_)}.");
+                    $"{nameof(UIAnimatedComponentController)} requires a {profileName} configuration.");
             }
 
-            if (colors_ == null || colors_.Length == 0)
+            if (profile.MinimumScale > profile.MaximumScale)
             {
                 throw new InvalidOperationException(
-                    $"{nameof(UIAnimatedComponentController)} requires at least one color.");
+                    $"{nameof(UIAnimatedComponentController)} requires {profileName} minimum scale to be less than or equal to maximum scale.");
+            }
+
+            if (profile.Colors == null || profile.Colors.Length == 0)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(UIAnimatedComponentController)} requires at least one color in {profileName}.");
             }
         }
     }

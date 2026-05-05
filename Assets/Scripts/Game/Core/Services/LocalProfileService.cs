@@ -53,7 +53,7 @@ namespace Game.Core.Services
                 },
                 RoomData = new Room(),
                 InventoryData = DefaultProfileState.CreateInventory(),
-                PendingReward = DefaultProfileState.InitialPendingReward
+                PendingRewardCount = DefaultProfileState.InitialPendingRewardCount
             };
 
             store_.AddProfile(profile);

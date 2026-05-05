@@ -472,7 +472,7 @@ public sealed class ChildrenController : ControllerBase
 
         gameState.EnsureDefaults(childProfile.PetName);
 
-        if (!gameState.PendingReward)
+        if (gameState.PendingRewardCount <= 0)
         {
             return BadRequest(new
             {
@@ -757,7 +757,7 @@ public sealed class ChildrenController : ControllerBase
 
             gameState.Update(
                 request.BrushSessionDurationMinutes,
-                request.PendingReward,
+                request.PendingRewardCount,
                 request.Muted,
                 SerializeJson(request.PetState),
                 SerializeJson(request.RoomState),
@@ -830,7 +830,7 @@ public sealed class ChildrenController : ControllerBase
         GetGameStateRevision(gameState),
         gameState.CoinsBalance,
         gameState.BrushSessionDurationMinutes,
-        gameState.PendingReward,
+        gameState.PendingRewardCount,
         gameState.Muted,
         ParseJson(gameState.PetStateJson),
         ParseJson(gameState.RoomStateJson),

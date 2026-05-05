@@ -202,7 +202,7 @@ namespace Game.Core.Services
             {
                 BaseRevision = baseRevision ?? string.Empty,
                 BrushSessionDurationMinutes = snapshot.BrushSessionDurationMinutes,
-                PendingReward = snapshot.PendingReward,
+                PendingRewardCount = snapshot.PendingRewardCount,
                 Muted = snapshot.Muted,
                 PetState = snapshot.PetState ?? new Pet(),
                 RoomState = snapshot.RoomState ?? new Room(),
@@ -425,6 +425,15 @@ namespace Game.Core.Services
 
         private async Task<RemoteResponse> SendAuthorizedAsync(RemoteRequest request)
         {
+            if (authService_ == null || !await authService_.EnsureSessionIsValidAsync())
+            {
+                return new RemoteResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No auth session is available."
+                };
+            }
+
             string token = authService_.CurrentSession?.AccessToken;
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -504,7 +513,7 @@ namespace Game.Core.Services
                 },
                 RoomData = new Room(),
                 InventoryData = DefaultProfileState.CreateInventory(),
-                PendingReward = DefaultProfileState.InitialPendingReward,
+                PendingRewardCount = DefaultProfileState.InitialPendingRewardCount,
                 Muted = false
             };
 
@@ -599,7 +608,7 @@ namespace Game.Core.Services
         {
             public string BaseRevision;
             public int BrushSessionDurationMinutes;
-            public bool PendingReward;
+            public int PendingRewardCount;
             public bool Muted;
             public Pet PetState;
             public Room RoomState;

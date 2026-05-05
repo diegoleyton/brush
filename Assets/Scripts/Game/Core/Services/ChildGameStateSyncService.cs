@@ -314,7 +314,7 @@ namespace Game.Core.Services
                 if (!preserveExistingDefaults && snapshot.BrushSessionDurationMinutes > 0)
                 {
                     profile.BrushSessionDurationMinutes = snapshot.BrushSessionDurationMinutes;
-                    profile.PendingReward = snapshot.PendingReward;
+                    profile.PendingRewardCount = snapshot.PendingRewardCount;
                     profile.Muted = snapshot.Muted;
                 }
 
@@ -334,7 +334,7 @@ namespace Game.Core.Services
                 }
 
                 dispatcher_?.Send(new ProfileUpdatedEvent());
-                dispatcher_?.Send(new PendingRewardEvent());
+                dispatcher_?.Send(new PendingRewardEvent(profile.PendingRewardCount));
                 dispatcher_?.Send(new InventoryUpdatedEvent());
                 dispatcher_?.Send(new CurrencyUpdatedEvent());
             }
@@ -352,7 +352,7 @@ namespace Game.Core.Services
                 Revision = profile.RemoteGameStateRevision ?? string.Empty,
                 CoinsBalance = profile.Coins,
                 BrushSessionDurationMinutes = (int)Math.Max(1f, MathF.Round(profile.BrushSessionDurationMinutes)),
-                PendingReward = profile.PendingReward,
+                PendingRewardCount = profile.PendingRewardCount,
                 Muted = profile.Muted,
                 PetState = profile.PetData ?? new Pet(),
                 RoomState = profile.RoomData ?? new Room(),

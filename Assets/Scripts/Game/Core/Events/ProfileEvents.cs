@@ -21,5 +21,11 @@ namespace Game.Core.Events
     /// </summary>
     public sealed class PendingRewardEvent : IEvent
     {
+        public PendingRewardEvent(int pendingRewardCount = 0)
+        {
+            PendingRewardCount = pendingRewardCount;
+        }
+
+        public int PendingRewardCount { get; }
     }
 }

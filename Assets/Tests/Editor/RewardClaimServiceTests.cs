@@ -134,6 +134,8 @@ namespace Game.Core.Tests
 
             public Task InitializeAsync() => Task.CompletedTask;
 
+            public Task<bool> EnsureSessionIsValidAsync() => Task.FromResult(HasSession);
+
             public Task<AuthResult> CreateAccountAsync(string email, string password, string familyName) =>
                 Task.FromResult<AuthResult>(null);
 

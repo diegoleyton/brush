@@ -14,7 +14,7 @@ public sealed class ChildGameState
     public ChildGameState(Guid childProfileId, string petName = "")
     {
         ChildProfileId = childProfileId;
-        PendingReward = true;
+        PendingRewardCount = 1;
         PetStateJson = ChildGameStateDefaults.CreatePetStateJson(petName);
         RoomStateJson = ChildGameStateDefaults.CreateRoomStateJson();
         InventoryStateJson = ChildGameStateDefaults.CreateInventoryStateJson();
@@ -26,7 +26,7 @@ public sealed class ChildGameState
 
     public int BrushSessionDurationMinutes { get; private set; } = DefaultBrushSessionDurationMinutes;
 
-    public bool PendingReward { get; private set; }
+    public int PendingRewardCount { get; private set; }
 
     public bool Muted { get; private set; }
 
@@ -44,7 +44,7 @@ public sealed class ChildGameState
 
     public void Update(
         int brushSessionDurationMinutes,
-        bool pendingReward,
+        int pendingRewardCount,
         bool muted,
         string petStateJson,
         string roomStateJson,
@@ -58,7 +58,7 @@ public sealed class ChildGameState
         }
 
         BrushSessionDurationMinutes = brushSessionDurationMinutes;
-        PendingReward = pendingReward;
+        PendingRewardCount = Math.Max(0, pendingRewardCount);
         Muted = muted;
         PetStateJson = ValidateJson(petStateJson, nameof(petStateJson));
         RoomStateJson = ValidateJson(roomStateJson, nameof(roomStateJson));
@@ -122,7 +122,7 @@ public sealed class ChildGameState
         }
 
         PetStateJson = ChildGameStateDefaults.SetLastBrushTime(normalizedPetStateJson, petName, nowUnixSeconds);
-        PendingReward = true;
+        PendingRewardCount++;
         UpdatedAt = DateTimeOffset.UtcNow;
         return true;
     }

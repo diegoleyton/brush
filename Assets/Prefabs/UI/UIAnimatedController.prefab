@@ -55,4 +55,16 @@ MonoBehaviour:
   minimumScale_: 0.97
   maximumScale_: 1.03
   scaleCycleDurationSeconds_: 1.5
-  colorCycleDurationSeconds_: 0.7
+  colorCycleDurationSeconds_: 0.9
+  boldColors_:
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0.75686276, b: 0.78039217, a: 1}
+  - {r: 1, g: 0.8235294, b: 0.72156864, a: 1}
+  - {r: 1, g: 1, b: 0.7058824, a: 1}
+  - {r: 0.8, g: 1, b: 0.7764706, a: 1}
+  - {r: 0.6666667, g: 0.8745098, b: 1, a: 1}
+  - {r: 0.8509804, g: 0.7764706, b: 1, a: 1}
+  boldMinimumScale_: 0.85
+  boldMaximumScale_: 1.18
+  boldScaleCycleDurationSeconds_: 0.4
+  boldColorCycleDurationSeconds_: 0.2

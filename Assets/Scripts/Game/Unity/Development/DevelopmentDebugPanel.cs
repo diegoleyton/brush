@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.ScreenBlocker;
+using Flowbit.Utilities.Storage;
 using Flowbit.Utilities.Unity.RemoteCommunication;
 using Game.Core.Configuration;
 using Game.Core.Data;
@@ -36,6 +37,8 @@ namespace Game.Unity.Development
         private IChildGameStateSyncService childGameStateSyncService_;
         private ScreenBlocker screenBlocker_;
         private DevelopmentRemoteSimulationSettings remoteSimulationSettings_;
+        private IAuthService authService_;
+        private IDataStorage dataStorage_;
 
         private bool isOpen_;
         private Rect windowRect_ = new Rect(24f, 96f, 560f, 820f);
@@ -58,7 +61,9 @@ namespace Game.Unity.Development
             IChildrenApiClient childrenApiClient,
             IChildGameStateSyncService childGameStateSyncService,
             ScreenBlocker screenBlocker,
-            DevelopmentRemoteSimulationSettings remoteSimulationSettings)
+            DevelopmentRemoteSimulationSettings remoteSimulationSettings,
+            IAuthService authService,
+            IDataStorage dataStorage)
         {
             repository_ = repository;
             roomGameplayService_ = roomGameplayService;
@@ -67,6 +72,8 @@ namespace Game.Unity.Development
             childGameStateSyncService_ = childGameStateSyncService;
             screenBlocker_ = screenBlocker;
             remoteSimulationSettings_ = remoteSimulationSettings;
+            authService_ = authService;
+            dataStorage_ = dataStorage;
         }
 
         private void Awake()
@@ -169,6 +176,7 @@ namespace Game.Unity.Development
 
             DrawCoinsSection();
             DrawRemoteSimulationSection();
+            DrawAuthSimulationSection();
             DrawPendingRewardSection();
             DrawInventorySection(InteractionPointType.PLACEABLE_OBJECT, "Placeable Objects", roomGameplayService_.AddPlaceableObject);
             DrawInventorySection(InteractionPointType.FOOD, "Food", roomGameplayService_.AddFood);
@@ -208,7 +216,7 @@ namespace Game.Unity.Development
             GUILayout.Label($"Profile: {currentProfile.Name}");
             GUILayout.Label($"Pet: {currentProfile.PetData?.Name ?? string.Empty}");
             GUILayout.Label($"Coins: {currentProfile.Coins}");
-            GUILayout.Label($"Pending reward: {currentProfile.PendingReward}");
+            GUILayout.Label($"Pending rewards: {currentProfile.PendingRewardCount}");
             GUILayout.Space(6f);
         }
 
@@ -279,6 +287,18 @@ namespace Game.Unity.Development
             GUILayout.Space(8f);
         }
 
+        private void DrawAuthSimulationSection()
+        {
+            GUILayout.Label("Auth Simulation");
+
+            if (GUILayout.Button("Expire Access Token"))
+            {
+                _ = ExpireAccessTokenAsync();
+            }
+
+            GUILayout.Space(8f);
+        }
+
         private async Task AddCoinsAsync(int amount)
         {
             Profile currentProfile = repository_?.CurrentProfile;
@@ -328,20 +348,40 @@ namespace Game.Unity.Development
             feedback_ = $"+{amount} coins";
         }
 
+        private async Task ExpireAccessTokenAsync()
+        {
+            AuthSession currentSession = authService_?.CurrentSession;
+            if (currentSession == null || !currentSession.HasRefreshToken)
+            {
+                feedback_ = "No refreshable auth session.";
+                return;
+            }
+
+            currentSession.ExpiresAtUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 60;
+
+            if (dataStorage_ != null)
+            {
+                await dataStorage_.SaveAsync(AuthService.SessionStorageKey, currentSession);
+            }
+
+            feedback_ = "Access token expired locally. The next protected request should refresh the session automatically.";
+        }
+
         private void DrawPendingRewardSection()
         {
             GUILayout.Label("Pending Reward");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Enable"))
+            if (GUILayout.Button("+1"))
             {
-                repository_?.SetPendingReward(true);
-                feedback_ = "Pending reward enabled.";
+                int nextCount = Math.Max(0, (repository_?.CurrentProfile?.PendingRewardCount ?? 0) + 1);
+                repository_?.SetPendingRewardCount(nextCount);
+                feedback_ = $"Pending rewards: {nextCount}.";
             }
 
             if (GUILayout.Button("Clear"))
             {
-                repository_?.SetPendingReward(false);
-                feedback_ = "Pending reward cleared.";
+                repository_?.SetPendingRewardCount(0);
+                feedback_ = "Pending rewards cleared.";
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(8f);

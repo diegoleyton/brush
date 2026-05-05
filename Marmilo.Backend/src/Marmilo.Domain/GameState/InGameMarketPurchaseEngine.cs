@@ -69,7 +69,7 @@ public static class InGameMarketPurchaseEngine
         gameState.SetCoinsBalance(Math.Max(0, gameState.CoinsBalance - item.Price));
         gameState.Update(
             gameState.BrushSessionDurationMinutes,
-            gameState.PendingReward,
+            gameState.PendingRewardCount,
             gameState.Muted,
             gameState.PetStateJson,
             gameState.RoomStateJson,

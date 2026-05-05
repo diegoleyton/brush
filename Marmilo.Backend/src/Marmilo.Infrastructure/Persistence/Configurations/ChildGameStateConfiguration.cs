@@ -23,8 +23,8 @@ public sealed class ChildGameStateConfiguration : IEntityTypeConfiguration<Child
             .HasColumnName("brush_session_duration_minutes")
             .IsRequired();
 
-        builder.Property(gameState => gameState.PendingReward)
-            .HasColumnName("pending_reward")
+        builder.Property(gameState => gameState.PendingRewardCount)
+            .HasColumnName("pending_reward_count")
             .IsRequired();
 
         builder.Property(gameState => gameState.Muted)

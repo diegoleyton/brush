@@ -19,6 +19,8 @@ namespace Game.Core.Services
 
         public bool HasAccessToken => !string.IsNullOrWhiteSpace(AccessToken);
 
+        public bool HasRefreshToken => !string.IsNullOrWhiteSpace(RefreshToken);
+
         public bool IsExpired
         {
             get
@@ -34,5 +36,7 @@ namespace Game.Core.Services
         }
 
         public bool HasUsableAccessToken => HasAccessToken && !IsExpired;
+
+        public bool HasRefreshableSession => HasUsableAccessToken || HasRefreshToken;
     }
 }

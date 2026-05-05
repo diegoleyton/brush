@@ -38,8 +38,6 @@ namespace Game.Unity.RoomScene
         private bool restoreInventoryAfterDrag_;
         private bool waitForPaintEffectAfterDrag_;
         private bool waitForSkinEffectAfterDrag_;
-        private bool rewardSceneNavigationRequested_;
-
         [SerializeField]
         [FormerlySerializedAs("paletteList_")]
         private RoomInventoryListUI inventoryList_;
@@ -49,6 +47,9 @@ namespace Game.Unity.RoomScene
 
         [SerializeField]
         private InputField petNameInput_;
+
+        [SerializeField]
+        private RewardButton rewardButton_;
 
         [SerializeField]
         private InteractionPointType selectedInventoryType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -83,6 +84,8 @@ namespace Game.Unity.RoomScene
             SubscribeToDispatcher();
             BindPetNameInput();
             RefreshPetNameInput();
+            BindRewardButton();
+            RefreshRewardButton();
             BindInventoryCategoryButtons();
             BuildDropAcceptedHandlers();
         }
@@ -92,7 +95,6 @@ namespace Game.Unity.RoomScene
             if (initialized_)
             {
                 RefreshDropAreas();
-                TryOpenRewardsSceneIfPending();
             }
         }
 
@@ -117,8 +119,8 @@ namespace Game.Unity.RoomScene
             RefreshInventoryList();
             RefreshDropAreas();
             RefreshPetNameInput();
+            RefreshRewardButton();
             initialized_ = true;
-            TryOpenRewardsSceneIfPending();
         }
 
         public void GoToBrushScene()
@@ -155,6 +157,17 @@ namespace Game.Unity.RoomScene
             }
 
             navigationService_.Navigate(SceneType.MarketScene);
+        }
+
+        public void GoToRewardsScene()
+        {
+            if (navigationService_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(IGameNavigationService)} dependency.");
+            }
+
+            navigationService_.Navigate(SceneType.RewardsScene);
         }
 
         private void ValidateSceneReferences()
@@ -373,7 +386,7 @@ namespace Game.Unity.RoomScene
         {
             RefreshInventoryList();
             RefreshPetNameInput();
-            TryOpenRewardsSceneIfPending();
+            RefreshRewardButton();
         }
 
         private void OnProfileUpdated(ProfileUpdatedEvent _)
@@ -383,7 +396,7 @@ namespace Game.Unity.RoomScene
 
         private void OnPendingRewardChanged(PendingRewardEvent _)
         {
-            TryOpenRewardsSceneIfPending();
+            RefreshRewardButton();
         }
 
         private void OnSwitchList(SwitchListEvent eventData)
@@ -617,29 +630,22 @@ namespace Game.Unity.RoomScene
                 throw new InvalidOperationException(
                     $"{nameof(RoomController)} requires an {nameof(InputField)} reference for the pet name input.");
             }
+
+            if (rewardButton_ == null)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(RoomController)} requires a {nameof(RewardButton)} reference.");
+            }
         }
 
-        private void TryOpenRewardsSceneIfPending()
+        private void BindRewardButton()
         {
-            if (!initialized_ || !isActiveAndEnabled || navigationService_ == null)
-            {
-                return;
-            }
+            rewardButton_?.Initialize(GoToRewardsScene);
+        }
 
-            bool hasPendingReward = repository_?.CurrentProfile?.PendingReward == true;
-            if (!hasPendingReward)
-            {
-                rewardSceneNavigationRequested_ = false;
-                return;
-            }
-
-            if (rewardSceneNavigationRequested_)
-            {
-                return;
-            }
-
-            rewardSceneNavigationRequested_ = true;
-            navigationService_.Navigate(SceneType.RewardsScene);
+        private void RefreshRewardButton()
+        {
+            rewardButton_?.SetPendingRewardCount(repository_?.CurrentProfile?.PendingRewardCount ?? 0);
         }
 
     }

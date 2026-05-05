@@ -284,6 +284,8 @@ namespace Game.Core.Tests
 
             public Task InitializeAsync() => Task.CompletedTask;
 
+            public Task<bool> EnsureSessionIsValidAsync() => Task.FromResult(HasSession);
+
             public Task<AuthResult> CreateAccountAsync(string email, string password, string familyName) =>
                 Task.FromResult<AuthResult>(null);
 
@@ -421,7 +423,7 @@ namespace Game.Core.Tests
                                 Revision = entry.Snapshot.Revision,
                                 CoinsBalance = entry.Snapshot.CoinsBalance,
                                 BrushSessionDurationMinutes = entry.Snapshot.BrushSessionDurationMinutes,
-                                PendingReward = entry.Snapshot.PendingReward,
+                                PendingRewardCount = entry.Snapshot.PendingRewardCount,
                                 Muted = entry.Snapshot.Muted,
                                 PetState = entry.Snapshot.PetState,
                                 RoomState = entry.Snapshot.RoomState,

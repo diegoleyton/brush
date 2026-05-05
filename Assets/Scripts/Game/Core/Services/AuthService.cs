@@ -32,7 +32,7 @@ namespace Game.Core.Services
 
         public AuthSession CurrentSession { get; private set; }
 
-        public bool HasSession => CurrentSession != null && CurrentSession.HasUsableAccessToken;
+        public bool HasSession => CurrentSession != null && CurrentSession.HasRefreshableSession;
 
         public async Task InitializeAsync()
         {
@@ -57,9 +57,18 @@ namespace Game.Core.Services
             DataLoadResult<AuthSession> loadResult =
                 await dataStorage_.LoadAsync<AuthSession>(SessionStorageKey);
 
-            CurrentSession = loadResult.Found && loadResult.Data != null && loadResult.Data.HasUsableAccessToken
+            CurrentSession = loadResult.Found && loadResult.Data != null && loadResult.Data.HasRefreshableSession
                 ? loadResult.Data
                 : null;
+
+            if (CurrentSession != null && CurrentSession.IsExpired)
+            {
+                bool refreshed = await EnsureSessionIsValidAsync();
+                if (!refreshed)
+                {
+                    return;
+                }
+            }
 
             if (CurrentSession == null && loadResult.Found && loadResult.Data != null && loadResult.Data.HasAccessToken)
             {
@@ -70,6 +79,59 @@ namespace Game.Core.Services
             logger_?.Log(HasSession
                 ? "[Auth] Restored auth session."
                 : "[Auth] No auth session found.");
+        }
+
+        public async Task<bool> EnsureSessionIsValidAsync()
+        {
+            if (CurrentSession == null)
+            {
+                return false;
+            }
+
+            if (CurrentSession.HasUsableAccessToken)
+            {
+                return true;
+            }
+
+            if (!CurrentSession.HasRefreshToken)
+            {
+                await ClearPersistedSessionAsync("[Auth] Cleared expired auth session without refresh token.");
+                return false;
+            }
+
+            SupabaseAuthResponse refreshResponse =
+                await identityProviderClient_.RefreshSessionAsync(CurrentSession.RefreshToken);
+            if (!refreshResponse.IsSuccess)
+            {
+                await ClearPersistedSessionAsync("[Auth] Failed to refresh auth session.");
+                return false;
+            }
+
+            AuthSession refreshedSession = ToSession(refreshResponse);
+            if (refreshedSession == null)
+            {
+                await ClearPersistedSessionAsync("[Auth] Refresh did not return a valid auth session.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(refreshedSession.Email))
+            {
+                refreshedSession.Email = CurrentSession.Email;
+            }
+
+            if (string.IsNullOrWhiteSpace(refreshedSession.UserId))
+            {
+                refreshedSession.UserId = CurrentSession.UserId;
+            }
+
+            if (string.IsNullOrWhiteSpace(refreshedSession.RefreshToken))
+            {
+                refreshedSession.RefreshToken = CurrentSession.RefreshToken;
+            }
+
+            await PersistSessionAsync(refreshedSession);
+            logger_?.Log("[Auth] Refreshed auth session.");
+            return true;
         }
 
         public async Task<AuthResult> CreateAccountAsync(string email, string password, string familyName)
@@ -127,6 +189,14 @@ namespace Game.Core.Services
             initializeTask_ = Task.CompletedTask;
             await dataStorage_.SaveAsync(SessionStorageKey, new AuthSession());
             logger_?.Log("[Auth] Cleared auth session.");
+        }
+
+        private async Task ClearPersistedSessionAsync(string logMessage)
+        {
+            CurrentSession = null;
+            initializeTask_ = Task.CompletedTask;
+            await dataStorage_.SaveAsync(SessionStorageKey, new AuthSession());
+            logger_?.Log(logMessage);
         }
 
         private async Task PersistSessionAsync(AuthSession session)

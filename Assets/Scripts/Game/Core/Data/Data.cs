@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
-
 using Game.Core.Configuration;
 
 namespace Game.Core.Data
@@ -32,8 +31,11 @@ namespace Game.Core.Data
         public Pet PetData = new Pet();
         public Room RoomData = new Room();
         public Inventory InventoryData = new Inventory();
-        public bool PendingReward = false;
+        [FormerlySerializedAs("PendingReward")]
+        public int PendingRewardCount = 0;
         public bool Muted = false;
+
+        public bool HasPendingReward => PendingRewardCount > 0;
     }
 
     /// <summary>

@@ -7,7 +7,7 @@ public sealed record ChildGameStateResponse(
     string Revision,
     int CoinsBalance,
     int BrushSessionDurationMinutes,
-    bool PendingReward,
+    int PendingRewardCount,
     bool Muted,
     JsonElement PetState,
     JsonElement RoomState,

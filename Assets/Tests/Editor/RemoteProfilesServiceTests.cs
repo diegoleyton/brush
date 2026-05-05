@@ -23,7 +23,7 @@ namespace Game.Core.Tests
                 RemoteProfileId = "child-1",
                 Name = "Old Name",
                 ProfilePictureId = 1,
-                PendingReward = true,
+                PendingRewardCount = 1,
                 Coins = 99,
                 PetData = new Pet { Name = "Old Pet", lastBrushTime = 123 }
             };
@@ -57,7 +57,7 @@ namespace Game.Core.Tests
             Assert.That(store.CurrentProfile.Name, Is.EqualTo("New Name"));
             Assert.That(store.CurrentProfile.ProfilePictureId, Is.EqualTo(7));
             Assert.That(store.CurrentProfile.PetData.Name, Is.EqualTo("New Pet"));
-            Assert.That(store.CurrentProfile.PendingReward, Is.True);
+            Assert.That(store.CurrentProfile.PendingRewardCount, Is.EqualTo(1));
             Assert.That(store.CurrentProfile.Coins, Is.EqualTo(99));
             Assert.That(updatedRecorder.Count, Is.EqualTo(1));
             Assert.That(switchedRecorder.Count, Is.EqualTo(0));
@@ -144,6 +144,8 @@ namespace Game.Core.Tests
             public bool HasSession { get; }
 
             public Task InitializeAsync() => Task.CompletedTask;
+
+            public Task<bool> EnsureSessionIsValidAsync() => Task.FromResult(HasSession);
 
             public Task<AuthResult> CreateAccountAsync(string email, string password, string familyName) =>
                 Task.FromResult<AuthResult>(null);

@@ -207,9 +207,9 @@ namespace Marmilo.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("muted");
 
-                    b.Property<bool>("PendingReward")
-                        .HasColumnType("boolean")
-                        .HasColumnName("pending_reward");
+                    b.Property<int>("PendingRewardCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("pending_reward_count");
 
                     b.Property<string>("PetStateJson")
                         .IsRequired()

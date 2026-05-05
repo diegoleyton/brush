@@ -5,7 +5,7 @@ namespace Marmilo.Api.Contracts.Children;
 public sealed record UpdateChildGameStateRequest(
     string? BaseRevision,
     int BrushSessionDurationMinutes,
-    bool PendingReward,
+    int PendingRewardCount,
     bool Muted,
     JsonElement PetState,
     JsonElement RoomState,

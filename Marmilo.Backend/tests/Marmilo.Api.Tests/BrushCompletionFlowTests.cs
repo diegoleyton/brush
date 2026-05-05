@@ -29,8 +29,8 @@ public sealed class BrushCompletionFlowTests : IClassFixture<MarmiloApiFactory>
         JsonObject completedState = await flow.CompleteBrushSessionAsync(childId);
         JsonObject refreshedState = await flow.GetGameStateAsync(childId);
 
-        Assert.True(completedState["pendingReward"]?.GetValue<bool>());
-        Assert.True(refreshedState["pendingReward"]?.GetValue<bool>());
+        Assert.Equal(2, completedState["pendingRewardCount"]?.GetValue<int>());
+        Assert.Equal(2, refreshedState["pendingRewardCount"]?.GetValue<int>());
 
         JsonObject petState = refreshedState["petState"]?.AsObject()
             ?? throw new InvalidOperationException("Expected petState object.");

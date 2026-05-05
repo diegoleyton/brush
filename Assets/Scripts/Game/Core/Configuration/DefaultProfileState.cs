@@ -19,7 +19,7 @@ namespace Game.Core.Configuration
         public const int DefaultPetDressItemId = 0;
         public const float DefaultBrushSessionDurationMinutes = 2f;
 
-        public const bool InitialPendingReward = true;
+        public const int InitialPendingRewardCount = 1;
 
         public static readonly Color DefaultRoomSurfaceColor = Color.white;
 

@@ -39,6 +39,11 @@ namespace Game.Core.Services
                 $"{settings_.SupabaseUrl}/auth/v1/token?grant_type=password",
                 "{\"email\":\"" + EscapeJson(email) + "\",\"password\":\"" + EscapeJson(password) + "\"}");
 
+        public Task<SupabaseAuthResponse> RefreshSessionAsync(string refreshToken) =>
+            SendAuthRequestAsync(
+                $"{settings_.SupabaseUrl}/auth/v1/token?grant_type=refresh_token",
+                "{\"refresh_token\":\"" + EscapeJson(refreshToken) + "\"}");
+
         private async Task<SupabaseAuthResponse> SendAuthRequestAsync(string url, string jsonBody)
         {
             string configurationError = ValidateConfiguration();

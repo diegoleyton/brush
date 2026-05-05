@@ -10,5 +10,7 @@ namespace Game.Core.Services
         Task<SupabaseAuthResponse> SignUpAsync(string email, string password);
 
         Task<SupabaseAuthResponse> LoginAsync(string email, string password);
+
+        Task<SupabaseAuthResponse> RefreshSessionAsync(string refreshToken);
     }
 }

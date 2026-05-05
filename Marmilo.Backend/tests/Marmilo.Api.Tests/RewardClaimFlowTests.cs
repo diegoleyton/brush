@@ -33,7 +33,7 @@ public sealed class RewardClaimFlowTests : IClassFixture<MarmiloApiFactory>
         JsonObject refreshedState = await flow.GetGameStateAsync(childId);
 
         Assert.Equal(2, rewards.Count);
-        Assert.False(refreshedState["pendingReward"]?.GetValue<bool>());
+        Assert.Equal(0, refreshedState["pendingRewardCount"]?.GetValue<int>());
     }
 
     [Fact]
@@ -59,5 +59,30 @@ public sealed class RewardClaimFlowTests : IClassFixture<MarmiloApiFactory>
 
         JsonObject error = await secondResponse.ReadJsonObjectAsync();
         Assert.Equal("No pending reward is available for this child profile.", error["message"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task Claim_rewards_consumes_only_one_pending_reward_when_multiple_are_available()
+    {
+        await factory_.ResetDatabaseAsync();
+
+        TestAuthSession session = new(Guid.NewGuid(), "rewards-multi@marmilo.test");
+        TestFlowDriver flow = new(factory_, session);
+
+        await flow.RegisterParentAsync("Marmilo Rewards Multi Family");
+
+        JsonObject child = await flow.CreateChildAsync("Sofia", "Nube", 1);
+        Guid childId = child["id"]?.GetValue<Guid>()
+            ?? throw new InvalidOperationException("Expected child id.");
+
+        await flow.CompleteBrushSessionAsync(childId);
+
+        JsonObject claim = await flow.ClaimRewardsAsync(childId);
+        JsonArray rewards = claim["rewards"]?.AsArray()
+            ?? throw new InvalidOperationException("Expected rewards array.");
+        JsonObject refreshedState = await flow.GetGameStateAsync(childId);
+
+        Assert.Equal(2, rewards.Count);
+        Assert.Equal(1, refreshedState["pendingRewardCount"]?.GetValue<int>());
     }
 }

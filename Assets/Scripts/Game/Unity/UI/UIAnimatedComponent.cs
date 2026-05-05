@@ -15,9 +15,14 @@ namespace Game.Unity.UI
         [SerializeField]
         private Image image_;
 
+        [SerializeField]
+        private UIAnimatedComponentAnimationType animationType_ = UIAnimatedComponentAnimationType.Subtle;
+
         private RectTransform animatedTransform_;
 
         private UIAnimatedComponentController controller_;
+
+        public UIAnimatedComponentAnimationType AnimationType => animationType_;
 
         [Inject]
         public void Construct(UIAnimatedComponentController controller)

@@ -153,6 +153,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/CurrencyItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/RetryPopupParams.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDragVisual.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/UI/UIAnimatedComponentAnimationType.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropVisual.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/BrushTimer.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/DragItems/RoomDropArea.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Dress/PetDressController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Inventory/RoomInventoryView.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RewardButton.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/ItemViews/PlaceableObjectItemView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ProfileSelectionScene/ProfileSelectionScene.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketItemView.cs" />

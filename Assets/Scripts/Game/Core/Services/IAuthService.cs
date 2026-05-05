@@ -13,6 +13,8 @@ namespace Game.Core.Services
 
         Task InitializeAsync();
 
+        Task<bool> EnsureSessionIsValidAsync();
+
         Task<AuthResult> CreateAccountAsync(string email, string password, string familyName);
 
         Task<AuthResult> LoginAsync(string email, string password);

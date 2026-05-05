@@ -158,7 +158,7 @@ internal sealed class TestFlowDriver
         Guid childId,
         string? baseRevision,
         int brushSessionDurationMinutes,
-        bool pendingReward,
+        int pendingRewardCount,
         bool muted,
         JsonNode petState,
         JsonNode roomState,
@@ -171,7 +171,7 @@ internal sealed class TestFlowDriver
             {
                 baseRevision,
                 brushSessionDurationMinutes,
-                pendingReward,
+                pendingRewardCount,
                 muted,
                 petState,
                 roomState,

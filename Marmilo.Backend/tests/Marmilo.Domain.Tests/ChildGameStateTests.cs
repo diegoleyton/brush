@@ -10,7 +10,7 @@ public sealed class ChildGameStateTests
         ChildGameState state = new(Guid.NewGuid());
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            state.Update(0, false, false, "{}", "{}", "{}"));
+            state.Update(0, 0, false, "{}", "{}", "{}"));
     }
 
     [Fact]
@@ -18,7 +18,7 @@ public sealed class ChildGameStateTests
     {
         ChildGameState state = new(Guid.NewGuid());
 
-        state.Update(2, true, true, "", " ", null!);
+        state.Update(2, 1, true, "", " ", null!);
 
         Assert.Equal("{}", state.PetStateJson);
         Assert.Equal("{}", state.RoomStateJson);
@@ -37,14 +37,14 @@ public sealed class ChildGameStateTests
     public void TryCompleteBrushSession_sets_last_brush_time_and_pending_reward_when_not_on_cooldown()
     {
         ChildGameState state = new(Guid.NewGuid(), "Nube");
-        state.Update(2, pendingReward: false, muted: false, state.PetStateJson, state.RoomStateJson, state.InventoryStateJson);
+        state.Update(2, pendingRewardCount: 0, muted: false, state.PetStateJson, state.RoomStateJson, state.InventoryStateJson);
 
         long nowUnixSeconds = 1_700_000_000;
 
         bool completed = state.TryCompleteBrushSession("Nube", nowUnixSeconds);
 
         Assert.True(completed);
-        Assert.True(state.PendingReward);
+        Assert.Equal(1, state.PendingRewardCount);
         Assert.Equal(nowUnixSeconds, ChildGameStateDefaults.GetLastBrushTime(state.PetStateJson, "Nube"));
     }
 

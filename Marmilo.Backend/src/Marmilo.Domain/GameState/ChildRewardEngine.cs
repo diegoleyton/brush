@@ -60,7 +60,7 @@ public static class ChildRewardEngine
         gameState.SetCoinsBalance(coinsBalance);
         gameState.Update(
             gameState.BrushSessionDurationMinutes,
-            pendingReward: false,
+            pendingRewardCount: Math.Max(0, gameState.PendingRewardCount - 1),
             gameState.Muted,
             gameState.PetStateJson,
             gameState.RoomStateJson,

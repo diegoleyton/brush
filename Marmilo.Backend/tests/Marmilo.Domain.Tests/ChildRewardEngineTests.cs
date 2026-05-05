@@ -26,7 +26,7 @@ public sealed class ChildRewardEngineTests
 
         ChildRewardEngine.ApplyRewardClaim(state, rewards);
 
-        Assert.False(state.PendingReward);
+        Assert.Equal(0, state.PendingRewardCount);
         Assert.Equal(15, state.CoinsBalance);
 
         using JsonDocument inventoryDocument = JsonDocument.Parse(state.InventoryStateJson);
@@ -54,7 +54,7 @@ public sealed class ChildRewardEngineTests
 
         state.Update(
             brushSessionDurationMinutes: 2,
-            pendingReward: true,
+            pendingRewardCount: 1,
             muted: false,
             state.PetStateJson,
             state.RoomStateJson,
