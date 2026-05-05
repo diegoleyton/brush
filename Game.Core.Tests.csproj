@@ -65,9 +65,11 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Tests/Editor/ChildGameStateSyncServiceTests.cs" />
     <Compile Include="Assets/Tests/Editor/MarketPurchaseServiceTests.cs" />
     <Compile Include="Assets/Tests/Editor/BrushCompletionServiceTests.cs" />
     <Compile Include="Assets/Tests/Editor/RewardClaimServiceTests.cs" />
+    <Compile Include="Assets/Tests/Editor/RemoteProfilesServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/Tests/Editor/Game.Core.Tests.asmdef" />
@@ -1092,6 +1094,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Game.Core.csproj" />
+    <ProjectReference Include="Flowbit.Utilities.Core.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

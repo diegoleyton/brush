@@ -2,7 +2,8 @@
     "name": "Game.Core.Tests",
     "rootNamespace": "Game.Core.Tests",
     "references": [
-        "GUID:e8aba5676995f42a9933a04ccbc3a5f2"
+        "GUID:e8aba5676995f42a9933a04ccbc3a5f2",
+        "GUID:8ef688732ae7d4480ad65ada33b7bdea"
     ],
     "includePlatforms": [
         "Editor"
