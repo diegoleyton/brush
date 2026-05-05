@@ -32,4 +32,34 @@ public sealed class ChildGameStateTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => state.SetCoinsBalance(-1));
     }
+
+    [Fact]
+    public void TryCompleteBrushSession_sets_last_brush_time_and_pending_reward_when_not_on_cooldown()
+    {
+        ChildGameState state = new(Guid.NewGuid(), "Nube");
+        state.Update(2, pendingReward: false, muted: false, state.PetStateJson, state.RoomStateJson, state.InventoryStateJson);
+
+        long nowUnixSeconds = 1_700_000_000;
+
+        bool completed = state.TryCompleteBrushSession("Nube", nowUnixSeconds);
+
+        Assert.True(completed);
+        Assert.True(state.PendingReward);
+        Assert.Equal(nowUnixSeconds, ChildGameStateDefaults.GetLastBrushTime(state.PetStateJson, "Nube"));
+    }
+
+    [Fact]
+    public void TryCompleteBrushSession_rejects_when_brush_is_on_cooldown()
+    {
+        ChildGameState state = new(Guid.NewGuid(), "Nube");
+        long firstBrushUnixSeconds = 1_700_000_000;
+        long blockedRetryUnixSeconds = firstBrushUnixSeconds + ChildGameState.BrushCooldownSeconds - 1;
+
+        bool firstCompletion = state.TryCompleteBrushSession("Nube", firstBrushUnixSeconds);
+        bool secondCompletion = state.TryCompleteBrushSession("Nube", blockedRetryUnixSeconds);
+
+        Assert.True(firstCompletion);
+        Assert.False(secondCompletion);
+        Assert.Equal(firstBrushUnixSeconds, ChildGameStateDefaults.GetLastBrushTime(state.PetStateJson, "Nube"));
+    }
 }

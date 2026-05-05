@@ -197,7 +197,7 @@ namespace Game.Unity.RewardScene
                     new RetryPopupParams(
                         message,
                         onRetry: () => startCoroutine_(GiveRewards()),
-                        onCancel: navigationService_?.Back,
+                        onCancel: navigationService_.Back,
                         title: LocalizationServiceLocator.GetText(
                             "rewards.retry.popup_title",
                             "Connection problem")));
@@ -209,14 +209,14 @@ namespace Game.Unity.RewardScene
 
         private void ShowClaimErrorPopup(string message)
         {
-            navigationService_?.Navigate(
+            navigationService_.Navigate(
                 SceneType.ErrorPopup,
                 new ErrorPopupParams(
                     message,
                     title: LocalizationServiceLocator.GetText(
                         "rewards.error.popup_title",
                         "Could not claim reward"),
-                    onClose: navigationService_?.Back));
+                    onClose: navigationService_.Back));
         }
 
         private static Exception UnwrapTaskException(AggregateException exception)

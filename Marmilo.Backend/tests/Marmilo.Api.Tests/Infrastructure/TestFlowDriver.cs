@@ -126,6 +126,59 @@ internal sealed class TestFlowDriver
         return await response.ReadJsonObjectAsync();
     }
 
+    public async Task<JsonObject> CompleteBrushSessionAsync(Guid childId)
+    {
+        using HttpClient client = session_.CreateAuthenticatedClient(factory_);
+        HttpResponseMessage response = await client.PostAsync($"/children/{childId}/brush-completions", content: null);
+        response.EnsureSuccessStatusCode();
+        return await response.ReadJsonObjectAsync();
+    }
+
+    public async Task<JsonObject> ClaimRewardsAsync(Guid childId)
+    {
+        using HttpClient client = session_.CreateAuthenticatedClient(factory_);
+        HttpResponseMessage response = await client.PostAsync($"/children/{childId}/claim-rewards", content: null);
+        response.EnsureSuccessStatusCode();
+        return await response.ReadJsonObjectAsync();
+    }
+
+    public async Task<HttpResponseMessage> PurchaseInGameMarketItemAsync(Guid childId, int itemType, int itemId)
+    {
+        using HttpClient client = session_.CreateAuthenticatedClient(factory_);
+        return await client.PostAsJsonAsync(
+            $"/children/{childId}/market-purchases",
+            new
+            {
+                itemType,
+                itemId
+            });
+    }
+
+    public async Task<HttpResponseMessage> UpdateGameStateAsync(
+        Guid childId,
+        string? baseRevision,
+        int brushSessionDurationMinutes,
+        bool pendingReward,
+        bool muted,
+        JsonNode petState,
+        JsonNode roomState,
+        JsonNode inventoryState)
+    {
+        using HttpClient client = session_.CreateAuthenticatedClient(factory_);
+        return await client.PutAsJsonAsync(
+            $"/children/{childId}/game-state",
+            new
+            {
+                baseRevision,
+                brushSessionDurationMinutes,
+                pendingReward,
+                muted,
+                petState,
+                roomState,
+                inventoryState
+            });
+    }
+
     public async Task<JsonObject> GetLedgerAsync(Guid childId)
     {
         using HttpClient client = session_.CreateAuthenticatedClient(factory_);
