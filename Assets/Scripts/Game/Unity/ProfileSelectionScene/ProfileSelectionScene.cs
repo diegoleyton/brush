@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Localization;
-using Flowbit.Utilities.RemoteCommunication;
 using Flowbit.Utilities.ScreenBlocker;
 
 using Game.Core.Data;
@@ -25,7 +24,7 @@ namespace Game.Unity.ProfileSelectionScene
     /// <summary>
     /// Presents the available save profiles and lets the player switch between them.
     /// </summary>
-    public sealed class ProfileSelectionScene : SceneBase
+    public sealed class ProfileSelectionScene : RemoteBootstrapSceneBase
     {
         [SerializeField]
         private GameObject backButtonRoot_;
@@ -45,12 +44,10 @@ namespace Game.Unity.ProfileSelectionScene
         private IProfilesService profilesService_;
         private IChildGameStateSyncService childGameStateSyncService_;
         private EventDispatcher dispatcher_;
-        private ScreenBlocker screenBlocker_;
         private bool dispatcherSubscribed_;
         private bool isLeavingScene_;
         private bool isPreparingSelectedProfile_;
         private bool hasLoadedRemoteProfiles_;
-        private bool isShowingBlockingPopup_;
         private int pendingProfileIndex_ = -1;
         private Coroutine delayedExitCoroutine_;
         private IDisposable selectionDelayBlockScope_;
@@ -69,7 +66,7 @@ namespace Game.Unity.ProfileSelectionScene
             gameStateStore_ = gameStateStore;
             profilesService_ = profilesService;
             childGameStateSyncService_ = childGameStateSyncService;
-            screenBlocker_ = screenBlocker;
+            ConfigureRemoteBootstrap(screenBlocker);
         }
 
         private void Awake()
@@ -83,6 +80,7 @@ namespace Game.Unity.ProfileSelectionScene
             isLeavingScene_ = false;
             isPreparingSelectedProfile_ = false;
             pendingProfileIndex_ = -1;
+            EnsureRemoteBootstrapEntryBlock();
 
             if (initialized_)
             {
@@ -96,11 +94,11 @@ namespace Game.Unity.ProfileSelectionScene
                     ClearProfileButtons();
                 }
 
-                _ = RefreshProfilesAsync();
+                RefreshProfilesAsync();
             }
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             if (delayedExitCoroutine_ != null)
             {
@@ -110,14 +108,16 @@ namespace Game.Unity.ProfileSelectionScene
 
             DisposeSelectionDelayBlockScope();
             UnsubscribeFromDispatcher();
+            base.OnDestroy();
         }
 
         protected override void Initialize()
         {
             SubscribeToDispatcher();
+            EnsureRemoteBootstrapEntryBlock();
             RefreshBackButtonVisibility();
             ClearProfileButtons();
-            _ = RefreshProfilesAsync();
+            RefreshProfilesAsync();
         }
 
         public void GoBack()
@@ -240,10 +240,13 @@ namespace Game.Unity.ProfileSelectionScene
             {
                 if (!hasLoadedRemoteProfiles_)
                 {
-                    ShowProfilesLoadFailurePopup(
+                    ShowBlockingErrorPopup(
                         LocalizationServiceLocator.GetText(
                             "profiles.load.required",
-                            "Could not load profiles. Please try again."));
+                            "Could not load profiles. Please try again."),
+                        LocalizationServiceLocator.GetText(
+                            "profiles.load.popup_title",
+                            "Could not load profiles"));
                 }
 
                 return;
@@ -264,53 +267,23 @@ namespace Game.Unity.ProfileSelectionScene
             profilesService_.SelectProfile(profileIndex);
         }
 
-        private async Task RefreshProfilesAsync()
+        private void RefreshProfilesAsync()
         {
-            if (profilesService_ == null)
-            {
-                return;
-            }
-
-            IDisposable blockScope = screenBlocker_?.BlockScope(
-                "ProfileSelectionRefresh",
-                showLoadingWithTime: true,
+            RunRemoteBootstrap(
+                RefreshProfilesCoreAsync,
+                blockerReason: "ProfileSelectionRefresh",
                 loadingMessage: LocalizationServiceLocator.GetText(
                     "loading.profiles.refresh",
-                    "Loading profiles..."));
-            try
-            {
-                await profilesService_.RefreshAsync();
-                hasLoadedRemoteProfiles_ = true;
-                RefreshBackButtonVisibility();
-                RefreshProfileButtons();
-            }
-            catch (Exception exception)
-            {
-                hasLoadedRemoteProfiles_ = false;
-                pendingProfileIndex_ = -1;
-                ClearProfileButtons();
-                Debug.LogException(exception, this);
-                string message = RemoteOperationMessageFormatter.Format(
-                    exception,
-                    LocalizationServiceLocator.GetText(
-                        "profiles.load.error",
-                        "Could not load profiles. Please try again."));
-
-                if (exception is RemoteRequestFailedException remoteException && remoteException.IsNetworkError)
-                {
-                    ShowProfilesLoadRetryPopup(
-                        message,
-                        () => _ = RefreshProfilesAsync());
-                }
-                else
-                {
-                    ShowProfilesLoadFailurePopup(message);
-                }
-            }
-            finally
-            {
-                blockScope?.Dispose();
-            }
+                    "Loading profiles..."),
+                fallbackFailureMessage: LocalizationServiceLocator.GetText(
+                    "profiles.load.error",
+                    "Could not load profiles. Please try again."),
+                failurePopupTitle: LocalizationServiceLocator.GetText(
+                    "profiles.load.popup_title",
+                    "Could not load profiles"),
+                retryPopupTitle: LocalizationServiceLocator.GetText(
+                    "profiles.retry.popup_title",
+                    "Connection problem"));
         }
 
         private async Task PrepareSelectedProfileAndExitAsync()
@@ -326,25 +299,37 @@ namespace Game.Unity.ProfileSelectionScene
 
             try
             {
-                IDisposable loadingScope = screenBlocker_?.BlockScope(
-                    "ProfileSelectionLoad",
-                    showLoadingWithTime: true,
-                    loadingMessage: LocalizationServiceLocator.GetText(
+                IDisposable loadingScope = ScreenBlocker?.BlockScope(new ScreenBlockerRequest
+                {
+                    Reason = "ProfileSelectionLoad",
+                    ShowLoadingWithTime = true,
+                    LoadingMessage = LocalizationServiceLocator.GetText(
                         "loading.profiles.select",
-                        "Loading profile..."));
+                        "Loading profile..."),
+                    ShowLoadingImmediately = true
+                });
                 try
                 {
                     if (childGameStateSyncService_ != null)
                     {
                         bool loadedCurrentProfile = await childGameStateSyncService_.ReloadCurrentProfileAsync();
+                        if (!isActiveAndEnabled)
+                        {
+                            isLeavingScene_ = false;
+                            return;
+                        }
+
                         if (!loadedCurrentProfile)
                         {
                             isLeavingScene_ = false;
-                            ShowProfilesLoadRetryPopup(
+                            ShowBlockingRetryPopup(
                                 LocalizationServiceLocator.GetText(
                                     "profiles.selection.load_error",
                                     "Could not load profile. Please try again."),
-                                () => _ = PrepareSelectedProfileAndExitAsync());
+                                () => _ = PrepareSelectedProfileAndExitAsync(),
+                                LocalizationServiceLocator.GetText(
+                                    "profiles.retry.popup_title",
+                                    "Connection problem"));
                             return;
                         }
                     }
@@ -359,7 +344,7 @@ namespace Game.Unity.ProfileSelectionScene
                     return;
                 }
 
-                selectionDelayBlockScope_ = screenBlocker_?.BlockScope("ProfileSelectionDelay");
+                selectionDelayBlockScope_ = ScreenBlocker?.BlockScope("ProfileSelectionDelay");
                 delayedExitCoroutine_ = StartCoroutine(GoBackAfterDelay());
             }
             catch (Exception exception)
@@ -374,46 +359,9 @@ namespace Game.Unity.ProfileSelectionScene
             }
         }
 
-        private void ShowProfilesLoadFailurePopup(string message)
+        protected override void HandleBlockingPopupClosed()
         {
-            if (NavigationService == null || isShowingBlockingPopup_)
-            {
-                return;
-            }
-
-            isShowingBlockingPopup_ = true;
-            NavigationService.Navigate(
-                SceneType.ErrorPopup,
-                new ErrorPopupParams(
-                    message,
-                    title: LocalizationServiceLocator.GetText("profiles.load.popup_title", "Could not load profiles"),
-                    onClose: HandleBlockingPopupClosed));
-        }
-
-        private void ShowProfilesLoadRetryPopup(string message, Action onRetry)
-        {
-            if (NavigationService == null || isShowingBlockingPopup_)
-            {
-                return;
-            }
-
-            isShowingBlockingPopup_ = true;
-            NavigationService.Navigate(
-                SceneType.RetryPopup,
-                new RetryPopupParams(
-                    message,
-                    onRetry: () =>
-                    {
-                        isShowingBlockingPopup_ = false;
-                        onRetry?.Invoke();
-                    },
-                    onCancel: HandleBlockingPopupClosed,
-                    title: LocalizationServiceLocator.GetText("profiles.retry.popup_title", "Connection problem")));
-        }
-
-        private void HandleBlockingPopupClosed()
-        {
-            isShowingBlockingPopup_ = false;
+            base.HandleBlockingPopupClosed();
 
             if (NavigationService == null)
             {
@@ -466,6 +414,24 @@ namespace Game.Unity.ProfileSelectionScene
         {
             selectionDelayBlockScope_?.Dispose();
             selectionDelayBlockScope_ = null;
+        }
+
+        private async Task RefreshProfilesCoreAsync()
+        {
+            if (profilesService_ == null)
+            {
+                return;
+            }
+
+            await profilesService_.RefreshAsync();
+            if (!isActiveAndEnabled)
+            {
+                return;
+            }
+
+            hasLoadedRemoteProfiles_ = true;
+            RefreshBackButtonVisibility();
+            RefreshProfileButtons();
         }
 
         private void ValidateSerializedReferences()

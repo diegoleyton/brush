@@ -28,10 +28,15 @@ namespace Game.Unity.UI
 
         private Coroutine hideCoroutine_;
 
-        public void Configure(Text text)
+        private void Awake()
         {
-            text_ = text;
+            ValidateSerializedReferences();
             Clear();
+        }
+
+        private void OnDisable()
+        {
+            StopHideCoroutine();
         }
 
         public void ShowInfo(string message, float? durationSeconds = null)
@@ -97,6 +102,15 @@ namespace Game.Unity.UI
 
             StopCoroutine(hideCoroutine_);
             hideCoroutine_ = null;
+        }
+
+        private void ValidateSerializedReferences()
+        {
+            if (text_ == null)
+            {
+                throw new MissingReferenceException(
+                    $"{nameof(FeedbackMessage)} requires a serialized {nameof(Text)} reference.");
+            }
         }
     }
 }

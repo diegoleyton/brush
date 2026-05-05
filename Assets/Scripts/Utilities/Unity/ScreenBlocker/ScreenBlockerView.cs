@@ -24,6 +24,7 @@ namespace Flowbit.Utilities.ScreenBlocker
 
         private string loadingMessage_;
         private bool showLoadingWithTime_;
+        private bool showLoadingImmediately_;
         private float loadingStartedAtRealtime_;
         private bool loadingVisible_;
 
@@ -54,11 +55,16 @@ namespace Flowbit.Utilities.ScreenBlocker
             gameObject.SetActive(blocked);
         }
 
-        public void ShowLoading(string message, bool showLoadingWithTime, float loadingStartedAtRealtime)
+        public void ShowLoading(
+            string message,
+            bool showLoadingWithTime,
+            float loadingStartedAtRealtime,
+            bool showLoadingImmediately = false)
         {
             ValidateDependencies();
             loadingMessage_ = string.IsNullOrWhiteSpace(message) ? "Loading..." : message.Trim();
             showLoadingWithTime_ = showLoadingWithTime;
+            showLoadingImmediately_ = showLoadingImmediately;
             loadingStartedAtRealtime_ = loadingStartedAtRealtime;
             SetLoadingVisibility(false);
 
@@ -73,6 +79,7 @@ namespace Flowbit.Utilities.ScreenBlocker
         {
             loadingMessage_ = string.Empty;
             showLoadingWithTime_ = false;
+            showLoadingImmediately_ = false;
             loadingStartedAtRealtime_ = 0f;
             SetLoadingVisibility(false);
 
@@ -84,7 +91,8 @@ namespace Flowbit.Utilities.ScreenBlocker
 
         private bool ShouldShowLoadingVisual()
         {
-            return Time.realtimeSinceStartup - loadingStartedAtRealtime_ >= loadingFeedbackDelaySeconds_;
+            return showLoadingImmediately_ ||
+                   Time.realtimeSinceStartup - loadingStartedAtRealtime_ >= loadingFeedbackDelaySeconds_;
         }
 
         private void SetLoadingVisibility(bool visible)

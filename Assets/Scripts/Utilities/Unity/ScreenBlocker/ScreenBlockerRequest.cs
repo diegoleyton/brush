@@ -10,5 +10,7 @@ namespace Flowbit.Utilities.ScreenBlocker
         public bool ShowLoadingWithTime { get; set; }
 
         public string LoadingMessage { get; set; }
+
+        public bool ShowLoadingImmediately { get; set; }
     }
 }

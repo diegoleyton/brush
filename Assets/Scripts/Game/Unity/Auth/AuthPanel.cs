@@ -30,7 +30,7 @@ namespace Game.Unity.Auth
         private Text sessionStatusText_;
 
         [SerializeField]
-        private Text feedbackText_;
+        private FeedbackMessage feedbackMessage_;
 
         [Header("Buttons")]
         [SerializeField]
@@ -45,7 +45,7 @@ namespace Game.Unity.Auth
 
         private IAuthService authService_;
         private ScreenBlocker screenBlocker_;
-        private FeedbackMessage feedbackMessage_;
+
         private bool isBusy_;
 
         [Inject]
@@ -58,8 +58,6 @@ namespace Game.Unity.Auth
         private void Awake()
         {
             ValidateSerializedReferences();
-            feedbackMessage_ = GetComponent<FeedbackMessage>() ?? gameObject.AddComponent<FeedbackMessage>();
-            feedbackMessage_.Configure(feedbackText_);
             WireButtons();
             RefreshView();
         }
@@ -265,7 +263,7 @@ namespace Game.Unity.Auth
             if (emailInput_ == null ||
                 passwordInput_ == null ||
                 sessionStatusText_ == null ||
-                feedbackText_ == null)
+                feedbackMessage_ == null)
             {
                 throw new InvalidOperationException(
                     $"{nameof(AuthPanel)} is missing one or more required serialized references.");

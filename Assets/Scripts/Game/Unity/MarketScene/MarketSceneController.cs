@@ -14,6 +14,7 @@ using Game.Core.Events;
 using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.Scenes;
+using Game.Unity.UI;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +41,7 @@ namespace Game.Unity.MarketScene
         private Text currentProfileText_;
 
         [SerializeField]
-        private MarketConfirmMessageView confirmMessageView_;
+        private FeedbackMessage feedbackMessage_;
 
         [SerializeField]
         private InteractionPointType selectedItemType_ = InteractionPointType.PLACEABLE_OBJECT;
@@ -272,13 +273,13 @@ namespace Game.Unity.MarketScene
             if (roomGameplayService_ != null &&
                 roomGameplayService_.IsMarketItemAlreadyOwned(definition.ItemType, definition.ItemId))
             {
-                confirmMessageView_?.ShowAlreadyOwnedMessage();
+                ShowError(LocalizationServiceLocator.GetText("market.purchase.already_owned", "Item already owned."));
                 return;
             }
 
             if (!repository_.CanAfford(definition.CurrencyType, definition.Price))
             {
-                confirmMessageView_?.ShowNotEnoughCurrencyMessage();
+                ShowError(LocalizationServiceLocator.GetText("market.purchase.not_enough_currency", "Not enough coins."));
                 return;
             }
 
@@ -311,7 +312,7 @@ namespace Game.Unity.MarketScene
 
         private void ClearFeedback()
         {
-            confirmMessageView_?.Clear();
+            feedbackMessage_?.Clear();
         }
 
         private void ValidateSerializedReferences()
@@ -319,13 +320,11 @@ namespace Game.Unity.MarketScene
             if (itemList_ == null ||
                 currencyText_ == null ||
                 currentProfileText_ == null ||
-                confirmMessageView_ == null)
+                feedbackMessage_ == null)
             {
                 throw new InvalidOperationException(
                     $"{nameof(MarketSceneController)} is missing one or more required serialized references.");
             }
-
-            confirmMessageView_.Validate();
         }
 
         private void OnMarketPurchaseCompleted(MarketPurchaseStatus status)
@@ -333,23 +332,33 @@ namespace Game.Unity.MarketScene
             switch (status)
             {
                 case MarketPurchaseStatus.OK:
-                    confirmMessageView_?.ShowSuccessMessage();
+                    ShowSuccess(LocalizationServiceLocator.GetText("market.purchase.success", "Purchase completed."));
                     return;
                 case MarketPurchaseStatus.NOT_ENOUGH_CURRENCY:
-                    confirmMessageView_?.ShowNotEnoughCurrencyMessage();
+                    ShowError(LocalizationServiceLocator.GetText("market.purchase.not_enough_currency", "Not enough coins."));
                     return;
                 case MarketPurchaseStatus.ALREADY_OWNED:
-                    confirmMessageView_?.ShowAlreadyOwnedMessage();
+                    ShowError(LocalizationServiceLocator.GetText("market.purchase.already_owned", "Item already owned."));
                     return;
                 case MarketPurchaseStatus.ITEM_NOT_FOUND:
-                    confirmMessageView_?.ShowItemNotFoundMessage();
+                    ShowError(LocalizationServiceLocator.GetText("market.purchase.item_not_found", "Item not found."));
                     return;
                 case MarketPurchaseStatus.NO_CURRENT_PROFILE:
-                    confirmMessageView_?.ShowNoCurrentProfileMessage();
+                    ShowError(LocalizationServiceLocator.GetText("market.purchase.no_profile", "No profile selected."));
                     return;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
+        }
+
+        private void ShowSuccess(string message)
+        {
+            feedbackMessage_?.ShowSuccess(message, durationSeconds: 2f);
+        }
+
+        private void ShowError(string message)
+        {
+            feedbackMessage_?.ShowError(message, durationSeconds: 2f);
         }
     }
 }

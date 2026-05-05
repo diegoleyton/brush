@@ -91,6 +91,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/Auth/AuthPanel.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/Transitions/GameSceneTransitionBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Editor/DressLayoutCaptureEditor.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Scenes/RemoteBootstrapSceneBase.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Hat/PetHatSurfaceView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/UI/UISettings.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentDebugPanel.cs" />
@@ -169,7 +170,6 @@
     <Compile Include="Assets/Scripts/Game/Unity/Development/DevelopmentProfileBootstrap.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Auth/LogoutButton.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Settings/RoomSettings.cs" />
-    <Compile Include="Assets/Scripts/Game/Unity/MarketScene/MarketConfirmMessageView.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/InstantiatorIds.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/Controllers/RoomViewController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Sync/ChildGameStateSyncFailurePresenter.cs" />

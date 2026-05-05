@@ -543,7 +543,7 @@ MonoBehaviour:
   - {fileID: 798160053}
   currencyText_: {fileID: 859139310}
   currentProfileText_: {fileID: 1779858122}
-  confirmMessageView_: {fileID: 279144954}
+  feedbackMessage_: {fileID: 1108287836}
   selectedItemType_: 0
 --- !u!4 &128971960
 Transform:
@@ -732,7 +732,6 @@ GameObject:
   - component: {fileID: 279144957}
   - component: {fileID: 279144956}
   - component: {fileID: 279144955}
-  - component: {fileID: 279144954}
   m_Layer: 5
   m_Name: MessageText
   m_TagString: Untagged
@@ -740,22 +739,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &279144954
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 279144953}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 874890e8093394cf79f9146ec57305a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  messageText_: {fileID: 279144955}
-  successColor_: {r: 0.011764706, g: 0.6313726, b: 0.08627451, a: 1}
-  failureColor_: {r: 0.8509804, g: 0.06666667, b: 0.27058825, a: 1}
-  displayDurationSeconds_: 6
 --- !u!114 &279144955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2163,6 +2146,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1108287834}
   - component: {fileID: 1108287835}
+  - component: {fileID: 1108287836}
   m_Layer: 5
   m_Name: Message
   m_TagString: Untagged
@@ -2198,6 +2182,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1108287833}
   m_CullTransparentMesh: 1
+--- !u!114 &1108287836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108287833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa84d30fd997148969bd5850ea9dd84b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text_: {fileID: 279144955}
+  infoColor_: {r: 0, g: 0, b: 0, a: 1}
+  successColor_: {r: 0, g: 0.5568628, b: 0.039215688, a: 1}
+  errorColor_: {r: 0.8117647, g: 0.019607844, b: 0.003921569, a: 1}
+  defaultDisplayDurationSeconds_: 4
 --- !u!1 &1124143172
 GameObject:
   m_ObjectHideFlags: 0

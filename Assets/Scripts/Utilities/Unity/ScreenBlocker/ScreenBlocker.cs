@@ -13,6 +13,7 @@ namespace Flowbit.Utilities.ScreenBlocker
         {
             public string Reason;
             public bool ShowLoadingWithTime;
+            public bool ShowLoadingImmediately;
             public string LoadingMessage;
             public float StartedAtRealtime;
         }
@@ -40,13 +41,15 @@ namespace Flowbit.Utilities.ScreenBlocker
         public IDisposable BlockScope(
             string reason = "",
             bool showLoadingWithTime = false,
-            string loadingMessage = null)
+            string loadingMessage = null,
+            bool showLoadingImmediately = false)
         {
             return BlockScope(new ScreenBlockerRequest
             {
                 Reason = reason,
                 ShowLoadingWithTime = showLoadingWithTime,
-                LoadingMessage = loadingMessage
+                LoadingMessage = loadingMessage,
+                ShowLoadingImmediately = showLoadingImmediately
             });
         }
 
@@ -72,6 +75,7 @@ namespace Flowbit.Utilities.ScreenBlocker
             {
                 Reason = request?.Reason,
                 ShowLoadingWithTime = request?.ShowLoadingWithTime ?? false,
+                ShowLoadingImmediately = request?.ShowLoadingImmediately ?? false,
                 LoadingMessage = request?.LoadingMessage,
                 StartedAtRealtime = Time.realtimeSinceStartup
             };
@@ -127,7 +131,8 @@ namespace Flowbit.Utilities.ScreenBlocker
                 blockerView_.ShowLoading(
                     latestLoadingState.LoadingMessage,
                     latestLoadingState.ShowLoadingWithTime,
-                    latestLoadingState.StartedAtRealtime);
+                    latestLoadingState.StartedAtRealtime,
+                    latestLoadingState.ShowLoadingImmediately);
             }
             else
             {

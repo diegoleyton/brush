@@ -24,7 +24,7 @@ namespace Game.Unity.ProfileManagementScene
     /// <summary>
     /// Lets the player create and delete profiles using fully serialized scene references.
     /// </summary>
-    public sealed class ProfileManagementScene : SceneBase
+    public sealed class ProfileManagementScene : RemoteBootstrapSceneBase
     {
         [SerializeField]
         private RectTransform profileListContainer_;
@@ -39,7 +39,7 @@ namespace Game.Unity.ProfileManagementScene
         private InputField petNameInput_;
 
         [SerializeField]
-        private Text feedbackText_;
+        private FeedbackMessage feedbackMessage_;
 
         [SerializeField]
         private Text brushTimeText_;
@@ -53,9 +53,8 @@ namespace Game.Unity.ProfileManagementScene
         private IProfilesService profilesService_;
         private DataRepository repository_;
         private EventDispatcher dispatcher_;
-        private ScreenBlocker screenBlocker_;
-        private FeedbackMessage feedbackMessage_;
         private bool dispatcherSubscribed_;
+        private bool hasLoadedRemoteProfiles_;
 
         [Inject]
         public void Construct(
@@ -71,39 +70,49 @@ namespace Game.Unity.ProfileManagementScene
             gameStateStore_ = gameStateStore;
             profilesService_ = profilesService;
             repository_ = repository;
-            screenBlocker_ = screenBlocker;
+            ConfigureRemoteBootstrap(screenBlocker);
         }
 
         private void Awake()
         {
             sceneType_ = SceneType.ProfileManagementScene;
             ValidateSerializedReferences();
-            feedbackMessage_ = GetComponent<FeedbackMessage>() ?? gameObject.AddComponent<FeedbackMessage>();
-            feedbackMessage_.Configure(feedbackText_);
         }
 
         private void OnEnable()
         {
+            EnsureRemoteBootstrapEntryBlock();
+
             if (initialized_)
             {
-                RefreshProfileRows();
-                _ = RefreshProfilesAsync();
+                if (hasLoadedRemoteProfiles_)
+                {
+                    RefreshProfileRows();
+                }
+                else
+                {
+                    ClearRows();
+                }
+
+                RefreshProfilesAsync();
             }
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             UnsubscribeFromDispatcher();
+            base.OnDestroy();
         }
 
         protected override void Initialize()
         {
             SubscribeToDispatcher();
+            EnsureRemoteBootstrapEntryBlock();
             ConfigureBrushTimeSlider();
             ClearFeedback();
-            RefreshProfileRows();
+            ClearRows();
             RefreshBrushTime();
-            _ = RefreshProfilesAsync();
+            RefreshProfilesAsync();
         }
 
         public void GoBack()
@@ -144,7 +153,7 @@ namespace Game.Unity.ProfileManagementScene
             }
 
             Profile createdProfile;
-            IDisposable blockScope = screenBlocker_?.BlockScope(
+            IDisposable blockScope = ScreenBlocker?.BlockScope(
                 "CreateProfile",
                 showLoadingWithTime: true,
                 loadingMessage: LocalizationServiceLocator.GetText(
@@ -215,7 +224,7 @@ namespace Game.Unity.ProfileManagementScene
             }
 
             bool deleted;
-            IDisposable blockScope = screenBlocker_?.BlockScope(
+            IDisposable blockScope = ScreenBlocker?.BlockScope(
                 "DeleteProfile",
                 showLoadingWithTime: true,
                 loadingMessage: LocalizationServiceLocator.GetText(
@@ -255,7 +264,11 @@ namespace Game.Unity.ProfileManagementScene
 
         private void OnProfileUpdated(ProfileUpdatedEvent _)
         {
-            RefreshProfileRows();
+            if (hasLoadedRemoteProfiles_)
+            {
+                RefreshProfileRows();
+            }
+
             RefreshBrushTime();
         }
 
@@ -390,35 +403,60 @@ namespace Game.Unity.ProfileManagementScene
             SetFeedback(string.Empty);
         }
 
-        private async Task RefreshProfilesAsync()
+        private void RefreshProfilesAsync()
+        {
+            RunRemoteBootstrap(
+                RefreshProfilesCoreAsync,
+                blockerReason: "ProfileManagementRefresh",
+                loadingMessage: LocalizationServiceLocator.GetText(
+                    "loading.profiles.refresh",
+                    "Loading profiles..."),
+                fallbackFailureMessage: LocalizationServiceLocator.GetText(
+                    "profiles.load.error",
+                    "Could not load profiles. Please try again."),
+                failurePopupTitle: LocalizationServiceLocator.GetText(
+                    "profiles.load.popup_title",
+                    "Could not load profiles"),
+                retryPopupTitle: LocalizationServiceLocator.GetText(
+                    "profiles.retry.popup_title",
+                    "Connection problem"));
+        }
+
+        private async Task RefreshProfilesCoreAsync()
         {
             if (profilesService_ == null)
             {
                 return;
             }
 
-            try
+            await profilesService_.RefreshAsync();
+            if (!isActiveAndEnabled)
             {
-                IDisposable blockScope = screenBlocker_?.BlockScope(
-                    "RefreshProfiles",
-                    showLoadingWithTime: true,
-                    loadingMessage: "Loading profiles...");
-                try
-                {
-                    await profilesService_.RefreshAsync();
-                }
-                finally
-                {
-                    blockScope?.Dispose();
-                }
+                return;
             }
-            catch (Exception exception)
+
+            hasLoadedRemoteProfiles_ = true;
+            RefreshProfileRows();
+            RefreshBrushTime();
+            ClearFeedback();
+        }
+
+        protected override void HandleBlockingPopupClosed()
+        {
+            base.HandleBlockingPopupClosed();
+
+            if (NavigationService == null)
             {
-                Debug.LogException(exception, this);
-                SetFeedback(RemoteOperationMessageFormatter.Format(
-                    exception,
-                    LocalizationServiceLocator.GetText("profiles.refresh.error", "Could not refresh profiles.")));
+                return;
             }
+
+            if (NavigationService.CanGoBack)
+            {
+                NavigationService.Back();
+                return;
+            }
+
+            NavigationService.NavigateAsRoot(SceneType.AuthScene);
         }
 
         private void ValidateSerializedReferences()
@@ -427,7 +465,7 @@ namespace Game.Unity.ProfileManagementScene
                 profileRowTemplate_ == null ||
                 profileNameInput_ == null ||
                 petNameInput_ == null ||
-                feedbackText_ == null ||
+                feedbackMessage_ == null ||
                 brushTimeText_ == null ||
                 brushTimeSlider_ == null)
             {
