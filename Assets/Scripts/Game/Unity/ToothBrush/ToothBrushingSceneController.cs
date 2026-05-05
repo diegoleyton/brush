@@ -160,6 +160,11 @@ namespace Game.Unity.ToothBrush
 
         private void HandleBrushCompletionFailure(Exception exception)
         {
+            if (exception is AuthSessionInvalidatedException)
+            {
+                return;
+            }
+
             string fallbackMessage = LocalizationServiceLocator.GetText(
                 "brush.complete.error",
                 "Could not complete brush session.");

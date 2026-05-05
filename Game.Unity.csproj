@@ -83,6 +83,7 @@
     <Compile Include="Assets/Scripts/Game/Unity/UI/FeedbackMessage.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/PlaceableObjects/RoomPlaceableObjectsController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Definitions/Events/NavigationGameEvents.cs" />
+    <Compile Include="Assets/Scripts/Game/Unity/Auth/AuthSessionInvalidationPresenter.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/RoomScene/RoomVisuals/Skin/PetSkinController.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/ToothBrush/PausableAnim.cs" />
     <Compile Include="Assets/Scripts/Game/Unity/Scenes/PopupBase.cs" />

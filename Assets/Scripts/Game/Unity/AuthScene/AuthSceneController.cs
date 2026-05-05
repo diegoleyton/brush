@@ -148,6 +148,10 @@ namespace Game.Unity.AuthScene
 
                 NavigationService.NavigateAsRoot(SceneType.RoomScene);
             }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);

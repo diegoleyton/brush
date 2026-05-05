@@ -49,6 +49,7 @@ namespace Game.Unity.MarketScene
         private DataRepository repository_;
         private IRoomGameplayService roomGameplayService_;
         private IMarketPurchaseService marketPurchaseService_;
+        private IAuthService authService_;
         private EventDispatcher dispatcher_;
         private ScreenBlocker screenBlocker_;
         private bool dispatcherSubscribed_;
@@ -60,6 +61,7 @@ namespace Game.Unity.MarketScene
             DataRepository repository,
             IRoomGameplayService roomGameplayService,
             IMarketPurchaseService marketPurchaseService,
+            IAuthService authService,
             ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
@@ -67,6 +69,7 @@ namespace Game.Unity.MarketScene
             repository_ = repository;
             roomGameplayService_ = roomGameplayService;
             marketPurchaseService_ = marketPurchaseService;
+            authService_ = authService;
             screenBlocker_ = screenBlocker;
         }
 
@@ -304,6 +307,10 @@ namespace Game.Unity.MarketScene
                 OnMarketPurchaseCompleted(status);
                 Refresh();
             }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
+            }
             finally
             {
                 blockScope?.Dispose();
@@ -344,6 +351,11 @@ namespace Game.Unity.MarketScene
                     ShowError(LocalizationServiceLocator.GetText("market.purchase.item_not_found", "Item not found."));
                     return;
                 case MarketPurchaseStatus.NO_CURRENT_PROFILE:
+                    if (authService_ != null && !authService_.HasSession)
+                    {
+                        return;
+                    }
+
                     ShowError(LocalizationServiceLocator.GetText("market.purchase.no_profile", "No profile selected."));
                     return;
                 default:

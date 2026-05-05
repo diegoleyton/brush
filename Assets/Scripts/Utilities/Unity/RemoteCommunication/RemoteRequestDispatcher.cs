@@ -65,6 +65,22 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
 
         private async Task<RemoteResponse> SendOnceAsync(RemoteRequest request)
         {
+            if (simulationSettings_?.SimulateUnauthorizedSession == true &&
+                request?.Headers != null &&
+                request.Headers.ContainsKey("Authorization"))
+            {
+                const string simulatedUnauthorizedPayload = "{\"message\":\"Your session is no longer valid. Please log in again.\"}";
+                logger_?.Log($"[Remote] Simulated unauthorized session for {request.Method} {request.Url}.");
+                return new RemoteResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = 401,
+                    Body = simulatedUnauthorizedPayload,
+                    ErrorMessage = simulatedUnauthorizedPayload,
+                    IsNetworkError = false
+                };
+            }
+
             if (simulationSettings_?.SimulateNetworkFailure == true)
             {
                 const string simulatedNetworkFailureError = "Simulated network failure.";

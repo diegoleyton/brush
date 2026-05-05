@@ -11,6 +11,8 @@ namespace Flowbit.Utilities.Unity.RemoteCommunication
 
         public bool SimulateUnresponsiveNetwork { get; set; }
 
+        public bool SimulateUnauthorizedSession { get; set; }
+
         public float SlowNetworkDelaySeconds { get; set; } = 2f;
 
         public float UnresponsiveNetworkExtraDelaySeconds { get; set; } = 1f;

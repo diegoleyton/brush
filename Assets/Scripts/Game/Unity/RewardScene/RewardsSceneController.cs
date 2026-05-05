@@ -185,6 +185,11 @@ namespace Game.Unity.RewardScene
 
         private void HandleClaimFailure(Exception exception)
         {
+            if (exception is AuthSessionInvalidatedException)
+            {
+                return;
+            }
+
             string fallbackMessage = LocalizationServiceLocator.GetText(
                 "rewards.claim.error",
                 "Could not claim rewards.");

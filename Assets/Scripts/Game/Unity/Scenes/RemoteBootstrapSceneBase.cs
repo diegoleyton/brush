@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Flowbit.Utilities.RemoteCommunication;
 using Flowbit.Utilities.ScreenBlocker;
+using Game.Core.Services;
 using Game.Unity.Definitions;
 using Game.Unity.UI;
 
@@ -130,6 +131,10 @@ namespace Game.Unity.Scenes
             try
             {
                 await bootstrapAsync();
+            }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
             }
             catch (Exception exception)
             {

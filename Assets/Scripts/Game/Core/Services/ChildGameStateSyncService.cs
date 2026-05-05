@@ -147,7 +147,14 @@ namespace Game.Core.Services
 
         private async void OnProfileSwitched(ProfileSwitchedEvent _)
         {
-            await EnsureCurrentProfileLoadedAsync();
+            try
+            {
+                await EnsureCurrentProfileLoadedAsync();
+            }
+            catch (AuthSessionInvalidatedException)
+            {
+                // The global presenter owns the player-facing flow for invalid sessions.
+            }
         }
 
         private async void OnLocalDataChanged(ChildGameStateLocallyChangedEvent _)
@@ -227,6 +234,12 @@ namespace Game.Core.Services
                             case ChildGameStateSyncPushStatus.ServerRejected:
                                 isOffline_ = false;
                                 await HandleRejectedPushAsync(entry.RemoteProfileId, result.ErrorMessage);
+                                return;
+
+                            case ChildGameStateSyncPushStatus.SessionInvalidated:
+                                isOffline_ = false;
+                                await RemovePendingEntryAsync(entry.RemoteProfileId);
+                                PublishSyncStatus();
                                 return;
 
                             default:

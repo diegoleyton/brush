@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Flowbit.Utilities.Core.Events;
 using Flowbit.Utilities.Core.Logger;
 using Flowbit.Utilities.RemoteCommunication;
 using Game.Core.Configuration;
 using Game.Core.Data;
+using Game.Core.Events;
 
 namespace Game.Core.Services
 {
@@ -18,19 +20,22 @@ namespace Game.Core.Services
         private readonly IRemoteRequestDispatcher remoteRequestDispatcher_;
         private readonly IRemotePayloadCodec payloadCodec_;
         private readonly IGameLogger logger_;
+        private readonly EventDispatcher dispatcher_;
 
         public ChildrenApiClient(
             BackendSettings settings,
             IAuthService authService,
             IRemoteRequestDispatcher remoteRequestDispatcher,
             IRemotePayloadCodec payloadCodec,
-            IGameLogger logger)
+            IGameLogger logger,
+            EventDispatcher dispatcher)
         {
             settings_ = settings ?? throw new ArgumentNullException(nameof(settings));
             authService_ = authService ?? throw new ArgumentNullException(nameof(authService));
             remoteRequestDispatcher_ = remoteRequestDispatcher ?? throw new ArgumentNullException(nameof(remoteRequestDispatcher));
             payloadCodec_ = payloadCodec ?? throw new ArgumentNullException(nameof(payloadCodec));
             logger_ = logger;
+            dispatcher_ = dispatcher;
         }
 
         public async Task<IReadOnlyList<Profile>> ListAsync()
@@ -43,6 +48,11 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
+                if (IsUnauthorizedResponse(response))
+                {
+                    throw CreateSessionInvalidatedException(response);
+                }
+
                 throw new RemoteRequestFailedException(
                     ResolveRemoteErrorMessage(response, "Could not load profiles."),
                     response.IsNetworkError,
@@ -85,6 +95,11 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
+                if (IsUnauthorizedResponse(response))
+                {
+                    throw CreateSessionInvalidatedException(response);
+                }
+
                 return null;
             }
 
@@ -104,6 +119,11 @@ namespace Game.Core.Services
                     $"{settings_.ApiBaseUrl}/children/{remoteProfileId}",
                     RemoteRequestMethod.Delete,
                     isIdempotent: false));
+
+            if (IsUnauthorizedResponse(response))
+            {
+                throw CreateSessionInvalidatedException(response);
+            }
 
             return response.IsSuccess && response.StatusCode == 204;
         }
@@ -130,6 +150,11 @@ namespace Game.Core.Services
                     body: body,
                     isIdempotent: false));
 
+            if (IsUnauthorizedResponse(response))
+            {
+                throw CreateSessionInvalidatedException(response);
+            }
+
             return response.IsSuccess;
         }
 
@@ -145,6 +170,11 @@ namespace Game.Core.Services
                     $"{settings_.ApiBaseUrl}/children/{remoteProfileId}/game-state",
                     RemoteRequestMethod.Get,
                     isIdempotent: true));
+
+            if (IsUnauthorizedResponse(response))
+            {
+                throw CreateSessionInvalidatedException(response);
+            }
 
             if (!response.IsSuccess)
             {
@@ -196,6 +226,16 @@ namespace Game.Core.Services
             }
 
             string errorMessage = TryParseErrorMessage(response.Body);
+            if (IsUnauthorizedResponse(response))
+            {
+                NotifySessionInvalidated(errorMessage);
+                return new ChildGameStateSyncPushResult
+                {
+                    Status = ChildGameStateSyncPushStatus.SessionInvalidated,
+                    ErrorMessage = errorMessage
+                };
+            }
+
             if (response.IsNetworkError)
             {
                 return new ChildGameStateSyncPushResult
@@ -238,6 +278,11 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
+                if (IsUnauthorizedResponse(response))
+                {
+                    throw CreateSessionInvalidatedException(response);
+                }
+
                 throw new RemoteRequestFailedException(
                     ResolveRemoteErrorMessage(response, "Could not complete brush session."),
                     response.IsNetworkError,
@@ -264,6 +309,11 @@ namespace Game.Core.Services
 
             if (!response.IsSuccess)
             {
+                if (IsUnauthorizedResponse(response))
+                {
+                    throw CreateSessionInvalidatedException(response);
+                }
+
                 throw new RemoteRequestFailedException(
                     ResolveRemoteErrorMessage(response, "Could not claim rewards."),
                     response.IsNetworkError,
@@ -323,6 +373,11 @@ namespace Game.Core.Services
                 return MarketPurchaseStatus.OK;
             }
 
+            if (IsUnauthorizedResponse(response))
+            {
+                throw CreateSessionInvalidatedException(response);
+            }
+
             if (response.StatusCode == 404)
             {
                 return MarketPurchaseStatus.ITEM_NOT_FOUND;
@@ -337,11 +392,6 @@ namespace Game.Core.Services
             if (errorMessage.Contains("enough coins", StringComparison.OrdinalIgnoreCase))
             {
                 return MarketPurchaseStatus.NOT_ENOUGH_CURRENCY;
-            }
-
-            if (response.StatusCode == 401)
-            {
-                return MarketPurchaseStatus.NO_CURRENT_PROFILE;
             }
 
             return MarketPurchaseStatus.ITEM_NOT_FOUND;
@@ -364,6 +414,11 @@ namespace Game.Core.Services
                     RemoteRequestMethod.Post,
                     body: body,
                     isIdempotent: false));
+
+            if (IsUnauthorizedResponse(response))
+            {
+                throw CreateSessionInvalidatedException(response);
+            }
 
             return response.IsSuccess;
         }
@@ -405,6 +460,28 @@ namespace Game.Core.Services
             }
 
             return response;
+        }
+
+        private bool IsUnauthorizedResponse(RemoteResponse response)
+        {
+            return response != null && !response.IsNetworkError && response.StatusCode == 401;
+        }
+
+        private AuthSessionInvalidatedException CreateSessionInvalidatedException(RemoteResponse response)
+        {
+            string message = ResolveRemoteErrorMessage(
+                response,
+                "Your session is no longer valid. Please log in again.");
+            NotifySessionInvalidated(message);
+            return new AuthSessionInvalidatedException(message);
+        }
+
+        private void NotifySessionInvalidated(string message)
+        {
+            dispatcher_?.Send(new AuthSessionInvalidatedEvent(
+                string.IsNullOrWhiteSpace(message)
+                    ? "Your session is no longer valid. Please log in again."
+                    : message));
         }
 
         private static Profile ToProfile(ChildProfileDto dto) =>

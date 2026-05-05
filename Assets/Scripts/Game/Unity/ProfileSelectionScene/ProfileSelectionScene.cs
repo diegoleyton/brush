@@ -347,6 +347,12 @@ namespace Game.Unity.ProfileSelectionScene
                 selectionDelayBlockScope_ = ScreenBlocker?.BlockScope("ProfileSelectionDelay");
                 delayedExitCoroutine_ = StartCoroutine(GoBackAfterDelay());
             }
+            catch (AuthSessionInvalidatedException)
+            {
+                DisposeSelectionDelayBlockScope();
+                isLeavingScene_ = false;
+                return;
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);

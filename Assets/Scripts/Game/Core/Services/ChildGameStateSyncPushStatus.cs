@@ -8,6 +8,7 @@ namespace Game.Core.Services
         Success,
         TransportFailure,
         Conflict,
-        ServerRejected
+        ServerRejected,
+        SessionInvalidated
     }
 }

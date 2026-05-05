@@ -52,6 +52,7 @@ namespace Game.Unity.ProfileManagementScene
         private ClientGameStateStore gameStateStore_;
         private IProfilesService profilesService_;
         private DataRepository repository_;
+        private IAuthService authService_;
         private EventDispatcher dispatcher_;
         private bool dispatcherSubscribed_;
         private bool hasLoadedRemoteProfiles_;
@@ -63,6 +64,7 @@ namespace Game.Unity.ProfileManagementScene
             ClientGameStateStore gameStateStore,
             IProfilesService profilesService,
             DataRepository repository,
+            IAuthService authService,
             ScreenBlocker screenBlocker)
         {
             base.Construct(dispatcher, navigationService);
@@ -70,6 +72,7 @@ namespace Game.Unity.ProfileManagementScene
             gameStateStore_ = gameStateStore;
             profilesService_ = profilesService;
             repository_ = repository;
+            authService_ = authService;
             ConfigureRemoteBootstrap(screenBlocker);
         }
 
@@ -163,6 +166,10 @@ namespace Game.Unity.ProfileManagementScene
             {
                 createdProfile = await profilesService_.CreateAsync(profileName, petName, pictureId: 1);
             }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
@@ -178,6 +185,11 @@ namespace Game.Unity.ProfileManagementScene
 
             if (createdProfile == null)
             {
+                if (authService_ != null && !authService_.HasSession)
+                {
+                    return;
+                }
+
                 SetFeedback(LocalizationServiceLocator.GetText("profiles.create.error", "Could not create profile."));
                 return;
             }
@@ -234,6 +246,10 @@ namespace Game.Unity.ProfileManagementScene
             {
                 deleted = await profilesService_.DeleteAsync(profileIndex);
             }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
@@ -249,6 +265,11 @@ namespace Game.Unity.ProfileManagementScene
 
             if (!deleted)
             {
+                if (authService_ != null && !authService_.HasSession)
+                {
+                    return;
+                }
+
                 SetFeedback(LocalizationServiceLocator.GetText("profiles.delete.minimum_one", "At least one profile must remain."));
                 return;
             }

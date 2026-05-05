@@ -18,6 +18,7 @@ using Game.Core.DataController;
 using Game.Core.Configuration;
 using Game.Core.Data;
 using Game.Core.Services;
+using Game.Unity.Auth;
 using Game.Unity.Audio;
 using Game.Unity.Development;
 using Game.Unity.Definitions;
@@ -162,6 +163,10 @@ namespace Game.Unity.Installers
                 .NonLazy();
 
             Container.BindInterfacesAndSelfTo<ChildGameStateSyncFailurePresenter>()
+                .AsSingle()
+                .NonLazy();
+
+            Container.BindInterfacesAndSelfTo<AuthSessionInvalidationPresenter>()
                 .AsSingle()
                 .NonLazy();
 

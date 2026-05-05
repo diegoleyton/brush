@@ -264,6 +264,18 @@ namespace Game.Unity.Development
                     : "Unresponsive network disabled.";
             }
 
+            bool simulateUnauthorizedSession =
+                remoteSimulationSettings_ != null && remoteSimulationSettings_.SimulateUnauthorizedSession;
+            bool newSimulateUnauthorizedSession = GUILayout.Toggle(simulateUnauthorizedSession, "Unauthorized Session");
+            if (remoteSimulationSettings_ != null &&
+                newSimulateUnauthorizedSession != simulateUnauthorizedSession)
+            {
+                remoteSimulationSettings_.SimulateUnauthorizedSession = newSimulateUnauthorizedSession;
+                feedback_ = newSimulateUnauthorizedSession
+                    ? "Unauthorized session simulation enabled."
+                    : "Unauthorized session simulation disabled.";
+            }
+
             GUILayout.Space(8f);
         }
 
@@ -286,10 +298,9 @@ namespace Game.Unity.Development
                 "DebugGrantCoins",
                 showLoadingWithTime: true,
                 loadingMessage: "Granting coins...");
-            bool granted;
             try
             {
-                granted = await childrenApiClient_.GrantCoinsAsync(
+                bool granted = await childrenApiClient_.GrantCoinsAsync(
                     currentProfile.RemoteProfileId,
                     amount,
                     "Debug panel grant");
@@ -299,15 +310,19 @@ namespace Game.Unity.Development
                     feedback_ = "Failed to grant coins.";
                     return;
                 }
-
-                if (childGameStateSyncService_ != null)
-                {
-                    await childGameStateSyncService_.ReloadCurrentProfileAsync();
-                }
+            }
+            catch (AuthSessionInvalidatedException)
+            {
+                return;
             }
             finally
             {
                 blockScope?.Dispose();
+            }
+
+            if (childGameStateSyncService_ != null)
+            {
+                await childGameStateSyncService_.ReloadCurrentProfileAsync();
             }
 
             feedback_ = $"+{amount} coins";

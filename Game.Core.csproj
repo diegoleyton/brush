@@ -82,11 +82,13 @@
     <Compile Include="Assets/Scripts/Game/Core/Services/BrushCompletionService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IBrushCompletionService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/AuthService.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Services/AuthSessionInvalidatedException.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/RewardClaimService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/BackendApiClient.cs" />
     <Compile Include="Assets/Scripts/Game/Core/DataController/DataController.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IRewardClaimService.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Configuration/ItemCatalog.cs" />
+    <Compile Include="Assets/Scripts/Game/Core/Events/AuthSessionInvalidatedEvent.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Rules/GameRules.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/DataRepository.cs" />
     <Compile Include="Assets/Scripts/Game/Core/Services/IProfileService.cs" />
